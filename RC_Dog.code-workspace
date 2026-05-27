@@ -1,0 +1,21 @@
+{
+    "folders": [
+        {
+            "name": "dogF103C8T6",
+            "path": "dogF103C8T6"
+        },
+        {
+            "name": "STM32F405RGT6_CT",
+            "path": "STM32F405RGT6_CT"
+        }
+    ],
+    "settings": {
+        "cmake.cmakePath": "cube-cmake",
+        "stm32cube-ide-clangd.path": "cube",
+        "stm32cube-ide-clangd.arguments": [
+            "starm-clangd",
+            "--query-driver=${env:CUBE_BUNDLE_PATH}/gnu-tools-for-stm32/13.3.1+st.9/bin/arm-none-eabi-gcc*",
+            "--query-driver=${env:CUBE_BUNDLE_PATH}/gnu-tools-for-stm32/13.3.1+st.9/bin/arm-none-eabi-g++*"
+        ]
+    }
+}
