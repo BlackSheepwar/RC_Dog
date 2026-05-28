@@ -51,12 +51,13 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Key/app_key.c
     User/APP/APP_Key/app_key_cmd.c
     User/APP/APP_SE/app_se.c
+    User/APP/APP_Knob/app_knob.c
     # BSP
     User/BSP/BSP_Key/bsp_key.c
     User/BSP/BSP_Usart/bsp_usart.c
     User/BSP/BSP_SE/bsp_se.c
     User/BSP/BSP_CAN/bsp_can.c
-    User/BSP/BSP_RK/bsp_rk.c
+    User/BSP/BSP_ADC/bsp_ADC.c
     # Middlewares
     User/Middlewares/Debounce/debounce.c
     User/Middlewares/Codec/codec.c
@@ -80,12 +81,13 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Usart
     User/APP/APP_Key
     User/APP/APP_SE
+    User/APP/APP_Knob
     # BSP
     User/BSP/BSP_Key
     User/BSP/BSP_Usart
     User/BSP/BSP_SE
     User/BSP/BSP_CAN
-    User/BSP/BSP_RK
+    User/BSP/BSP_ADC
     # Middlewares
     User/Middlewares/Debounce
     User/Middlewares/Codec

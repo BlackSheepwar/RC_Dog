@@ -10,6 +10,7 @@
  * 头文件包含
  *============================================================================*/
 #include "main.h"
+#include "usart.h"
 #include <string.h>
 #include "bsp_usart.h"
 
