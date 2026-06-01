@@ -5,8 +5,8 @@
             "path": "dogF103C8T6"
         },
         {
-            "name": "STM32F405RGT6_CT",
-            "path": "STM32F405RGT6_CT"
+            "name": "FrontDog",
+            "path": "FrontDog"
         }
     ],
     "settings": {
