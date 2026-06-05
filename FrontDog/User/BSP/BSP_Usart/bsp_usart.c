@@ -65,7 +65,7 @@ static BSP_USART_t *BSP_USART_GetHuartById(UART_HandleTypeDef *huart)
 static void BSP_USART_restart_dma(BSP_USART_t *port)
 {
     HAL_UARTEx_ReceiveToIdle_DMA(port->huart, port->dma_buf, USART_BUF_SIZE);
-    __HAL_DMA_DISABLE_IT(port->hdma_rx, DMA_IT_HT);
+    __HAL_DMA_DISABLE_IT(port->huart->hdmarx, DMA_IT_HT);
 }
 
 /*==============================================================================
@@ -168,14 +168,13 @@ void BSP_USART_Init(void)
  * @brief 注册一个 BSP 串口实例
  * @note 初始化 FIFO 和 DMA 接收，使用结构体内部的 DMA 缓冲区
  * @param id        串口编号（逻辑编号，不要求等于数组下标）
- * @param huart     UART 硬件句柄
- * @param hdma_rx   UART 对应 DMA 接收句柄
+ * @param huart     UART 硬件句柄（DMA句柄从 huart->hdmarx 自动获取）
  * @retval 1: 注册成功
  * @retval 0: 注册失败
  */
-uint8_t BSP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart, DMA_HandleTypeDef  *hdma_rx)
+uint8_t BSP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
 {
-    if (!huart || !hdma_rx)
+    if (!huart)
         return 0;
 
     /* 池满则失败 */
@@ -192,7 +191,6 @@ uint8_t BSP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart, DMA_Handle
     port->data_ready = 0;
     port->rx_size    = 0;
     port->huart      = huart;
-    port->hdma_rx    = hdma_rx;
     port->fifo_head  = 0;
     port->fifo_tail  = 0;
     port->tx_busy    = 0;

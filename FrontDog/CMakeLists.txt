@@ -55,10 +55,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_CAN/app_can_cmd_1.c
     User/APP/APP_CAN/app_can_cmd_2.c
 
-    # Common（平台无关层）
+    # Common
     User/Common/protocol.c
-
-    #User/APP/APP_Knob/app_knob.c
 
     # BSP
     User/BSP/BSP_Key/bsp_key.c
@@ -66,23 +64,21 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/BSP/BSP_SE/bsp_se.c
     User/BSP/BSP_CAN/bsp_can.c
 
-    #User/BSP/BSP_ADC/bsp_adc.c
-
     # Middlewares
     User/Middlewares/Debounce/debounce.c
     User/Middlewares/Codec/codec.c
     User/Middlewares/OLED/oled.c
     User/Middlewares/OLED/oled_extend.c
     User/Middlewares/OLED/font.c
-    # OS Layer
-    "User/OS Layer/task_rx.c"
-    "User/OS Layer/task_tx.c"
-    "User/OS Layer/task_key.c"
-    "User/OS Layer/task_par.c"
-    "User/OS Layer/task_se.c"
-    "User/OS Layer/task_can_f0.c"
-    "User/OS Layer/task_can_f1.c"
-    "User/OS Layer/task_oled.c"
+    # TASK
+    User/TASK/task_rx.c
+    User/TASK/task_tx.c
+    User/TASK/task_key.c
+    User/TASK/task_par.c
+    User/TASK/task_se.c
+    User/TASK/task_can_f0.c
+    User/TASK/task_can_f1.c
+    User/TASK/task_oled.c
 )
 
 # Add include paths
@@ -94,9 +90,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_SE
     User/APP/APP_CAN
 
-    #User/APP/APP_Knob
-
-    # Common（平台无关层）
+    # Common
     User/Common
 
     # BSP
@@ -105,14 +99,12 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     User/BSP/BSP_SE
     User/BSP/BSP_CAN
 
-    #User/BSP/BSP_ADC
-
     # Middlewares
     User/Middlewares/Debounce
     User/Middlewares/Codec
     User/Middlewares/OLED
-    # OS Layer
-    "User/OS Layer"
+    # TASK
+    User/TASK
 )
 
 # Add project symbols (macros)

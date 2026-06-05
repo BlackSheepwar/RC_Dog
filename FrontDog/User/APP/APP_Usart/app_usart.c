@@ -111,11 +111,12 @@ void APP_USART_Init(void)
 
 /**
  * @brief 注册一个 APP 串口解析实例
- * @param id 串口编号（需与 BSP 层一致）
+ * @param id    串口编号（需与 BSP 层一致）
+ * @param huart UART 硬件句柄（DMA句柄从 huart->hdmarx 自动获取）
  * @retval 1：注册成功
  * @retval 0：注册失败
  */
-uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart, DMA_HandleTypeDef *hdma_rx)
+uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
 {
     // 检查池是否已满
     if (app_port_count >= USART_MAX_PORTS) return 0;
@@ -130,7 +131,7 @@ uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart, DMA_Handle
     port->last_rx_time = 0;
 
     // 在底层 BSP 注册
-    BSP_USART_RegisterPort(id, huart, hdma_rx);
+    BSP_USART_RegisterPort(id, huart);
 
     app_port_count++;
     return 1;

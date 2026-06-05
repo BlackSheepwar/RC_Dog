@@ -148,7 +148,7 @@ uint8_t BSP_CAN_Start(uint8_t id)
  * @note F405共28个滤波器（0-27），0-13给CAN1，14-27给CAN2。
  *       SlaveStartFilterBank=14 自动分配。
  */
-uint8_t BSP_CAN_FilterConfig(uint8_t id, BSP_CAN_FilterConfig_t *cfg)
+uint8_t BSP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg)
 {
     /* ---------- 参数检查 ---------- */
     BSP_CAN_t *can = BSP_CAN_GetById(id);

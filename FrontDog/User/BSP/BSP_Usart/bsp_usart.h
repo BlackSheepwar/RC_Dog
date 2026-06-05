@@ -36,7 +36,6 @@ typedef struct {
     uint8_t             data_ready;     // 数据准备标志，1 表示有新数据
     uint16_t            rx_size;        // 本次DMA接收到的数据长度
     UART_HandleTypeDef  *huart;         // UART 硬件句柄
-    DMA_HandleTypeDef   *hdma_rx;       // UART 对应 DMA 接收句柄
     uint8_t             dma_buf[USART_BUF_SIZE]; // DMA 接收缓冲区
     uint8_t             fifo[UART_FIFO_SIZE]; // 环形队列缓存
     uint16_t            fifo_head;     // FIFO 写入指针
@@ -56,12 +55,11 @@ void BSP_USART_Init(void);
  * @brief 注册一个 BSP 串口实例
  * @note 初始化 FIFO 和 DMA 接收，使用结构体内部的 DMA 缓冲区
  * @param id        串口编号（逻辑编号，不要求等于数组下标）
- * @param huart     UART 硬件句柄
- * @param hdma_rx   UART 对应 DMA 接收句柄
+ * @param huart     UART 硬件句柄（DMA句柄从 huart->hdmarx 自动获取）
  * @retval 1: 注册成功
  * @retval 0: 注册失败
  */
-uint8_t BSP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart, DMA_HandleTypeDef  *hdma_rx);
+uint8_t BSP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart);
 
 /*==============================================================================
  * 发送函数

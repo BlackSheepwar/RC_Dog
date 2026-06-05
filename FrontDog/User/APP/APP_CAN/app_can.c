@@ -101,7 +101,7 @@ uint8_t APP_CAN_Register(uint8_t id, CAN_HandleTypeDef *hcan)
  *
  * @note 委托 BSP_CAN_FilterConfig 完成硬件配置
  */
-uint8_t APP_CAN_FilterConfig(uint8_t id, BSP_CAN_FilterConfig_t *cfg)
+uint8_t APP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg)
 {
     /* ---------- 查找端口 ---------- */
     APP_CAN_t *port = APP_CAN_GetById(id);

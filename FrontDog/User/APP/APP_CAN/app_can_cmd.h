@@ -17,6 +17,42 @@
 #include "can.h"
 
 /*==============================================================================
+ * CAN RX 配置表类型（CAN1/CAN2 共用）
+ *============================================================================*/
+typedef void (*can_frame_handler_t)(CAN_RxHeaderTypeDef *header, uint8_t *data);
+
+typedef struct {
+    uint32_t            can_id;
+    uint8_t             ide;        // CAN_ID_STD / CAN_ID_EXT
+    uint8_t             rtr;        // CAN_RTR_DATA / CAN_RTR_REMOTE
+    can_frame_handler_t handler;
+} can_rx_entry_t;
+
+/**
+ * @brief 通用配置表分发函数（inline，跨文件共用）
+ * @param table   配置表
+ * @param count   表项数
+ * @param header  CAN帧头
+ * @param data    帧数据
+ */
+static inline void CAN_DispatchByTable(const can_rx_entry_t *table, uint8_t count,
+                                        CAN_RxHeaderTypeDef *header, uint8_t *data)
+{
+    uint32_t id = (header->IDE == CAN_ID_STD) ? header->StdId : header->ExtId;
+
+    for (uint8_t i = 0; i < count; i++)
+    {
+        if (header->IDE == table[i].ide &&
+            header->RTR == table[i].rtr &&
+            id == table[i].can_id)
+        {
+            table[i].handler(header, data);
+            return;
+        }
+    }
+}
+
+/*==============================================================================
  * CAN1 命令分发
  *============================================================================*/
 /**

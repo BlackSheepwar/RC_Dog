@@ -57,7 +57,7 @@ uint8_t APP_CAN_Register(uint8_t id, CAN_HandleTypeDef *hcan);
  * @retval 1: 配置成功
  * @retval 0: 配置失败
  */
-uint8_t APP_CAN_FilterConfig(uint8_t id, BSP_CAN_FilterConfig_t *cfg);
+uint8_t APP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg);
 
 /*==============================================================================
  * 启动函数

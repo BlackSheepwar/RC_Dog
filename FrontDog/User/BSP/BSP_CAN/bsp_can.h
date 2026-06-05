@@ -169,7 +169,7 @@ uint8_t BSP_CAN_Start(uint8_t id);
  *         标准帧 16bit → BSP_CAN_STD16(id, rtr)
  *         扩展帧 32bit → BSP_CAN_EXT32_HIGH(id, rtr) / BSP_CAN_EXT32_LOW(id)
  */
-uint8_t BSP_CAN_FilterConfig(uint8_t id, BSP_CAN_FilterConfig_t *cfg);
+uint8_t BSP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg);
 
 /*==============================================================================
  * 发送函数
