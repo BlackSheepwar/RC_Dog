@@ -1,5 +1,5 @@
 /**
- * @file tsak_tx.c
+ * @file task_tx.c
  * @brief 实现USART发送处理任务
  * @author 李嘉图
  * @date 2026-5-4
@@ -13,15 +13,11 @@
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-/**
- * @brief TXTask 任务入口函数
- * @param argument 任务参数（未使用）
- */
-void StartTXTask(void *argument)
+void Task_TX(void *argument)
 {
   for(;;)
   {
-    osSemaphoreAcquire(TXBinarySemHandle, osWaitForever);
+    osSemaphoreAcquire(TX_BSHandle, osWaitForever);
     APP_USART_SendTxPacket();
   }
 }

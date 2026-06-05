@@ -26,16 +26,17 @@ void App_Key_Init(void);
  * @brief 注册一个按键到静态资源池
  * @param key_id  按键ID（用户定义）
  * @param long_press 长按判定阈值（单位:任务周期）
+ * @param active_level 按键激活电平（0:低电平，1:高电平）
  * @param GPIOx   按键GPIO端口
  * @param Pin     按键引脚
  * @retval 0: 参数错误
  * @retval 1: 成功
  * @retval 2: 资源池已满
  */
-uint8_t App_Key_Register(uint8_t key_id, 
-                        uint8_t long_press, 
-                        uint8_t active_level, 
-                        GPIO_TypeDef *GPIOx, 
+uint8_t App_Key_Register(uint8_t key_id,
+                        uint8_t long_press,
+                        uint8_t active_level,
+                        GPIO_TypeDef *GPIOx,
                         uint16_t Pin);
 
 /*==============================================================================

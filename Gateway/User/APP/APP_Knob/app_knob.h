@@ -16,7 +16,7 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "bsp_ADC.h"
+#include "bsp_adc.h"
 
 /*==============================================================================
  * 宏定义与常量
@@ -30,6 +30,7 @@ typedef struct {
     uint8_t  knob_id;            // 旋钮ID（上层标识）
     uint8_t  adc_id;             // 绑定的ADC外设ID
     uint8_t  adc_ch_index;       // ADC规则组通道索引（1 ~ ch_num）
+    uint8_t  enable;             // 使能标志：1=启用（默认），0=禁用
     int16_t min_val;             // 映射最小值（支持负值）
     int16_t max_val;             // 映射最大值
 } APP_Knob_t;
@@ -64,11 +65,21 @@ int8_t APP_KNOB_Register(uint8_t knob_id, uint8_t adc_id,
  * @retval 0:  成功
  * @retval -1: 未找到该旋钮
  * @retval -2: 底层ADC读取失败
+ * @retval -3: 旋钮未使能（enable == 0）
  *
  * @note min_val 对应 ADC=0 时的输出，max_val 对应 ADC=4095 时的输出。
  *       若 min_val > max_val，映射方向自动反转，无需额外配置。
  *       计算公式: out = min_val + raw * (max_val - min_val) / 4095
  */
 int8_t APP_KNOB_GetValue(uint8_t knob_id, int32_t *out_val);
+
+/**
+ * @brief 设置旋钮使能状态
+ * @param knob_id  旋钮ID
+ * @param enable   使能标志：1=启用，0=禁用
+ * @retval 0:  成功
+ * @retval -1: 未找到该旋钮
+ */
+int8_t APP_KNOB_SetEnable(uint8_t knob_id, uint8_t enable);
 
 #endif

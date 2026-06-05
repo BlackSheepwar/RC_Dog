@@ -15,16 +15,12 @@
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-void StartPARTask(void *argument)
+void Task_PAR(void *argument)
 {
-  App_Key_Init();
-
-  App_Key_Register(1, 18, 1, GPIOC, GPIO_PIN_13);
-  
   Debounce_Event_packet_t msg;
   for(;;)
   {
-    osMessageQueueGet(KEYQueueHandle, &msg, NULL, osWaitForever);
+    osMessageQueueGet(KEY_QHandle, &msg, NULL, osWaitForever);
     uint8_t id = msg.id;
     Debounce_Event_t event = msg.event;
     App_Key_CMD_Packet(id, event);

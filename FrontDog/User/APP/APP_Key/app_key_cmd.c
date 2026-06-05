@@ -19,31 +19,31 @@
  *============================================================================*/
 static void App_Key_APP_A1(Debounce_Event_t event)
 {
-    switch (event) 
+    switch (event)
     {
-        case KEY_EVENT_DOWN: 
+        case KEY_EVENT_DOWN:
         {
             HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_2);
         }
         break;     // 刚按下
 
-        case KEY_EVENT_CLICK: 
+        case KEY_EVENT_CLICK:
         {
         }
         break;    // 短按释放
 
-        case KEY_EVENT_LONG: 
+        case KEY_EVENT_LONG:
         {
         }
         break;     // 长按触发
 
-        case KEY_EVENT_LONG_UP: 
+        case KEY_EVENT_LONG_UP:
         {
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
         }
         break;  // 长按松开
 
-        default: break; 
+        default: break;
     }
 }
 

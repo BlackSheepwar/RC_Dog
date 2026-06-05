@@ -32,10 +32,10 @@ void App_Key_Init(void);
  * @retval 1: 成功
  * @retval 2: 资源池已满
  */
-uint8_t App_Key_Register(uint8_t key_id, 
-                        uint8_t long_press, 
-                        uint8_t active_level, 
-                        GPIO_TypeDef *GPIOx, 
+uint8_t App_Key_Register(uint8_t key_id,
+                        uint8_t long_press,
+                        uint8_t active_level,
+                        GPIO_TypeDef *GPIOx,
                         uint16_t Pin);
 
 /*==============================================================================

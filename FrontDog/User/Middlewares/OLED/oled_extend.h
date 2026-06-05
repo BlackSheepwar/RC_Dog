@@ -1,6 +1,6 @@
 /**
  * @file oled_extend.h
- * @brief 波特律动OLED驱动(SSD1306)扩展件 
+ * @brief 波特律动OLED驱动(SSD1306)扩展件
  * @author 制作人: 李嘉图
  * @date
  *   创建时间: 2025-12-02
@@ -38,7 +38,7 @@ void OLED_ShowFrameArea(uint8_t start_col, uint8_t end_col, uint8_t start_row, u
 
 /**
  * @brief 分步刷新全屏，每次调用刷新一页（8像素高）
- * @return 1: 本帧完成了一页刷新  
+ * @return 1: 本帧完成了一页刷新
  * @return 0: 全屏已刷新完一轮，本次无操作
  */
 uint8_t OLED_UpdateScreenByStep(void);

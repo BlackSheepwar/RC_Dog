@@ -16,14 +16,10 @@
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-void StartOLEDTask(void *argument)
+void Task_OLED(void *argument)
 {
-  OLED_Init();
   for(;;)
   {
-    OLED_NewFrame();
-    OLED_PrintDecimal(0, 0, APP_SE_GetCurrent(1), &afont16x8, OLED_COLOR_NORMAL);
-    OLED_ShowFrame();
-    osDelay(1);
+    osDelay(10);
   }
 }

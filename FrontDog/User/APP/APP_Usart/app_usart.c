@@ -112,7 +112,7 @@ void APP_USART_Init(void)
 /**
  * @brief 注册一个 APP 串口解析实例
  * @param id 串口编号（需与 BSP 层一致）
- * @retval 1：注册成功 
+ * @retval 1：注册成功
  * @retval 0：注册失败
  */
 uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart, DMA_HandleTypeDef *hdma_rx)
@@ -255,9 +255,9 @@ void APP_USART_BuildRxPacket(uint8_t id)
  */
 void APP_USART_TxScheduler(uint8_t id)
 {
-    if (BSP_USART_ReadTxBusy(id) == 0) 
+    if (BSP_USART_ReadTxBusy(id) == 0)
     {
-        osSemaphoreRelease(TXBinarySemHandle);
+        osSemaphoreRelease(TX_BSHandle);
     }
 }
 

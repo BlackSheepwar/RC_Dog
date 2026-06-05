@@ -1,5 +1,5 @@
 /**
- * @file tsak_rx.c
+ * @file task_rx.c
  * @brief 实现USART接收处理任务
  * @author 李嘉图
  * @date 2026-5-4
@@ -21,11 +21,7 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-/**
- * @brief RXTask 任务入口函数
- * @param argument 任务参数（未使用）
- */
-void StartRXTask(void *argument)
+void Task_RX(void *argument)
 {
   APP_USART_Init();
   APP_USART_RegisterPort(1, &huart1, &hdma_usart1_rx);
@@ -33,7 +29,7 @@ void StartRXTask(void *argument)
 
  for (;;)
  {
-   osMessageQueueGet(RXQueueHandle, &id, NULL, osWaitForever);
+   osMessageQueueGet(RX_QHandle, &id, NULL, osWaitForever);
 
     APP_USART_BuildRxPacket(id);
 

@@ -88,6 +88,7 @@ int8_t APP_KNOB_Register(uint8_t knob_id, uint8_t adc_id,
     knob_pool[knob_count].knob_id      = knob_id;
     knob_pool[knob_count].adc_id       = adc_id;
     knob_pool[knob_count].adc_ch_index = adc_ch_index;
+    knob_pool[knob_count].enable       = 1;     // 默认启用
     knob_pool[knob_count].min_val      = min_val;
     knob_pool[knob_count].max_val      = max_val;
     knob_count++;
@@ -105,14 +106,19 @@ int8_t APP_KNOB_Register(uint8_t knob_id, uint8_t adc_id,
  * @retval 0:  成功
  * @retval -1: 未找到该旋钮
  * @retval -2: 底层ADC读取失败
+ * @retval -3: 旋钮未使能（enable == 0）
  *
- * @note ADC原始值（12位，0~4095）经线性映射到旋钮的 [min_val, max_val] 区间。
+ * @note min_val 对应 ADC=0 时的输出，max_val 对应 ADC=4095 时的输出。
+ *       若 min_val > max_val，映射方向自动反转，无需额外配置。
  *       计算公式: out = min_val + raw * (max_val - min_val) / 4095
  */
 int8_t APP_KNOB_GetValue(uint8_t knob_id, int32_t *out_val)
 {
     APP_Knob_t *p = APP_KNOB_GetById(knob_id);
     if(p == NULL) return -1;
+
+    /* ---------- 检查旋钮是否使能 ---------- */
+    if(!p->enable) return -3;
 
     /* ---------- 从BSP层读取ADC原始值 ---------- */
     uint16_t raw;

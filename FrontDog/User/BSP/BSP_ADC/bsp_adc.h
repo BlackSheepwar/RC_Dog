@@ -1,5 +1,5 @@
 /**
- * @file bsp_ADC.h
+ * @file bsp_adc.h
  * @brief ADC底层驱动（DMA连续采集）
  * @author 李嘉图
  * @date 2026-05-28
@@ -8,8 +8,8 @@
  *       规则组各通道的ADC值实时更新在 dma_buf 中，上层按索引读取。
  */
 
-#ifndef __ADC_BSP_H__
-#define __ADC_BSP_H__
+#ifndef __BSP_ADC_H__
+#define __BSP_ADC_H__
 
 /*==============================================================================
  * 头文件包含
@@ -67,4 +67,4 @@ int8_t BSP_ADC_Register(uint8_t id, ADC_HandleTypeDef *hadc, uint8_t ch_num);
  */
 int8_t BSP_ADC_GetValue(uint8_t id, uint8_t ch_index, uint16_t *out_val);
 
-#endif
+#endif /* __BSP_ADC_H__ */

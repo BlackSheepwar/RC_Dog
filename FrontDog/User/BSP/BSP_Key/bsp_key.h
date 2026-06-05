@@ -5,8 +5,8 @@
  * @date 2026-04-18
  */
 
-#ifndef __KEY_BSP_H__
-#define __KEY_BSP_H__
+#ifndef __BSP_KEY_H__
+#define __BSP_KEY_H__
 
 /*==============================================================================
  * 头文件包含
@@ -58,4 +58,4 @@ uint8_t BSP_Key_Register(uint8_t key_id, GPIO_TypeDef *GPIOx, uint16_t Pin);
  */
 uint8_t BSP_Key_ReadState(uint8_t key_id);
 
-#endif
+#endif /* __BSP_KEY_H__ */

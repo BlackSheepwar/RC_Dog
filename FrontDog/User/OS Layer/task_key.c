@@ -1,27 +1,26 @@
 /**
- * @file tsak_tx.c
- * @brief 实现USART发送处理任务
+ * @file task_key.c
+ * @brief 实现按键扫描与消息发送任务
  * @author 李嘉图
- * @date 2026-5-4
+ * @date 2026-05-08
  */
 
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "app_usart.h"
+#include "main.h"
+#include "app_key.h"
 
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-/**
- * @brief TXTask 任务入口函数
- * @param argument 任务参数（未使用）
- */
-void StartTXTask(void *argument)
+void Task_KEY(void *argument)
 {
+  App_Key_Init();
+  App_Key_Register(1, 18, 1, GPIOC, GPIO_PIN_13);
   for(;;)
   {
-    osSemaphoreAcquire(TXBinarySemHandle, osWaitForever);
-    APP_USART_SendTxPacket();
+    App_Key_Update();
+    osDelay(10);
   }
 }

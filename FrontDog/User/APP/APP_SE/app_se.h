@@ -26,6 +26,8 @@ typedef struct
 
     uint8_t speed;           // 每次调度变化步进（1°~10°）
 
+    uint8_t reverse;         // 方向反转: 0=正转, 1=反转（物理装反时用）
+
     uint8_t enable;          // 是否启用
 } APP_SE_t;
 
@@ -45,11 +47,12 @@ void APP_SE_Init(void);
  * @param offset     舵机角度偏移量（-25°~25°）
  * @param init_angle 初始角度
  * @param speed      运动步进速度（1°~10°）
+ * @param reverse    方向反转: 0=正转, 1=反转
  * @retval 1: 注册成功
  * @retval 0: 注册失败
  */
-uint8_t APP_SE_Add(uint8_t id,  TIM_HandleTypeDef *htim, 
-uint32_t Channel, int16_t offset, int16_t init_angle, uint8_t speed);
+uint8_t APP_SE_Add(uint8_t id,  TIM_HandleTypeDef *htim,
+uint32_t Channel, int16_t offset, int16_t init_angle, uint8_t speed, uint8_t reverse);
 
 /**
  * @brief 设置舵机目标角度（使用查找接口）
@@ -73,6 +76,14 @@ void APP_SE_SetincreaseTarget(uint8_t id, int16_t angle);
  * @retval 无
  */
 int16_t APP_SE_GetCurrent(uint8_t id);
+
+/**
+ * @brief 设置舵机运动速度
+ * @param id    舵机编号
+ * @param speed 步进速度（1°~10°/次调度）
+ * @retval 无
+ */
+void APP_SE_SetSpeed(uint8_t id, uint8_t speed);
 
 /**
  * @brief 舵机平滑调度器（周期调用）

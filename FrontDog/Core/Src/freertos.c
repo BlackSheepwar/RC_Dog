@@ -26,9 +26,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "debounce.h"
+#include "bsp_can.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
+typedef StaticQueue_t osStaticMessageQDef_t;
+typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -47,69 +51,153 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for KEYTask */
-osThreadId_t KEYTaskHandle;
-const osThreadAttr_t KEYTask_attributes = {
-  .name = "KEYTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityRealtime5,
+/* Definitions for KEY_T */
+osThreadId_t KEY_THandle;
+uint32_t KEY_TBuffer[ 256 ];
+osStaticThreadDef_t KEY_TControlBlock;
+const osThreadAttr_t KEY_T_attributes = {
+  .name = "KEY_T",
+  .cb_mem = &KEY_TControlBlock,
+  .cb_size = sizeof(KEY_TControlBlock),
+  .stack_mem = &KEY_TBuffer[0],
+  .stack_size = sizeof(KEY_TBuffer),
+  .priority = (osPriority_t) osPriorityRealtime4,
 };
-/* Definitions for PARTask */
-osThreadId_t PARTaskHandle;
-const osThreadAttr_t PARTask_attributes = {
-  .name = "PARTask",
-  .stack_size = 256 * 4,
+/* Definitions for PAR_T */
+osThreadId_t PAR_THandle;
+uint32_t PAR_TBuffer[ 256 ];
+osStaticThreadDef_t PAR_TControlBlock;
+const osThreadAttr_t PAR_T_attributes = {
+  .name = "PAR_T",
+  .cb_mem = &PAR_TControlBlock,
+  .cb_size = sizeof(PAR_TControlBlock),
+  .stack_mem = &PAR_TBuffer[0],
+  .stack_size = sizeof(PAR_TBuffer),
+  .priority = (osPriority_t) osPriorityHigh5,
+};
+/* Definitions for RX_T */
+osThreadId_t RX_THandle;
+uint32_t RX_TBuffer[ 512 ];
+osStaticThreadDef_t RX_TControlBlock;
+const osThreadAttr_t RX_T_attributes = {
+  .name = "RX_T",
+  .cb_mem = &RX_TControlBlock,
+  .cb_size = sizeof(RX_TControlBlock),
+  .stack_mem = &RX_TBuffer[0],
+  .stack_size = sizeof(RX_TBuffer),
+  .priority = (osPriority_t) osPriorityRealtime3,
+};
+/* Definitions for TX_T */
+osThreadId_t TX_THandle;
+uint32_t TX_TBuffer[ 256 ];
+osStaticThreadDef_t TX_TControlBlock;
+const osThreadAttr_t TX_T_attributes = {
+  .name = "TX_T",
+  .cb_mem = &TX_TControlBlock,
+  .cb_size = sizeof(TX_TControlBlock),
+  .stack_mem = &TX_TBuffer[0],
+  .stack_size = sizeof(TX_TBuffer),
+  .priority = (osPriority_t) osPriorityAboveNormal6,
+};
+/* Definitions for SE_T */
+osThreadId_t SE_THandle;
+uint32_t SE_TBuffer[ 512 ];
+osStaticThreadDef_t SE_TControlBlock;
+const osThreadAttr_t SE_T_attributes = {
+  .name = "SE_T",
+  .cb_mem = &SE_TControlBlock,
+  .cb_size = sizeof(SE_TControlBlock),
+  .stack_mem = &SE_TBuffer[0],
+  .stack_size = sizeof(SE_TBuffer),
   .priority = (osPriority_t) osPriorityHigh6,
 };
-/* Definitions for RXTask */
-osThreadId_t RXTaskHandle;
-const osThreadAttr_t RXTask_attributes = {
-  .name = "RXTask",
-  .stack_size = 256 * 4,
+/* Definitions for OLED_T */
+osThreadId_t OLED_THandle;
+uint32_t OLED_TBuffer[ 256 ];
+osStaticThreadDef_t OLED_TControlBlock;
+const osThreadAttr_t OLED_T_attributes = {
+  .name = "OLED_T",
+  .cb_mem = &OLED_TControlBlock,
+  .cb_size = sizeof(OLED_TControlBlock),
+  .stack_mem = &OLED_TBuffer[0],
+  .stack_size = sizeof(OLED_TBuffer),
+  .priority = (osPriority_t) osPriorityLow6,
+};
+/* Definitions for CAN_F0_T */
+osThreadId_t CAN_F0_THandle;
+uint32_t CAN_F0_TBuffer[ 256 ];
+osStaticThreadDef_t CAN_F0_TControlBlock;
+const osThreadAttr_t CAN_F0_T_attributes = {
+  .name = "CAN_F0_T",
+  .cb_mem = &CAN_F0_TControlBlock,
+  .cb_size = sizeof(CAN_F0_TControlBlock),
+  .stack_mem = &CAN_F0_TBuffer[0],
+  .stack_size = sizeof(CAN_F0_TBuffer),
   .priority = (osPriority_t) osPriorityRealtime6,
 };
-/* Definitions for TXTask */
-osThreadId_t TXTaskHandle;
-const osThreadAttr_t TXTask_attributes = {
-  .name = "TXTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal7,
+/* Definitions for CAN_F1_T */
+osThreadId_t CAN_F1_THandle;
+uint32_t CAN_F1_TBuffer[ 256 ];
+osStaticThreadDef_t CAN_F1_TControlBlock;
+const osThreadAttr_t CAN_F1_T_attributes = {
+  .name = "CAN_F1_T",
+  .cb_mem = &CAN_F1_TControlBlock,
+  .cb_size = sizeof(CAN_F1_TControlBlock),
+  .stack_mem = &CAN_F1_TBuffer[0],
+  .stack_size = sizeof(CAN_F1_TBuffer),
+  .priority = (osPriority_t) osPriorityRealtime5,
 };
-/* Definitions for SETask */
-osThreadId_t SETaskHandle;
-const osThreadAttr_t SETask_attributes = {
-  .name = "SETask",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityHigh7,
+/* Definitions for RX_Q */
+osMessageQueueId_t RX_QHandle;
+uint8_t RX_QBuffer[ 16 * sizeof( uint8_t ) ];
+osStaticMessageQDef_t RX_QControlBlock;
+const osMessageQueueAttr_t RX_Q_attributes = {
+  .name = "RX_Q",
+  .cb_mem = &RX_QControlBlock,
+  .cb_size = sizeof(RX_QControlBlock),
+  .mq_mem = &RX_QBuffer,
+  .mq_size = sizeof(RX_QBuffer)
 };
-/* Definitions for CANTask */
-osThreadId_t CANTaskHandle;
-const osThreadAttr_t CANTask_attributes = {
-  .name = "CANTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityRealtime7,
+/* Definitions for KEY_Q */
+osMessageQueueId_t KEY_QHandle;
+uint8_t KEY_QBuffer[ 16 * sizeof( Debounce_Event_packet_t ) ];
+osStaticMessageQDef_t KEY_QControlBlock;
+const osMessageQueueAttr_t KEY_Q_attributes = {
+  .name = "KEY_Q",
+  .cb_mem = &KEY_QControlBlock,
+  .cb_size = sizeof(KEY_QControlBlock),
+  .mq_mem = &KEY_QBuffer,
+  .mq_size = sizeof(KEY_QBuffer)
 };
-/* Definitions for OLEDTask */
-osThreadId_t OLEDTaskHandle;
-const osThreadAttr_t OLEDTask_attributes = {
-  .name = "OLEDTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityLow7,
+/* Definitions for CAN_F0_Q */
+osMessageQueueId_t CAN_F0_QHandle;
+uint8_t CAN_F0_QBuffer[ 16 * sizeof( BSP_CAN_Packet_t ) ];
+osStaticMessageQDef_t CAN_F0_QControlBlock;
+const osMessageQueueAttr_t CAN_F0_Q_attributes = {
+  .name = "CAN_F0_Q",
+  .cb_mem = &CAN_F0_QControlBlock,
+  .cb_size = sizeof(CAN_F0_QControlBlock),
+  .mq_mem = &CAN_F0_QBuffer,
+  .mq_size = sizeof(CAN_F0_QBuffer)
 };
-/* Definitions for RXQueue */
-osMessageQueueId_t RXQueueHandle;
-const osMessageQueueAttr_t RXQueue_attributes = {
-  .name = "RXQueue"
+/* Definitions for CAN_F1_Q */
+osMessageQueueId_t CAN_F1_QHandle;
+uint8_t CAN_F1_QBuffer[ 16 * sizeof( BSP_CAN_Packet_t ) ];
+osStaticMessageQDef_t CAN_F1_QControlBlock;
+const osMessageQueueAttr_t CAN_F1_Q_attributes = {
+  .name = "CAN_F1_Q",
+  .cb_mem = &CAN_F1_QControlBlock,
+  .cb_size = sizeof(CAN_F1_QControlBlock),
+  .mq_mem = &CAN_F1_QBuffer,
+  .mq_size = sizeof(CAN_F1_QBuffer)
 };
-/* Definitions for KEYQueue */
-osMessageQueueId_t KEYQueueHandle;
-const osMessageQueueAttr_t KEYQueue_attributes = {
-  .name = "KEYQueue"
-};
-/* Definitions for TXBinarySem */
-osSemaphoreId_t TXBinarySemHandle;
-const osSemaphoreAttr_t TXBinarySem_attributes = {
-  .name = "TXBinarySem"
+/* Definitions for TX_BS */
+osSemaphoreId_t TX_BSHandle;
+osStaticSemaphoreDef_t TX_BSControlBlock;
+const osSemaphoreAttr_t TX_BS_attributes = {
+  .name = "TX_BS",
+  .cb_mem = &TX_BSControlBlock,
+  .cb_size = sizeof(TX_BSControlBlock),
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,13 +205,14 @@ const osSemaphoreAttr_t TXBinarySem_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
-void StartKEYTask(void *argument);
-void StartPARTask(void *argument);
-void StartRXTask(void *argument);
-void StartTXTask(void *argument);
-void StartSETask(void *argument);
-void StartCANTask(void *argument);
-void StartOLEDTask(void *argument);
+void Task_KEY(void *argument);
+void Task_PAR(void *argument);
+void Task_RX(void *argument);
+void Task_TX(void *argument);
+void Task_SE(void *argument);
+void Task_OLED(void *argument);
+void Task_CAN_F0(void *argument);
+void Task_CAN_F1(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -142,8 +231,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
-  /* creation of TXBinarySem */
-  TXBinarySemHandle = osSemaphoreNew(1, 1, &TXBinarySem_attributes);
+  /* creation of TX_BS */
+  TX_BSHandle = osSemaphoreNew(1, 1, &TX_BS_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -154,37 +243,46 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the queue(s) */
-  /* creation of RXQueue */
-  RXQueueHandle = osMessageQueueNew (16, sizeof(uint8_t), &RXQueue_attributes);
+  /* creation of RX_Q */
+  RX_QHandle = osMessageQueueNew (16, sizeof(uint8_t), &RX_Q_attributes);
 
-  /* creation of KEYQueue */
-  KEYQueueHandle = osMessageQueueNew (16, sizeof(Debounce_Event_packet_t), &KEYQueue_attributes);
+  /* creation of KEY_Q */
+  KEY_QHandle = osMessageQueueNew (16, sizeof(Debounce_Event_packet_t), &KEY_Q_attributes);
+
+  /* creation of CAN_F0_Q */
+  CAN_F0_QHandle = osMessageQueueNew (16, sizeof(BSP_CAN_Packet_t), &CAN_F0_Q_attributes);
+
+  /* creation of CAN_F1_Q */
+  CAN_F1_QHandle = osMessageQueueNew (16, sizeof(BSP_CAN_Packet_t), &CAN_F1_Q_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of KEYTask */
-  KEYTaskHandle = osThreadNew(StartKEYTask, NULL, &KEYTask_attributes);
+  /* creation of KEY_T */
+  KEY_THandle = osThreadNew(Task_KEY, NULL, &KEY_T_attributes);
 
-  /* creation of PARTask */
-  PARTaskHandle = osThreadNew(StartPARTask, NULL, &PARTask_attributes);
+  /* creation of PAR_T */
+  PAR_THandle = osThreadNew(Task_PAR, NULL, &PAR_T_attributes);
 
-  /* creation of RXTask */
-  RXTaskHandle = osThreadNew(StartRXTask, NULL, &RXTask_attributes);
+  /* creation of RX_T */
+  RX_THandle = osThreadNew(Task_RX, NULL, &RX_T_attributes);
 
-  /* creation of TXTask */
-  TXTaskHandle = osThreadNew(StartTXTask, NULL, &TXTask_attributes);
+  /* creation of TX_T */
+  TX_THandle = osThreadNew(Task_TX, NULL, &TX_T_attributes);
 
-  /* creation of SETask */
-  SETaskHandle = osThreadNew(StartSETask, NULL, &SETask_attributes);
+  /* creation of SE_T */
+  SE_THandle = osThreadNew(Task_SE, NULL, &SE_T_attributes);
 
-  /* creation of CANTask */
-  CANTaskHandle = osThreadNew(StartCANTask, NULL, &CANTask_attributes);
+  /* creation of OLED_T */
+  OLED_THandle = osThreadNew(Task_OLED, NULL, &OLED_T_attributes);
 
-  /* creation of OLEDTask */
-  OLEDTaskHandle = osThreadNew(StartOLEDTask, NULL, &OLEDTask_attributes);
+  /* creation of CAN_F0_T */
+  CAN_F0_THandle = osThreadNew(Task_CAN_F0, NULL, &CAN_F0_T_attributes);
+
+  /* creation of CAN_F1_T */
+  CAN_F1_THandle = osThreadNew(Task_CAN_F1, NULL, &CAN_F1_T_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -196,130 +294,148 @@ void MX_FREERTOS_Init(void) {
 
 }
 
-/* USER CODE BEGIN Header_StartKEYTask */
+/* USER CODE BEGIN Header_Task_KEY */
 /**
-  * @brief  Function implementing the KEYTask thread.
+  * @brief  Function implementing the KEY_T thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartKEYTask */
-__weak void StartKEYTask(void *argument)
+/* USER CODE END Header_Task_KEY */
+__weak void Task_KEY(void *argument)
 {
-  /* USER CODE BEGIN StartKEYTask */
+  /* USER CODE BEGIN Task_KEY */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartKEYTask */
+  /* USER CODE END Task_KEY */
 }
 
-/* USER CODE BEGIN Header_StartPARTask */
+/* USER CODE BEGIN Header_Task_PAR */
 /**
-* @brief Function implementing the PARTask thread.
+* @brief Function implementing the PAR_T thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartPARTask */
-__weak void StartPARTask(void *argument)
+/* USER CODE END Header_Task_PAR */
+__weak void Task_PAR(void *argument)
 {
-  /* USER CODE BEGIN StartPARTask */
+  /* USER CODE BEGIN Task_PAR */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartPARTask */
+  /* USER CODE END Task_PAR */
 }
 
-/* USER CODE BEGIN Header_StartRXTask */
+/* USER CODE BEGIN Header_Task_RX */
 /**
-* @brief Function implementing the RXTask thread.
+* @brief Function implementing the RX_T thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartRXTask */
-__weak void StartRXTask(void *argument)
+/* USER CODE END Header_Task_RX */
+__weak void Task_RX(void *argument)
 {
-  /* USER CODE BEGIN StartRXTask */
+  /* USER CODE BEGIN Task_RX */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartRXTask */
+  /* USER CODE END Task_RX */
 }
 
-/* USER CODE BEGIN Header_StartTXTask */
+/* USER CODE BEGIN Header_Task_TX */
 /**
-* @brief Function implementing the TXTask thread.
+* @brief Function implementing the TX_T thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartTXTask */
-__weak void StartTXTask(void *argument)
+/* USER CODE END Header_Task_TX */
+__weak void Task_TX(void *argument)
 {
-  /* USER CODE BEGIN StartTXTask */
+  /* USER CODE BEGIN Task_TX */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartTXTask */
+  /* USER CODE END Task_TX */
 }
 
-/* USER CODE BEGIN Header_StartSETask */
+/* USER CODE BEGIN Header_Task_SE */
 /**
-* @brief Function implementing the SETask thread.
+* @brief Function implementing the SE_T thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartSETask */
-__weak void StartSETask(void *argument)
+/* USER CODE END Header_Task_SE */
+__weak void Task_SE(void *argument)
 {
-  /* USER CODE BEGIN StartSETask */
+  /* USER CODE BEGIN Task_SE */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartSETask */
+  /* USER CODE END Task_SE */
 }
 
-/* USER CODE BEGIN Header_StartCANTask */
+/* USER CODE BEGIN Header_Task_OLED */
 /**
-* @brief Function implementing the CANTask thread.
+* @brief Function implementing the OLED_T thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartCANTask */
-__weak void StartCANTask(void *argument)
+/* USER CODE END Header_Task_OLED */
+__weak void Task_OLED(void *argument)
 {
-  /* USER CODE BEGIN StartCANTask */
+  /* USER CODE BEGIN Task_OLED */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartCANTask */
+  /* USER CODE END Task_OLED */
 }
 
-/* USER CODE BEGIN Header_StartOLEDTask */
+/* USER CODE BEGIN Header_Task_CAN_F0 */
 /**
-* @brief Function implementing the OLEDTask thread.
+* @brief Function implementing the CAN_F0_T thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartOLEDTask */
-__weak void StartOLEDTask(void *argument)
+/* USER CODE END Header_Task_CAN_F0 */
+__weak void Task_CAN_F0(void *argument)
 {
-  /* USER CODE BEGIN StartOLEDTask */
+  /* USER CODE BEGIN Task_CAN_F0 */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END StartOLEDTask */
+  /* USER CODE END Task_CAN_F0 */
+}
+
+/* USER CODE BEGIN Header_Task_CAN_F1 */
+/**
+* @brief Function implementing the CAN_F1_T thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Task_CAN_F1 */
+__weak void Task_CAN_F1(void *argument)
+{
+  /* USER CODE BEGIN Task_CAN_F1 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Task_CAN_F1 */
 }
 
 /* Private application code --------------------------------------------------*/

@@ -51,7 +51,7 @@ Debounce_Event_t Debounce_Update(Debounce_Key_t *key, uint8_t raw)
     switch(key->state)
     {
         case KEY_NO:
-            if(key->stable == key->active_level) 
+            if(key->stable == key->active_level)
             {
                 key->state = KEY_YES;
                 key->long_counter = 0;

@@ -184,7 +184,7 @@ void OLED_ShowFrame()
     memcpy(sendBuffer + 1, OLED_GRAM[i], OLED_COLUMN);
     OLED_Send(sendBuffer, OLED_COLUMN + 1);
   }
-} 
+}
 
 /**
  * @brief 设置一个像素点

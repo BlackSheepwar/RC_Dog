@@ -51,7 +51,7 @@ static BSP_USART_t *BSP_USART_GetHuartById(UART_HandleTypeDef *huart)
 {
     for (uint8_t i = 0; i < bsp_usart_count; i++)
     {
-        if (bsp_usart_pool[i].huart == huart)  
+        if (bsp_usart_pool[i].huart == huart)
             return &bsp_usart_pool[i];
     }
     return NULL;
@@ -310,7 +310,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         BSP_USART_enqueue_dma_data_to_fifo(port);
 
         // 3. 发送通知到消息队列，告知处理任务有新数据到达
-        osMessageQueuePut(RXQueueHandle, &id, 0, 0);
+        osMessageQueuePut(RX_QHandle, &id, 0, 0);
     }
 
     // 4. 重新启动DMA接收，为下一次数据接收做准备
@@ -334,6 +334,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     if (BSP_USART_ReadTxBusy(port->id) == 1)
     {
         BSP_USART_WriteTxBusyFree(port->id);
-        osSemaphoreRelease(TXBinarySemHandle);
+        osSemaphoreRelease(TX_BSHandle);
     }
 }

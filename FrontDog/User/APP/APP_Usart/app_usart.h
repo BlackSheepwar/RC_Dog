@@ -12,7 +12,7 @@
  * 头文件包含
  *============================================================================*/
 #include "bsp_usart.h"
-#include "codec.h" 
+#include "codec.h"
 
 /*==============================================================================
  * 宏定义与常量
@@ -52,7 +52,7 @@ void APP_USART_Init(void);
 /**
  * @brief 注册一个 APP 串口解析实例
  * @param id 串口编号（需与 BSP 层一致）
- * @retval 1：注册成功 
+ * @retval 1：注册成功
  * @retval 0：注册失败
  */
 uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart, DMA_HandleTypeDef *hdma_rx);

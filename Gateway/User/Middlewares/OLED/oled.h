@@ -215,7 +215,7 @@ void OLED_PrintASCIIString(uint8_t x, uint8_t y, char *str,
 void OLED_PrintString(uint8_t x, uint8_t y, char *str,
                       const Font *font, OLED_ColorMode color);
 
-/** 
+/**
 * @brief 用于存放原本不引出的函数与定义提供给扩展函数（禁止在扩展函数外的地方引用）
 */
 void OLED_Send(uint8_t *data, uint8_t len);

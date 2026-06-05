@@ -1,25 +1,23 @@
 /**
- * @file tsak_can.c
- * @brief 实现CAN控制任务，通过消息队列接收指令
+ * @file task_tx.c
+ * @brief 实现USART发送处理任务
  * @author 李嘉图
- * @date 2026-05-08
+ * @date 2026-5-4
  */
 
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "main.h"
-#include "bsp_can.h"
+#include "app_usart.h"
 
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-void StartCANTask(void *argument)
+void Task_TX(void *argument)
 {
-  CAN_Filter_Mask_Config(&hcan1,CAN_FILTER(0) | CAN_FILT_1 | CAN_STDID | CAN_DATA_TYPE, 0x114, 0x7FF);
-  CAN_Init(&hcan1);
   for(;;)
   {
-    osDelay(10);
+    osSemaphoreAcquire(TX_BSHandle, osWaitForever);
+    APP_USART_SendTxPacket();
   }
 }

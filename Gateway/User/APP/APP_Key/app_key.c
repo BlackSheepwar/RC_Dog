@@ -49,7 +49,7 @@ static void App_Key_SendEvent(uint8_t id, Debounce_Event_t event)
     msg.id = id;
     msg.event = event;
 
-    if(osMessageQueuePut(KEYQueueHandle, &msg, 0, 0) != osOK)
+    if(osMessageQueuePut(KEY_QHandle, &msg, 0, 0) != osOK)
     {
         // TODO: 队列满处理
     }
@@ -78,10 +78,10 @@ void App_Key_Init(void)
  * @retval 1: 成功
  * @retval 2: 资源池已满
  */
-uint8_t App_Key_Register(uint8_t key_id, 
-                        uint8_t long_press, 
-                        uint8_t active_level, 
-                        GPIO_TypeDef *GPIOx, 
+uint8_t App_Key_Register(uint8_t key_id,
+                        uint8_t long_press,
+                        uint8_t active_level,
+                        GPIO_TypeDef *GPIOx,
                         uint16_t Pin)
 {
     if(GPIOx == NULL) return 0;

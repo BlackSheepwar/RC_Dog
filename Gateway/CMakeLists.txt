@@ -50,15 +50,19 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Usart/app_usart_cmd.c
     User/APP/APP_Key/app_key.c
     User/APP/APP_Key/app_key_cmd.c
+    User/APP/APP_CAN/app_can.c
+    User/APP/APP_CAN/app_can_cmd_1.c
+    User/APP/APP_Knob/app_knob.c
+    User/APP/APP_Operation/app_operation.c
 
-    #User/APP/APP_Knob/app_knob.c
-    
+    # Common（平台无关层）
+    User/Common/protocol.c
+
     # BSP
     User/BSP/BSP_Key/bsp_key.c
     User/BSP/BSP_Usart/bsp_usart.c
     User/BSP/BSP_CAN/bsp_can.c
-
-    #User/BSP/BSP_ADC/bsp_ADC.c
+    User/BSP/BSP_ADC/bsp_adc.c
 
     # Middlewares
     User/Middlewares/Debounce/debounce.c
@@ -67,11 +71,12 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Middlewares/OLED/oled_extend.c
     User/Middlewares/OLED/font.c
     # OS Layer
-    "User/OS Layer/tsak_rx.c"
-    "User/OS Layer/tsak_tx.c"
-    "User/OS Layer/tsak_key.c"
+    "User/OS Layer/task_rx.c"
+    "User/OS Layer/task_tx.c"
+    "User/OS Layer/task_key.c"
     "User/OS Layer/task_par.c"
-    "User/OS Layer/tsak_can.c"
+    "User/OS Layer/task_can_f0.c"
+    "User/OS Layer/task_can_f1.c"
     "User/OS Layer/task_oled.c"
 )
 
@@ -81,20 +86,23 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # APP
     User/APP/APP_Usart
     User/APP/APP_Key
+    User/APP/APP_CAN
+    User/APP/APP_Knob
+    User/APP/APP_Operation
 
-    #User/APP/APP_Knob
+    # Common（平台无关层）
+    User/Common
 
     # BSP
     User/BSP/BSP_Key
     User/BSP/BSP_Usart
     User/BSP/BSP_CAN
-
-    #User/BSP/BSP_ADC
+    User/BSP/BSP_ADC
 
     # Middlewares
     User/Middlewares/Debounce
     User/Middlewares/Codec
-    User/Middlewares/OLED  
+    User/Middlewares/OLED
     # OS Layer
     "User/OS Layer"
 )

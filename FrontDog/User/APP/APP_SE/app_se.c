@@ -53,11 +53,12 @@ void APP_SE_Init(void)
  * @param offset     舵机角度偏移量（-25°~25°）
  * @param init_angle 初始角度
  * @param speed      运动步进速度（1°~10°）
+ * @param reverse    方向反转: 0=正转, 1=反转
  * @retval 1: 注册成功
  * @retval 0: 注册失败
  */
-uint8_t APP_SE_Add(uint8_t id,  TIM_HandleTypeDef *htim, 
-uint32_t Channel, int16_t offset, int16_t init_angle, uint8_t speed)
+uint8_t APP_SE_Add(uint8_t id,  TIM_HandleTypeDef *htim,
+uint32_t Channel, int16_t offset, int16_t init_angle, uint8_t speed, uint8_t reverse)
 {
     if (app_se_count >= SE_MAX_SIZE)
         return 0;
@@ -73,19 +74,22 @@ uint32_t Channel, int16_t offset, int16_t init_angle, uint8_t speed)
     APP_SE_t *se = &app_se_pool[app_se_count];
 
     se->id = id;
-    se->offset = offset;
     se->current_angle = init_angle;
     se->target_angle = init_angle;
     se->speed = (speed == 0) ? 1 : speed;
+    se->reverse = (reverse != 0) ? 1 : 0;
+    se->offset = se->reverse ? -offset : offset;
     se->enable = 1;
 
     // 启动舵机定时器
     BSP_SE_Start(htim, Channel);
     // 重置舵机角度
     BSP_SE_Reset(htim);
-    // 输出初始角度
-    BSP_SE_300Angle(se->id,
-                se->current_angle + se->offset + 150);
+    // 输出初始角度（offset已随reverse取反，不需要额外处理）
+    int16_t init_out = se->current_angle + se->offset + 150;
+    if (se->reverse)
+        init_out = 300 - init_out;
+    BSP_SE_300Angle(se->id, (uint16_t)init_out);
 
     app_se_count++;
 
@@ -150,6 +154,23 @@ int16_t APP_SE_GetCurrent(uint8_t id)
 }
 
 /**
+ * @brief 设置舵机运动速度
+ * @param id    舵机编号
+ * @param speed 步进速度（1°~10°/次调度）
+ * @retval 无
+ */
+void APP_SE_SetSpeed(uint8_t id, uint8_t speed)
+{
+    APP_SE_t *se = APP_SE_GetById(id);
+    if (se == NULL) return;
+
+    if (speed < 1)   speed = 1;
+    if (speed > 10)  speed = 10;
+
+    se->speed = speed;
+}
+
+/**
  * @brief 舵机平滑调度器（周期调用）
  * @note  建议5~20ms调用一次
  * @retval 无
@@ -187,6 +208,10 @@ void APP_SE_Scheduler(void)
         int16_t out_angle;
 
         out_angle = se->current_angle + se->offset + 150;
+
+        /* 反转：以150为中心镜像，等效于旋转方向取反 */
+        if (se->reverse)
+            out_angle = 300 - out_angle;
 
         if(out_angle < 0)
             out_angle = 0;

@@ -18,7 +18,7 @@
  *============================================================================*/
 static void APP_USART_AA(void)
 {
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_11);
 }
 
 static void APP_USART_A9(void)

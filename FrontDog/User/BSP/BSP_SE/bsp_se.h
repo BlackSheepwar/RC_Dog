@@ -66,12 +66,12 @@ void BSP_SE_Reset(TIM_HandleTypeDef *htim);
 
 /**
  * @brief 启动舵机定时器
- */ 
+ */
 void BSP_SE_Start(TIM_HandleTypeDef *htim, uint32_t Channel);
 
 /**
  * @brief 停止舵机定时器
- */ 
+ */
 void BSP_SE_Stop(TIM_HandleTypeDef *htim, uint32_t Channel);
 
 /*==============================================================================
