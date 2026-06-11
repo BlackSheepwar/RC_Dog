@@ -1,12 +1,12 @@
 /**
- * @file key_mws.h
- * @brief 按键处理接口
+ * @file debounce.h
+ * @brief 防抖库处理接口
  * @author 李嘉图
  * @date 2026-05-08
  */
 
-#ifndef __KEY_MWS_H__
-#define __KEY_MWS_H__
+#ifndef __DEBOUNCE_H__
+#define __DEBOUNCE_H__
 
 /*==============================================================================
  * 宏定义与常量

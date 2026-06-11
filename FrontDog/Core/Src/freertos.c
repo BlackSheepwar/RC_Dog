@@ -99,16 +99,16 @@ const osThreadAttr_t TX_T_attributes = {
   .stack_size = sizeof(TX_TBuffer),
   .priority = (osPriority_t) osPriorityAboveNormal6,
 };
-/* Definitions for SE_T */
-osThreadId_t SE_THandle;
-uint32_t SE_TBuffer[ 512 ];
-osStaticThreadDef_t SE_TControlBlock;
-const osThreadAttr_t SE_T_attributes = {
-  .name = "SE_T",
-  .cb_mem = &SE_TControlBlock,
-  .cb_size = sizeof(SE_TControlBlock),
-  .stack_mem = &SE_TBuffer[0],
-  .stack_size = sizeof(SE_TBuffer),
+/* Definitions for SERVO_T */
+osThreadId_t SERVO_THandle;
+uint32_t SERVO_TBuffer[ 64 ];
+osStaticThreadDef_t SERVO_TControlBlock;
+const osThreadAttr_t SERVO_T_attributes = {
+  .name = "SERVO_T",
+  .cb_mem = &SERVO_TControlBlock,
+  .cb_size = sizeof(SERVO_TControlBlock),
+  .stack_mem = &SERVO_TBuffer[0],
+  .stack_size = sizeof(SERVO_TBuffer),
   .priority = (osPriority_t) osPriorityHigh6,
 };
 /* Definitions for OLED_T */
@@ -209,7 +209,7 @@ void Task_KEY(void *argument);
 void Task_PAR(void *argument);
 void Task_RX(void *argument);
 void Task_TX(void *argument);
-void Task_SE(void *argument);
+void Task_SERVO_T(void *argument);
 void Task_OLED(void *argument);
 void Task_CAN_F0(void *argument);
 void Task_CAN_F1(void *argument);
@@ -272,8 +272,8 @@ void MX_FREERTOS_Init(void) {
   /* creation of TX_T */
   TX_THandle = osThreadNew(Task_TX, NULL, &TX_T_attributes);
 
-  /* creation of SE_T */
-  SE_THandle = osThreadNew(Task_SE, NULL, &SE_T_attributes);
+  /* creation of SERVO_T */
+  SERVO_THandle = osThreadNew(Task_SERVO_T, NULL, &SERVO_T_attributes);
 
   /* creation of OLED_T */
   OLED_THandle = osThreadNew(Task_OLED, NULL, &OLED_T_attributes);
@@ -366,22 +366,22 @@ __weak void Task_TX(void *argument)
   /* USER CODE END Task_TX */
 }
 
-/* USER CODE BEGIN Header_Task_SE */
+/* USER CODE BEGIN Header_Task_SERVO_T */
 /**
-* @brief Function implementing the SE_T thread.
+* @brief Function implementing the SERVO_T thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_Task_SE */
-__weak void Task_SE(void *argument)
+/* USER CODE END Header_Task_SERVO_T */
+__weak void Task_SERVO_T(void *argument)
 {
-  /* USER CODE BEGIN Task_SE */
+  /* USER CODE BEGIN Task_SERVO_T */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END Task_SE */
+  /* USER CODE END Task_SERVO_T */
 }
 
 /* USER CODE BEGIN Header_Task_OLED */

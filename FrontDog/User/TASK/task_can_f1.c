@@ -15,11 +15,26 @@
 #include "main.h"
 #include "bsp_can.h"
 #include "app_can_cmd.h"
+#include "app_can_cfg.h"
+#include "common.h"
 
 /*==============================================================================
  * 外部变量声明
  *============================================================================*/
 extern CAN_HandleTypeDef hcan1;
+
+/*==============================================================================
+ * CAN 端口路由表
+ *============================================================================*/
+typedef struct {
+    uint8_t id;
+    void    (*handler)(CAN_RxHeaderTypeDef *header, uint8_t *data);
+} can_fifo1_routing_entry_t;
+
+static const can_fifo1_routing_entry_t CAN_FIFO1_ROUTING_TABLE[] = {
+    { .id = 1, .handler = APP_CAN1_F1_Cmd },
+    // { .id = 2, .handler = APP_CAN2_F1_Cmd },  // CAN2 暂未启用
+};
 
 /*==============================================================================
  * 任务函数
@@ -30,9 +45,15 @@ void Task_CAN_F1(void *argument)
     {
         BSP_CAN_Packet_t rx_pkt;
         osMessageQueueGet(CAN_F1_QHandle, &rx_pkt, NULL, osWaitForever);
-        if (rx_pkt.id == 1)
-            APP_CAN1_F1_Cmd(&rx_pkt.header, rx_pkt.data);
-        else
-            APP_CAN2_F1_Cmd(&rx_pkt.header, rx_pkt.data);
+
+        /* 查表分发到对应 CAN 端口的处理函数 */
+        for (uint8_t i = 0; i < ARRAY_SIZE(CAN_FIFO1_ROUTING_TABLE); i++)
+        {
+            if (CAN_FIFO1_ROUTING_TABLE[i].id == rx_pkt.id)
+            {
+                CAN_FIFO1_ROUTING_TABLE[i].handler(&rx_pkt.header, rx_pkt.data);
+                break;
+            }
+        }
     }
 }

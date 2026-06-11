@@ -274,16 +274,23 @@ void APP_USART_SendTxPacket(void)
 
     uint8_t txbuf[USART_BUF_SIZE];
 
-    // 构建完整帧
+    /* 帧格式: HEAD1 HEAD2 LEN CMD [PAYLOAD] CHK
+     * pkt.len = 总帧长（含帧头） = payload_len + 5
+     * 线缆 LEN 字段 = payload_len + 3
+     * 最大 payload_len = MAX_PACKET_LEN - 5 = 123 → txbuf 最大 128 字节 */
+    uint8_t wire_len = (uint8_t)(pkt.len - 2);
+    uint8_t pay_len  = (uint8_t)(pkt.len - 5);
+
     txbuf[0] = PACKET_HEAD1;
     txbuf[1] = PACKET_HEAD2;
-    txbuf[2] = pkt.len;
+    txbuf[2] = wire_len;
     txbuf[3] = pkt.cmd;
-    memcpy(&txbuf[4], pkt.payload, pkt.len);
-    txbuf[pkt.len + 4] = pkt.chk;
+    if (pay_len > 0)
+        memcpy(&txbuf[4], pkt.payload, pay_len);
+    txbuf[4 + pay_len] = pkt.chk;
 
     BSP_USART_WriteTxBusy(pkt.id);
-    BSP_USART_Send(pkt.id, txbuf, pkt.len);
+    BSP_USART_Send(pkt.id, txbuf, pkt.len);   // 总发送字节数 = pkt.len
 }
 
 

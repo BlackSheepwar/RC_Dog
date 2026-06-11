@@ -35,6 +35,6 @@ void Task_KEY(void *argument)
     for (;;)
     {
         App_Key_Update();
-        osDelay(10);
+        osDelay(KEY_SCAN_PERIOD_MS);
     }
 }

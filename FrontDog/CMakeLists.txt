@@ -50,7 +50,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Usart/app_usart_cmd.c
     User/APP/APP_Key/app_key.c
     User/APP/APP_Key/app_key_cmd.c
-    User/APP/APP_SE/app_se.c
+    User/APP/APP_Servo/app_servo.c
+    User/APP/APP_Servo/app_servo_gait.c
     User/APP/APP_CAN/app_can.c
     User/APP/APP_CAN/app_can_cmd_1.c
     User/APP/APP_CAN/app_can_cmd_2.c
@@ -61,7 +62,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # BSP
     User/BSP/BSP_Key/bsp_key.c
     User/BSP/BSP_Usart/bsp_usart.c
-    User/BSP/BSP_SE/bsp_se.c
+    User/BSP/BSP_PWM/bsp_pwm.c
     User/BSP/BSP_CAN/bsp_can.c
 
     # Middlewares
@@ -75,7 +76,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/TASK/task_tx.c
     User/TASK/task_key.c
     User/TASK/task_par.c
-    User/TASK/task_se.c
+    User/TASK/task_servo.c
     User/TASK/task_can_f0.c
     User/TASK/task_can_f1.c
     User/TASK/task_oled.c
@@ -87,7 +88,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # APP
     User/APP/APP_Usart
     User/APP/APP_Key
-    User/APP/APP_SE
+    User/APP/APP_Servo
     User/APP/APP_CAN
 
     # Common
@@ -96,7 +97,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # BSP
     User/BSP/BSP_Key
     User/BSP/BSP_Usart
-    User/BSP/BSP_SE
+    User/BSP/BSP_PWM
     User/BSP/BSP_CAN
 
     # Middlewares

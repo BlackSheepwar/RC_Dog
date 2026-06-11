@@ -86,22 +86,16 @@ uint8_t App_Key_Register(uint8_t key_id,
 {
     if(GPIOx == NULL) return 0;
 
+    /* ---------- 查重（O(n)） ---------- */
+    if(App_Key_GetById(key_id) != NULL) return 0;
+
+    /* ---------- 容量检查 ---------- */
+    if(app_key_count >= KEY_MAX_NUM) return 2;
+
     /* ---------- BSP注册 ---------- */
     uint8_t ret = BSP_Key_Register(key_id, GPIOx, Pin);
     if (ret != 1) return ret;
-
-    /* ---------- 查重（O(n)） ---------- */
-    if(App_Key_GetById(key_id) != NULL)
-    {
-        return 0;
-    }
-
-    /* ---------- 容量检查 ---------- */
-    if(app_key_count >= KEY_MAX_NUM)
-    {
-        return 2;
-    }
-
+    
     /* ---------- 注册 ---------- */
     Debounce_Key_t *key = &app_key_pool[app_key_count];
 

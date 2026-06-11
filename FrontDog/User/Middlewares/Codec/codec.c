@@ -125,13 +125,12 @@ Codec_Packet_t Codec_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data,
         return pkt;   // 失败返回零值结构体，len = -1
     }
 
+    /* 校验和覆盖线缆上 LEN~PAYLOAD 区域，不含帧头 */
     uint8_t chk = 0;
-    chk += id;
-    chk += PACKET_HEAD1;
-    chk += PACKET_HEAD2;
+    uint8_t wire_len = (uint8_t)(len - 2);   // 线缆 LEN = payload_len + 3
+    chk += wire_len;
     chk += cmd;
-    chk += len;
-    for (uint8_t i = 0; i < len-5; i++)
+    for (uint8_t i = 0; i < len - 5; i++)
     {
         chk += data[i];
     }
@@ -141,7 +140,7 @@ Codec_Packet_t Codec_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data,
     pkt.head2 = PACKET_HEAD2;
     pkt.cmd = cmd;
     pkt.len = len;
-    if (len > 0) memcpy(pkt.payload, data, len);
+    if (len > 0) memcpy(pkt.payload, data, len-5);
     pkt.chk = chk;
 
     return pkt;

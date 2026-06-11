@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include "app_usart_cmd.h"
 #include "app_usart.h"
-#include "app_se.h"
+#include "app_servo.h"
 #include "common.h"
 
 /*==============================================================================
@@ -26,14 +26,14 @@ static void APP_USART_AA(uint8_t *payload, uint8_t len)
 {
     (void)payload;
     (void)len;
-    APP_SE_SetTarget(1, -125);
+    APP_Servo_SetTarget(1, -125);
 }
 
 static void APP_USART_A9(uint8_t *payload, uint8_t len)
 {
     (void)payload;
     (void)len;
-    APP_SE_SetTarget(1, 125);
+    APP_Servo_SetTarget(1, 125);
 }
 
 static void APP_USART_A8(uint8_t *payload, uint8_t len)

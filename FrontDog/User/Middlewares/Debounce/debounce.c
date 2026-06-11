@@ -1,6 +1,6 @@
 /**
- * @file key_mws.c
- * @brief 按键防抖,状态机处理
+ * @file debounce.c
+ * @brief 防抖库状态机处理实现
  * @author 李嘉图
  * @date 2026-05-08
  */

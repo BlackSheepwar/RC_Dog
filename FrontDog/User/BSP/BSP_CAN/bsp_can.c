@@ -47,7 +47,7 @@ static BSP_CAN_t *BSP_CAN_GetById(uint8_t id)
  * @retval 非NULL：返回对应CAN实例结构体指针
  * @retval NULL：未找到
  */
-static BSP_CAN_t *BSP_CAN_GetHuartById(CAN_HandleTypeDef *hcan)
+static BSP_CAN_t *BSP_CAN_GetByHcan(CAN_HandleTypeDef *hcan)
 {
     for (uint8_t i = 0; i < bsp_can_count; i++)
     {
@@ -244,7 +244,8 @@ uint8_t BSP_CAN_SendMsg(uint8_t id, uint32_t can_id, uint8_t is_extid, uint8_t i
  */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    BSP_CAN_t* port = BSP_CAN_GetHuartById(hcan);
+    BSP_CAN_t* port = BSP_CAN_GetByHcan(hcan);
+    if (!port) return;
     BSP_CAN_Packet_t rx_pkt;
     rx_pkt.id = port->id;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_pkt.header, rx_pkt.data);
@@ -258,7 +259,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
  */
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    BSP_CAN_t* port = BSP_CAN_GetHuartById(hcan);
+    BSP_CAN_t* port = BSP_CAN_GetByHcan(hcan);
+    if (!port) return;
     BSP_CAN_Packet_t rx_pkt;
     rx_pkt.id = port->id;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rx_pkt.header, rx_pkt.data);

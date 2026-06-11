@@ -29,9 +29,9 @@ extern CAN_HandleTypeDef hcan1;
 typedef struct {
     uint8_t id;
     void    (*handler)(CAN_RxHeaderTypeDef *header, uint8_t *data);
-} can_routing_entry_t;
+} can_fifo0_routing_entry_t;
 
-static const can_routing_entry_t CAN_ROUTING_TABLE[] = {
+static const can_fifo0_routing_entry_t CAN_FIFO0_ROUTING_TABLE[] = {
     { .id = 1, .handler = APP_CAN1_F0_Cmd },
     // { .id = 2, .handler = APP_CAN2_F0_Cmd },  // CAN2 暂未启用
 };
@@ -59,11 +59,11 @@ void Task_CAN_F0(void *argument)
         osMessageQueueGet(CAN_F0_QHandle, &rx_pkt, NULL, osWaitForever);
 
         /* 查表分发到对应 CAN 端口的处理函数 */
-        for (uint8_t i = 0; i < ARRAY_SIZE(CAN_ROUTING_TABLE); i++)
+        for (uint8_t i = 0; i < ARRAY_SIZE(CAN_FIFO0_ROUTING_TABLE); i++)
         {
-            if (CAN_ROUTING_TABLE[i].id == rx_pkt.id)
+            if (CAN_FIFO0_ROUTING_TABLE[i].id == rx_pkt.id)
             {
-                CAN_ROUTING_TABLE[i].handler(&rx_pkt.header, rx_pkt.data);
+                CAN_FIFO0_ROUTING_TABLE[i].handler(&rx_pkt.header, rx_pkt.data);
                 break;
             }
         }

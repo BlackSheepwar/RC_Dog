@@ -231,6 +231,7 @@ void BSP_USART_Send(uint8_t id, uint8_t *buf, uint16_t len)
 uint8_t BSP_USART_ReadTxBusy(uint8_t id)
 {
     BSP_USART_t *port = BSP_USART_GetById(id);
+    if (!port) return 0;
     return port->tx_busy;
 }
 
@@ -240,6 +241,7 @@ uint8_t BSP_USART_ReadTxBusy(uint8_t id)
 void BSP_USART_WriteTxBusy(uint8_t id)
 {
     BSP_USART_t *port = BSP_USART_GetById(id);
+    if (!port) return;
     port->tx_busy = 1;
 }
 
@@ -249,6 +251,7 @@ void BSP_USART_WriteTxBusy(uint8_t id)
 void BSP_USART_WriteTxBusyFree(uint8_t id)
 {
     BSP_USART_t *port = BSP_USART_GetById(id);
+    if (!port) return;
     port->tx_busy = 0;
 }
 
