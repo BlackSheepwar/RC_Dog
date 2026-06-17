@@ -259,6 +259,8 @@ void APP_Servo_Scheduler(void)
         if (fabsf(diff) < 0.001f)
         {
             se->current_angle = (float)se->target_angle;
+            /* 即使已到位也输出 PWM，确保 Limb 层更新的角度即时反映到硬件 */
+            BSP_PWM_SetPulseUs(se->id, Servo_AngleToPulse(&se->hw, se->current_angle));
             continue;
         }
 

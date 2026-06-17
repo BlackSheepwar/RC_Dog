@@ -15,7 +15,7 @@
 #include "main.h"
 #include "app_servo.h"
 #include "app_servo_cfg.h"
-#include "app_servo_gait.h"
+#include "app_gait.h"
 #include "common.h"
 #include <stdint.h>
 
@@ -26,7 +26,6 @@ void Task_SERVO_T(void *argument)
 {
     /* ---- 初始化 ---- */
     APP_Servo_Init();
-    Gait_Init();
 
     /* ---- 配置定时器频率 ---- */
     for (uint8_t i = 0; i < SERVO_TIM_CFG_COUNT; i++)
@@ -42,11 +41,15 @@ void Task_SERVO_T(void *argument)
                    SERVO_CFG[i].speed_dps);
     }
 
-    /* ---- 周期调度 ---- */
+    /* ---- 初始化 IK 步态（需在舵机注册后，会在 Limb 层设置舵机高速）---- */
+    //Gait_IK_Init();
+
+    /* ---- 周期调度（架构链路见 gait doc）---- */
     for (;;)
     {
-        APP_Servo_Scheduler();    /* 舵机平滑逼近 */
-        Gait_Scheduler();      /* 步态相位推进（空闲时无开销） */
+        //Gait_IK_Scheduler();    /* 步态相位推进 + IK 解算 → Limb_SetTarget */
+        //Limb_Scheduler();       /* 时间基插值 → APP_Servo_SetTarget */
+        APP_Servo_Scheduler();  /* PWM 输出 */
         osDelay(SERVO_TICK_MS);
     }
 }

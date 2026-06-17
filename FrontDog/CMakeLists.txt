@@ -51,13 +51,13 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Key/app_key.c
     User/APP/APP_Key/app_key_cmd.c
     User/APP/APP_Servo/app_servo.c
-    User/APP/APP_Servo/app_servo_gait.c
+    User/APP/APP_Motion/app_gait.c
+    User/APP/APP_Motion/app_gait.h
+    User/APP/APP_Motion/app_limb.c
+    User/APP/APP_Motion/app_limb.h
     User/APP/APP_CAN/app_can.c
     User/APP/APP_CAN/app_can_cmd_1.c
     User/APP/APP_CAN/app_can_cmd_2.c
-
-    # Common
-    User/Common/protocol.c
 
     # BSP
     User/BSP/BSP_Key/bsp_key.c
@@ -68,9 +68,11 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Middlewares
     User/Middlewares/Debounce/debounce.c
     User/Middlewares/Codec/codec.c
-    User/Middlewares/OLED/oled.c
-    User/Middlewares/OLED/oled_extend.c
-    User/Middlewares/OLED/font.c
+    User/Middlewares/IK/ik_two_link.c
+    User/Middlewares/IK/ik_two_link.h
+    User/Third_Party/OLED/oled.c
+    User/Third_Party/OLED/oled_extend.c
+    User/Third_Party/OLED/font.c
     # TASK
     User/TASK/task_rx.c
     User/TASK/task_tx.c
@@ -89,6 +91,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Usart
     User/APP/APP_Key
     User/APP/APP_Servo
+    User/APP/APP_Motion
     User/APP/APP_CAN
 
     # Common
@@ -103,7 +106,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Middlewares
     User/Middlewares/Debounce
     User/Middlewares/Codec
-    User/Middlewares/OLED
+    User/Middlewares/IK
+    User/Third_Party/OLED
     # TASK
     User/TASK
 )

@@ -59,14 +59,14 @@ static const servo_tim_cfg_t SERVO_TIM_CFG[SERVO_TIM_CFG_COUNT] = {
 };
 
 static const servo_cfg_t SERVO_CFG[SERVO_COUNT] = {
-    { .id = 1,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 1, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
-    { .id = 2,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
-    { .id = 3,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
-    { .id = 4,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
-    { .id = 5,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
-    { .id = 6,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
-    { .id = 7,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
-    { .id = 8,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .id = 8,  .hw = { .phys_range = 300, .offset = -3, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 1, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .id = 7,  .hw = { .phys_range = 300, .offset = -5, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 1, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 50.0f },
+    { .id = 3,  .hw = { .phys_range = 300, .offset = -11, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 1, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 50.0f },
+    { .id = 4,  .hw = { .phys_range = 300, .offset = -15, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 1, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .id = 5,  .hw = { .phys_range = 300, .offset = 12, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 50.0f },
+    { .id = 6,  .hw = { .phys_range = 300, .offset = 13, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .id = 2,  .hw = { .phys_range = 300, .offset = 3, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .id = 1,  .hw = { .phys_range = 300, .offset = 7, .offset_max = 20, .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 50.0f },
 };
 
 #endif /* __APP_SERVO_CFG_H__ */

@@ -15,7 +15,6 @@
  *============================================================================*/
 #include "main.h"
 #include "bsp_can.h"
-#include "protocol.h"
 
 /*==============================================================================
  * CAN 实例配置
@@ -36,10 +35,10 @@ static const BSP_CAN_FilterConfig_t CAN1_F0_FILTER_CFG = {
     .fifo        = CAN1_FIFO0_FILTER_FIFO,
     .mode        = BSP_CAN_FILTER_MODE_LIST,
     .scale       = BSP_CAN_FILTER_SCALE_16,
-    .id1 = BSP_CAN_STD16(CANID_LEG1, 0, 0),
-    .id2 = BSP_CAN_STD16(CANID_LEG2, 0, 0),
-    .id3 = BSP_CAN_STD16(CANID_LEG3, 0, 0),
-    .id4 = BSP_CAN_STD16(CANID_LEG4, 0, 0),
+    .id1 = BSP_CAN_STD16(0X201, 0, 0),
+    .id2 = BSP_CAN_STD16(0X202, 0, 0),
+    .id3 = BSP_CAN_STD16(0X203, 0, 0),
+    .id4 = BSP_CAN_STD16(0X204, 0, 0),
 };
 
 /*==============================================================================
