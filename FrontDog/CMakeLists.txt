@@ -58,9 +58,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_CAN/app_can.c
     User/APP/APP_CAN/app_can_cmd_1.c
     User/APP/APP_CAN/app_can_cmd_2.c
-
+    
     # BSP
-    User/BSP/BSP_Key/bsp_key.c
+    User/BSP/BSP_GPIO/bsp_gpio.c
     User/BSP/BSP_Usart/bsp_usart.c
     User/BSP/BSP_PWM/bsp_pwm.c
     User/BSP/BSP_CAN/bsp_can.c
@@ -98,7 +98,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     User/Common
 
     # BSP
-    User/BSP/BSP_Key
+    User/BSP/BSP_GPIO
     User/BSP/BSP_Usart
     User/BSP/BSP_PWM
     User/BSP/BSP_CAN

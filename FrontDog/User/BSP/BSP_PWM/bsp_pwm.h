@@ -26,9 +26,9 @@
  *============================================================================*/
 #define TIM_APB2_Hz     168000000       // APB2定时器时钟（TIM9/10/11）
 #define TIM_APB1_Hz     84000000        // APB1定时器时钟（TIM12/13/14）
-#define TIM_MAX_SIZE      8             // PWM通道数量
-#define BSP_PWM_TIM_FREQ_HZ  1000000U   // 定时器计数频率，1MHz → 1计数值=1μs
-#define TIM_PSC_MAX          0xFFFFU   // PSC在所有STM32F4定时器上均为16位
+#define TIM_MAX_SIZE      16            // PWM通道数量
+#define BSP_SERVO_PWM_TIM_FREQ_HZ  1000000U   // 定时器计数频率，1MHz → 1计数值=1μs
+#define TIM_PSC_MAX          0xFFFFU    // PSC在所有STM32F4定时器上均为16位
 #define TIM_ARR_MAX(htim)    (IS_TIM_32B_COUNTER_INSTANCE((htim)->Instance) ? 0xFFFFFFFFU : 0xFFFFU)
 
 /*==============================================================================
@@ -38,16 +38,6 @@
  * @brief 初始化PWM BSP层
  */
 void BSP_PWM_Init(void);
-
-/**
- * @brief  设置PWM频率（采用 BSP_PWM_TIM_FREQ_HZ 计数频率）
- * @param  htim            定时器句柄
- * @param  TimerClockFreq  定时器时钟源频率，单位Hz
- * @param  DesiredFreq     目标PWM频率
- * @note   调用后脉宽映射变为：1次计数 = (1/BSP_PWM_TIM_FREQ_HZ)秒，之前设置的CCR值会失效，
- *         需立即重新设定各通道的脉宽。
- */
-void BSP_PWM_SetFreq(TIM_HandleTypeDef *htim, uint32_t TimerClockFreq, uint32_t DesiredFreq);
 
 /*==============================================================================
  * 定时器控制函数

@@ -2,9 +2,10 @@
  * @file task_key.c
  * @brief 实现按键扫描与消息发送任务
  * @author 李嘉图
- * @date 2026-06-05
+ * @date 2026-06-17
  *
  * @note 按键注册参数已提取到 app_key_cfg.h，
+ *       GPIO 引脚映射已下沉到 bsp_gpio.c 的 GPIO_HW_MAP，
  *       Task 层遍历配置表完成注册，新增按键只需在表中加一项。
  */
 
@@ -27,9 +28,7 @@ void Task_KEY(void *argument)
     {
         App_Key_Register(KEY_REG_TABLE[i].key_id,
                          KEY_REG_TABLE[i].long_press,
-                         KEY_REG_TABLE[i].active_level,
-                         KEY_REG_TABLE[i].GPIOx,
-                         KEY_REG_TABLE[i].Pin);
+                         KEY_REG_TABLE[i].active_level);
     }
 
     for (;;)

@@ -17,8 +17,7 @@
  * 头文件包含
  *============================================================================*/
 #include "app_gait.h"
-#include "app_servo.h"
-#include <math.h>
+#include "app_servo.h"      /* 显式声明依赖：Gait 层运行在 Servo 之上 */
 
 /*==============================================================================
  * 静态池
@@ -48,31 +47,39 @@ void Gait_IK_Init(void)
 /**
  * @brief 辅助函数：对单个相位做 IK 解算并设肢体目标
  * @param phase       IK 相位指针
- * @note 内部遍历所有腿，做 IK 解算后调用 Limb_SetTarget。
- *       若 IK 解算不可达，该腿跳过（保持原位）。
+ * @note 先对所有腿做 IK 解算，全部可达才一起设置目标。
+ *       任一腿 IK 失败时整组跳过，避免部分腿到位、部分停留在旧位置导致不平衡。
  */
 static void Gait_IK_ApplyPhase(const ik_gait_phase_t *phase)
 {
+    int16_t targets[LEG_COUNT][LIMB_JOINT_COUNT];
+    uint8_t all_valid = 1;
+
+    /* 第一遍：遍历所有腿做 IK，确保全部可达 */
     for (uint8_t leg = 0; leg < LEG_COUNT; leg++)
     {
         float hip_rad, knee_rad;
-        int16_t target[LIMB_JOINT_COUNT];
 
         if (IK_TwoLink(LEG_L1, LEG_L2,
                        phase->legs[leg].x,
                        phase->legs[leg].z,
                        &hip_rad, &knee_rad))
         {
-            target[0] = (int16_t)(hip_rad  * RAD_TO_DEG + 0.5f);
-            target[1] = (int16_t)(knee_rad * RAD_TO_DEG + 0.5f);
+            targets[leg][0] = (int16_t)(hip_rad  * RAD_TO_DEG + 0.5f);
+            targets[leg][1] = (int16_t)(knee_rad * RAD_TO_DEG + 0.5f);
         }
         else
         {
-            /* 不可达：跳过，肢体保持原位 */
-            continue;
+            all_valid = 0;
+            break;      /* 任一腿不可达 → 整组跳过 */
         }
+    }
 
-        Limb_SetTarget(leg, target, phase->duration_ms);
+    /* 第二遍：全部可达才设置肢体目标 */
+    if (all_valid)
+    {
+        for (uint8_t leg = 0; leg < LEG_COUNT; leg++)
+            Limb_SetTarget(leg, targets[leg], phase->duration_ms);
     }
 }
 
@@ -164,15 +171,15 @@ void Gait_IK_Scheduler(void)
 /*==============================================================================
  * 内置 IK 步态序列
  *
- * 注意：以下足端位置是参考值，基于 LEG_L1=LEG_L2=50mm 推算。
+ * 注意：以下足端位置是参考值，基于 LEG_L1=140mm, LEG_L2=180mm 推算。
  * 实际使用时必须根据机械结构微调。
  *
  * 足端坐标系原点在髋关节：
  *   x = 前后（+前）
  *   z = 竖直（+下）
  *
- * 可达范围：L1+L2=100mm（全伸） ~ |L1-L2|≈0mm（全折）
- * 合理工作区约 z=40~95mm
+ * 可达范围：L1+L2=320mm（全伸） ~ |L1-L2|≈40mm（全折）
+ * 合理工作区约 z=60~300mm
  *============================================================================*/
 
 /* ---------- 站立姿态 ----------

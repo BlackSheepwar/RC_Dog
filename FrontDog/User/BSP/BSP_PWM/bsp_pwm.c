@@ -13,21 +13,8 @@
  * 头文件包含
  *============================================================================*/
 #include "bsp_pwm.h"
+#include "common.h"     // ARRAY_SIZE
 #include "main.h"       // 引用 &htim9~14 等定时器句柄
-
-/*==============================================================================
- * 内部工具函数
- *============================================================================*/
-/**
- * @brief 设置指定通道的PWM比较值（计数值，非μs）
- * @param htim     定时器句柄
- * @param channel  通道宏，如 TIM_CHANNEL_1
- * @param compare  比较值（定时器计数值，≤ ARR）
- */
-static void BSP_PWM_SetCompare(TIM_HandleTypeDef *htim, uint32_t channel, uint32_t compare)
-{
-    __HAL_TIM_SET_COMPARE(htim, channel, compare);
-}
 
 /*==============================================================================
  * PWM硬件映射表
@@ -56,11 +43,60 @@ static const BSP_PwmMap_t PWM_HW_MAP[TIM_MAX_SIZE] = {
     { .pwm_id = 8,  .htim = &htim14, .channel = TIM_CHANNEL_1 },
 };
 
-#define PWM_HW_MAP_SIZE  (sizeof(PWM_HW_MAP) / sizeof(PWM_HW_MAP[0]))
+/*==============================================================================
+ * 定时器频率配置表（BSP 内置，上层不可见）
+ *
+ * 将定时器句柄映射到其总线时钟频率，供 BSP_PWM_SetAllFreq 批量初始化。
+ * 修改硬件（换定时器/换时钟树）时只需改这张表。
+ *============================================================================*/
+typedef struct {
+    TIM_HandleTypeDef *htim;
+    uint32_t           clock_hz;      /* 定时器总线时钟（APB1/APB2），与 bsp_pwm.h 宏对应 */
+    uint32_t           tim_freq_hz;   /* 定时器计数频率（PSC 分频后的计数器时钟） */
+    uint32_t           freq;          /* 目标 PWM 频率（Hz） */
+} BSP_TimerFreqMap_t;
 
-/** @brief 与PWM_HW_MAP同索引的ARR缓存（SRAM），0表示未设频 */
-static uint32_t PWM_ARR_CACHE[TIM_MAX_SIZE];
+static const BSP_TimerFreqMap_t PWM_TIM_CFG[] = {
+    { .htim = &htim9,  .clock_hz = TIM_APB2_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
+    { .htim = &htim10, .clock_hz = TIM_APB2_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
+    { .htim = &htim11, .clock_hz = TIM_APB2_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
+    { .htim = &htim12, .clock_hz = TIM_APB1_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
+    { .htim = &htim13, .clock_hz = TIM_APB1_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
+    { .htim = &htim14, .clock_hz = TIM_APB1_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
+};
 
+/**
+ * @brief 设置PWM频率（按 cfg->tim_freq_hz 计数频率）
+ * @param cfg 定时器频率配置表项（含预计算 ARR）
+ * @note 调用后脉宽映射变为：1次计数 = (1/tim_freq_hz)秒，之前设置的CCR值会失效，
+ *       需立即重新设定各通道的脉宽。
+ */
+static void BSP_PWM_SetFreq(const BSP_TimerFreqMap_t *cfg)
+{
+    uint32_t psc = (cfg->clock_hz / cfg->tim_freq_hz) - 1U;
+    uint32_t arr = (cfg->tim_freq_hz / cfg->freq) - 1U;
+
+    if (arr > TIM_ARR_MAX(cfg->htim) || psc > TIM_PSC_MAX) return;
+
+    cfg->htim->Instance->PSC = psc;
+    cfg->htim->Instance->ARR = arr;
+    cfg->htim->Instance->EGR = TIM_EGR_UG;
+}
+
+/**
+ * @brief 批量设置所有 PWM 定时器频率（按 PWM_TIM_CFG 表）
+ * @note 一行调用替代上层循环，定时器→时钟→频率映射由 BSP 内置。
+ *       在 APP_Servo_Add 之前调用。
+ */
+static void BSP_PWM_SetAllFreq(void)
+{
+    for (uint8_t i = 0; i < ARRAY_SIZE(PWM_TIM_CFG); i++)
+        BSP_PWM_SetFreq(&PWM_TIM_CFG[i]);
+}
+
+/*==============================================================================
+ * 内部工具函数
+ *============================================================================*/
 /**
  * @brief 根据pwm_id查找硬件映射
  * @param pwm_id 逻辑PWM编号
@@ -69,7 +105,7 @@ static uint32_t PWM_ARR_CACHE[TIM_MAX_SIZE];
  */
 static const BSP_PwmMap_t *BSP_PWM_FindMap(uint8_t pwm_id)
 {
-    for (uint8_t i = 0; i < PWM_HW_MAP_SIZE; i++)
+    for (uint8_t i = 0; i < ARRAY_SIZE(PWM_HW_MAP); i++)
     {
         if (PWM_HW_MAP[i].pwm_id == pwm_id)
             return &PWM_HW_MAP[i];
@@ -77,39 +113,40 @@ static const BSP_PwmMap_t *BSP_PWM_FindMap(uint8_t pwm_id)
     return NULL;
 }
 
+/**
+ * @brief 根据定时器句柄查找对应的频率配置项
+ * @param htim 定时器句柄
+ * @retval 非NULL：找到
+ * @retval NULL：未找到
+ */
+static const BSP_TimerFreqMap_t *BSP_PWM_FindTimerCfg(const TIM_HandleTypeDef *htim)
+{
+    for (uint8_t i = 0; i < ARRAY_SIZE(PWM_TIM_CFG); i++)
+    {
+        if (PWM_TIM_CFG[i].htim == htim)
+            return &PWM_TIM_CFG[i];
+    }
+    return NULL;
+}
+
+ /**
+ * @brief 设置指定通道的PWM比较值（计数值，非μs）
+ * @param htim     定时器句柄
+ * @param channel  通道宏，如 TIM_CHANNEL_1
+ * @param compare  比较值（定时器计数值，≤ ARR）
+ */
+static void BSP_PWM_SetCompare(TIM_HandleTypeDef *htim, uint32_t channel, uint32_t compare)
+{
+    __HAL_TIM_SET_COMPARE(htim, channel, compare);
+}
+
 /*==============================================================================
  * 初始化函数
  *============================================================================*/
 void BSP_PWM_Init(void)
 {
-    /* 无动态资源需要初始化，映射表为编译期常量 */
-}
-
-/**
- * @brief 设置PWM频率（采用 BSP_PWM_TIM_FREQ_HZ 计数频率）
- * @param htim           定时器句柄
- * @param TimerClockFreq 定时器时钟源频率，单位Hz
- * @param DesiredFreq    目标PWM频率
- * @note 调用后脉宽映射变为：1次计数 = (1/BSP_PWM_TIM_FREQ_HZ)秒，之前设置的CCR值会失效，
- *       需立即重新设定各通道的脉宽。
- */
-void BSP_PWM_SetFreq(TIM_HandleTypeDef *htim, uint32_t TimerClockFreq, uint32_t DesiredFreq)
-{
-    uint32_t psc = (TimerClockFreq / BSP_PWM_TIM_FREQ_HZ) - 1;
-    uint32_t arr = (BSP_PWM_TIM_FREQ_HZ / DesiredFreq) - 1;
-
-    if (arr > TIM_ARR_MAX(htim) || psc > TIM_PSC_MAX) return;
-
-    htim->Instance->PSC = psc;
-    htim->Instance->ARR = arr;
-    htim->Instance->EGR = TIM_EGR_UG;
-
-    /* 同步更新所有使用此定时器的映射项 */
-    for (uint8_t i = 0; i < PWM_HW_MAP_SIZE; i++)
-    {
-        if (PWM_HW_MAP[i].htim->Instance == htim->Instance)
-            PWM_ARR_CACHE[i] = arr;
-    }
+    // 定时器频率设置
+    BSP_PWM_SetAllFreq();
 }
 
 /*==============================================================================
@@ -161,17 +198,20 @@ void BSP_PWM_Reset(uint8_t pwm_id)
  * @brief 设置PWM脉宽（适用于舵机，直接输μs）
  * @param pwm_id   逻辑PWM编号
  * @param pulse_us 高电平脉宽，单位μs（典型范围500~2500）
- * @note  内部换算：计数值 = pulse_us × BSP_PWM_TIM_FREQ_HZ / 1000000
+ * @note  内部换算：计数值 = pulse_us × tim_freq_hz / 1000000
  */
 void BSP_PWM_SetPulseUs(uint8_t pwm_id, uint16_t pulse_us)
 {
     const BSP_PwmMap_t *map = BSP_PWM_FindMap(pwm_id);
     if (map == NULL) return;
 
-    uint32_t compare = (uint32_t)((uint64_t)pulse_us * BSP_PWM_TIM_FREQ_HZ / 1000000U);
-    uint32_t arr     = PWM_ARR_CACHE[map - PWM_HW_MAP];
-    if (arr == 0) arr = map->htim->Instance->ARR;
+    const BSP_TimerFreqMap_t *tcfg = BSP_PWM_FindTimerCfg(map->htim);
+    if (tcfg == NULL) return;
+
+    uint32_t compare = (uint32_t)((uint64_t)pulse_us * tcfg->tim_freq_hz / 1000000U);
+    uint32_t arr     = map->htim->Instance->ARR;
     if (compare > arr) compare = arr;
+
     BSP_PWM_SetCompare(map->htim, map->channel, compare);
 }
 
@@ -189,9 +229,8 @@ void BSP_PWM_SetDuty(uint8_t pwm_id, float duty_percent)
     if (duty_percent < 0.0f) duty_percent = 0.0f;
     if (duty_percent > 100.0f) duty_percent = 100.0f;
 
-    uint32_t arr     = PWM_ARR_CACHE[map - PWM_HW_MAP];
-    if (arr == 0) arr = map->htim->Instance->ARR;
+    uint32_t arr     = map->htim->Instance->ARR;
     uint32_t compare = (uint32_t)((float)(arr + 1) * duty_percent / 100.0f + 0.5f);
 
-    __HAL_TIM_SET_COMPARE(map->htim, map->channel, compare);
+    BSP_PWM_SetCompare(map->htim, map->channel, compare);
 }
