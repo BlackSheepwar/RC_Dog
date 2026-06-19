@@ -16,7 +16,10 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
 #include "app_gait.h"
+// 功能包含
+#include "bsp_sys.h"       /* BSP_GetTickMs */
 #include "app_servo.h"      /* 显式声明依赖：Gait 层运行在 Servo 之上 */
 
 /*==============================================================================
@@ -96,7 +99,7 @@ void Gait_IK_Start(const ik_gait_sequence_t *gait)
 
     s_ik.sequence         = gait;
     s_ik.phase_index      = 0;
-    s_ik.phase_start_tick = HAL_GetTick();
+    s_ik.phase_start_tick = BSP_GetTickMs();
     s_ik.active           = 1;
 
     /* ── 立即应用第一个相位 ── */
@@ -140,7 +143,7 @@ void Gait_IK_Scheduler(void)
         return;
 
     /* ── 检查当前相位是否结束 ── */
-    uint32_t now           = HAL_GetTick();
+    uint32_t now           = BSP_GetTickMs();
     uint32_t elapsed       = now - s_ik.phase_start_tick;
     uint32_t phase_duration = s_ik.sequence->phases[s_ik.phase_index].duration_ms;
 

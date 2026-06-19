@@ -1,8 +1,11 @@
 /**
- * @file task_oled.c
- * @brief 实现OLED任务
+ * @file bsp_sys.c
+ * @brief 系统级 BSP 封装实现
  * @author 李嘉图
- * @date 2026-05-08
+ * @date 2026-06-18
+ *
+ * @note 当前使用 HAL_GetTick() 作为时间基准，
+ *       若切换 tick 源（如 TIM2）只需改此文件的实现。
  */
 
 /*==============================================================================
@@ -10,19 +13,13 @@
  *============================================================================*/
 // 固定包含
 #include <stdint.h>
-#include "main.h"
-// 功能包含
-#include "oled.h"
-#include "oled_extend.h"
-#include "app_servo.h"
+#include "main.h"       /* HAL_GetTick */
+#include "bsp_sys.h"
 
 /*==============================================================================
- * 任务函数
+ * 时间基准
  *============================================================================*/
-void Task_OLED(void *argument)
+uint32_t BSP_GetTickMs(void)
 {
-  for(;;)
-  {
-    osDelay(10);
-  }
+    return HAL_GetTick();
 }

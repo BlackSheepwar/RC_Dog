@@ -19,12 +19,14 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
+#include <stdint.h>
 #include "main.h"
+#include "common.h"
+// 功能包含
 #include "app_servo.h"
 #include "app_servo_cfg.h"
 #include "app_gait.h"
-#include "common.h"
-#include <stdint.h>
 
 /*==============================================================================
  * 任务函数
@@ -36,7 +38,7 @@
  *   4. Gait_IK_Init()          — 初始化 Limb 层 + IK 步态状态
  *      （Gait_IK_Init 内部调用 Limb_Init，自动设定舵机高速跟随）
  *
- * 启动步态（在外部通过 CAN/USART/Key 命令调用）：
+ * 启动步态（在外部通过 CAN/UART/Key 命令调用）：
  *   Gait_IK_Start(&GAIT_IK_STAND) — 站立
  *   Gait_IK_Start(&GAIT_IK_WALK)  — 行走
  *   Gait_IK_Stop()                — 停止

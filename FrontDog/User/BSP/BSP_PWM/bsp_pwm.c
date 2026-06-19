@@ -12,9 +12,22 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
+#include <stdint.h>
+#include "main.h"       /* 引用 &htim9~14 等定时器句柄 */
+#include "common.h"
 #include "bsp_pwm.h"
-#include "common.h"     // ARRAY_SIZE
-#include "main.h"       // 引用 &htim9~14 等定时器句柄
+// 功能包含
+#include "tim.h"         /* TIM_HandleTypeDef */
+
+/*==============================================================================
+ * 宏定义与常量
+ *============================================================================*/
+#define TIM_APB2_Hz     168000000       // APB2定时器时钟（TIM9/10/11）
+#define TIM_APB1_Hz     84000000        // APB1定时器时钟（TIM12/13/14）
+#define BSP_SERVO_PWM_TIM_FREQ_HZ  1000000U   // 定时器计数频率，1MHz → 1计数值=1μs
+#define TIM_PSC_MAX          0xFFFFU    // PSC在所有STM32F4定时器上均为16位
+#define TIM_ARR_MAX(htim)    (IS_TIM_32B_COUNTER_INSTANCE((htim)->Instance) ? 0xFFFFFFFFU : 0xFFFFU)
 
 /*==============================================================================
  * PWM硬件映射表

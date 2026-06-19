@@ -10,14 +10,20 @@
  *       舵机→肢体的映射为编译期 const 表 LIMB_SERVO_MAP，
  *       Limb_Init 预置所有肢体 registered=1 并设定舵机高速跟随。
  *
- *       使用 HAL_GetTick() 作为时间基准，
+ *       使用 BSP_GetTickMs() 作为时间基准，
  *       无符号减法自动处理 49 天回绕（unsigned wrap-around）。
  */
 
+/*==============================================================================
+ * 头文件包含
+ *============================================================================*/
+// 固定包含
+#include <string.h>
 #include "app_limb.h"
+// 功能包含
+#include "bsp_sys.h"       /* BSP_GetTickMs */
 #include "app_limb_cfg.h"  /* LIMB_SERVO_MAP, LIMB_SERVO_SPEED_DPS */
 #include "app_servo.h"
-#include <string.h>
 
 /*==============================================================================
  * 静态池
@@ -78,7 +84,7 @@ void Limb_SetTarget(uint8_t limb_id,
         limb->target_joint[j] = target[j];
 
     limb->duration_ms = (duration_ms > 0) ? duration_ms : 1;
-    limb->start_tick  = HAL_GetTick();
+    limb->start_tick  = BSP_GetTickMs();
     limb->moving      = 1;
 
     /* ── 若目标与当前恰好一致，立即标记到位 ── */
@@ -206,7 +212,7 @@ void Limb_StopAll(void)
  */
 void Limb_Scheduler(void)
 {
-    uint32_t now = HAL_GetTick();
+    uint32_t now = BSP_GetTickMs();
 
     for (uint8_t i = 0; i < LIMB_MAX; i++)
     {

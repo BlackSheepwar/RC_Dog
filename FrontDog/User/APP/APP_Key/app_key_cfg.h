@@ -15,6 +15,12 @@
 #define __APP_KEY_CFG_H__
 
 /*==============================================================================
+ * 头文件包含
+ *============================================================================*/
+// 固定包含
+#include <stdint.h>
+
+/*==============================================================================
  * 宏定义与常量
  *============================================================================*/
 #define KEY_SCAN_PERIOD_MS 10
@@ -23,14 +29,16 @@
  * 按键注册参数配置
  *============================================================================*/
 typedef struct {
-    uint8_t  key_id;
-    uint8_t  long_press;     /* 长按判定阈值（单位:任务周期） */
-    uint8_t  active_level;   /* 按键激活电平（0:低电平，1:高电平） */
+    uint8_t  key_id;           /* 逻辑按键 ID（分发表匹配用） */
+    uint8_t  gpio_id;          /* GPIO 映射 ID（BSP_GPIO 寻址用） */
+    uint8_t  long_press;       /* 长按判定阈值（单位:任务周期） */
+    uint8_t  active_level;     /* 按键激活电平（0:低电平，1:高电平） */
+    uint8_t  debounce_ticks;   /* 消抖稳定计数（单位:任务周期，推荐 2~3） */
 } key_register_t;
 
-/* 按键注册表：{id, long_press, active_level} */
+/* 按键注册表：{key_id, gpio_id, long_press, active_level, debounce_ticks} */
 static const key_register_t KEY_REG_TABLE[] = {
-    { .key_id = 1, .long_press = 18, .active_level = 1 },
+    { .key_id = 1, .gpio_id = 1, .long_press = 18, .active_level = 1, .debounce_ticks = 2 },
 };
 
 #endif /* __APP_KEY_CFG_H__ */

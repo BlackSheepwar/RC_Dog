@@ -1,17 +1,17 @@
 /**
- * @file app_usart.h
+ * @file app_uart.h
  * @brief 串口应用模块
  * @author 李嘉图
  * @date 2026-5-4
  */
 
-#ifndef __APP_USART_H__
-#define __APP_USART_H__
+#ifndef __APP_UART_H__
+#define __APP_UART_H__
 
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "bsp_usart.h"
+#include "bsp_uart.h"
 #include "codec.h"
 
 /*==============================================================================
@@ -19,7 +19,7 @@
  *============================================================================*/
 #define RX_BUF_MAX     256          // 解包缓冲区大小
 #define PACKET_FIFO_SIZE 11         // 最多存 10 个未处理包(要保留一个空包)
-#define USART_RX_TIMEOUT_MS   50    // 半包超时时间（单位：ms）
+#define UART_RX_TIMEOUT_MS   50    // 半包超时时间（单位：ms）
 
 /*==============================================================================
  * 结构体
@@ -29,7 +29,7 @@ typedef struct {
     Codec_Packet_t buffer[PACKET_FIFO_SIZE];  // 队列缓冲区
     uint8_t  head;                      // 队头索引（读位置）
     uint8_t  tail;                      // 队尾索引（写位置）
-} APP_USART_PacketFIFO_t;
+} APP_UART_PacketFIFO_t;
 
 // 串口解包结构体
 typedef struct
@@ -38,7 +38,7 @@ typedef struct
     uint8_t  rx_buf[RX_BUF_MAX];    // 拼包缓冲区
     uint16_t rx_len;                // 当前缓冲区中有效数据长度
     uint32_t last_rx_time;          // 最后一次接收到数据的时间戳
-} APP_USART_t;
+} APP_UART_t;
 
 /*==============================================================================
  * 初始化函数
@@ -47,7 +47,7 @@ typedef struct
  * @brief APP初始化
  * @note 串口注册
  */
-void APP_USART_Init(void);
+void APP_UART_Init(void);
 
 /**
  * @brief 注册一个 APP 串口解析实例
@@ -56,7 +56,7 @@ void APP_USART_Init(void);
  * @retval 1：注册成功
  * @retval 0：注册失败
  */
-uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart);
+uint8_t APP_UART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart);
 
 
 /*==============================================================================
@@ -68,13 +68,13 @@ uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart);
  * @retval 1：成功消费一个数据包
  * @retval 0：没有数据包可消费
  */
-uint8_t APP_USART_SendRxPacket(void);
+uint8_t APP_UART_SendRxPacket(void);
 
 /**
  * @brief 解包并推入接收 FIFO 队列（基于单包解析器）
  * @param id 串口编号
  */
-void APP_USART_BuildRxPacket(uint8_t id);
+void APP_UART_BuildRxPacket(uint8_t id);
 
 /*==============================================================================
  * 发送数据包函数
@@ -83,7 +83,7 @@ void APP_USART_BuildRxPacket(uint8_t id);
  * @brief 发送 FIFO 调度处理（每次发送一个数据包）
  * @note  从 txPacketFIFO 中取出一个包，组装成完整帧并通过底层发送
  */
-void APP_USART_SendTxPacket(void);
+void APP_UART_SendTxPacket(void);
 
 /**
  * @brief 打包并推入发送 FIFO 队列
@@ -94,7 +94,7 @@ void APP_USART_SendTxPacket(void);
  * @retval 1：成功打包并入队
  * @retval 0：失败（参数非法、队列满等）
  */
-uint8_t APP_USART_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data, uint8_t len);
+uint8_t APP_UART_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data, uint8_t len);
 
 
 #endif

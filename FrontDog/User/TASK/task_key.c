@@ -12,10 +12,12 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
 #include "main.h"
+#include "common.h"
+// 功能包含
 #include "app_key.h"
 #include "app_key_cfg.h"
-#include "common.h"
 
 /*==============================================================================
  * 任务函数
@@ -27,8 +29,10 @@ void Task_KEY(void *argument)
     for (uint8_t i = 0; i < ARRAY_SIZE(KEY_REG_TABLE); i++)
     {
         App_Key_Register(KEY_REG_TABLE[i].key_id,
+                         KEY_REG_TABLE[i].gpio_id,
                          KEY_REG_TABLE[i].long_press,
-                         KEY_REG_TABLE[i].active_level);
+                         KEY_REG_TABLE[i].active_level,
+                         KEY_REG_TABLE[i].debounce_ticks);
     }
 
     for (;;)

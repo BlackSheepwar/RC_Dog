@@ -18,9 +18,26 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "app_servo.h"
+// 固定包含
+#include <stdint.h>
 #include <math.h>
-#include <stdlib.h>  /* abs() */
+#include <stdlib.h> 
+#include "app_servo.h"
+// 功能包含
+#include "bsp_pwm.h"       /* BSP_PWM_SetPulseUs */
+
+/*==============================================================================
+ * 舵机运行时实例结构体
+ *============================================================================*/
+typedef struct
+{
+    uint8_t             id;              // 舵机ID
+    Servo_HwConfig_t    hw;              // 硬件配置（安装后固定）
+    float               current_angle;   // 当前角度（浮点，连续平滑）
+    int16_t             target_angle;    // 目标角度（受 phys_range 和 offset_max 约束）
+    float               speed_dps;       // 角速度 (°/s)
+    uint8_t             enable;          // 是否启用: 1=参与调度, 0=跳过
+} APP_Servo_t;
 
 /*==============================================================================
  * 内部辅助函数（static inline，零调用开销）
@@ -173,7 +190,7 @@ uint8_t APP_Servo_Add(uint8_t id, const Servo_HwConfig_t *hw, float speed_dps)
 /*==============================================================================
  * 舵机控制函数
  *
- * 这些函数被 CAN 命令、USART 命令、步态调度器调用。
+ * 这些函数被 CAN 命令、UART 命令、步态调度器调用。
  * 它们只修改目标值，不直接控制硬件——
  * 真正的硬件输出在 APP_Servo_Scheduler() 里每 10ms 执行一次。
  *============================================================================*/
@@ -197,7 +214,7 @@ void APP_Servo_SetTarget(uint8_t id, int16_t angle)
  * @brief 设置舵机目标角度（增量方式）
  * @param id    舵机编号
  * @param angle 角度增量（相对当前目标值）
- * @note 用于 CAN 或 USART 的增量式控制。
+ * @note 用于 CAN 或 UART 的增量式控制。
  *       例如当前目标 0°，调 +10 就变成 10°。
  *       先限幅到物理可用范围 +/-(phys_range/2 - offset_max)，
  *       再限幅到软件机械限制 hw.limit_min / hw.limit_max。

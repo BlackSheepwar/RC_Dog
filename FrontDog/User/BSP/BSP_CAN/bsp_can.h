@@ -4,7 +4,7 @@
  * @author 李嘉图
  * @date 2026-06-01
  *
- * @note 采用静态资源池+注册模式管理CAN实例。
+ * @note 硬件映射表（id → hcan）在此文件中静态定义，
  *       支持双 CAN（hcan1/hcan2），滤波器 28 个平均分配。
  *       BSP层仅负责硬件配置与数据收发，不处理业务逻辑。
  *
@@ -20,6 +20,9 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
+#include <stdint.h>
+// 功能包含
 #include "can.h"
 
 /*==============================================================================
@@ -29,24 +32,24 @@
 #define BSP_CAN_DATA_LEN        8           // CAN数据帧最大长度
 
 // 滤波器模式
-#define BSP_CAN_FILTER_MODE_MASK   CAN_FILTERMODE_IDMASK   // 规则组
-#define BSP_CAN_FILTER_MODE_LIST   CAN_FILTERMODE_IDLIST   // 通道组
+#define BSP_CAN_FILTER_MODE_MASK   CAN_FILTERMODE_IDMASK    // 规则组
+#define BSP_CAN_FILTER_MODE_LIST   CAN_FILTERMODE_IDLIST    // 通道组
 
 // 滤波器位宽
-#define BSP_CAN_FILTER_SCALE_16    CAN_FILTERSCALE_16BIT   // 标准帧 (4个16位槽位)
-#define BSP_CAN_FILTER_SCALE_32    CAN_FILTERSCALE_32BIT   // 扩展帧 (2个32位槽位)
+#define BSP_CAN_FILTER_SCALE_16    CAN_FILTERSCALE_16BIT    // 标准帧 (4个16位槽位)
+#define BSP_CAN_FILTER_SCALE_32    CAN_FILTERSCALE_32BIT    // 扩展帧 (2个32位槽位)
 
 // FIFO选择
-#define BSP_CAN_FIFO0           CAN_RX_FIFO0
-#define BSP_CAN_FIFO1           CAN_RX_FIFO1
+#define BSP_CAN_FIFO0           CAN_RX_FIFO0                // FIFO0
+#define BSP_CAN_FIFO1           CAN_RX_FIFO1                // FIFO1
 
 // ID类型
-#define BSP_CAN_STDID           CAN_ID_STD
-#define BSP_CAN_EXTID           CAN_ID_EXT
+#define BSP_CAN_STDID           CAN_ID_STD                  // 标准帧ID
+#define BSP_CAN_EXTID           CAN_ID_EXT                  // 扩展帧ID
 
 // 帧类型
-#define BSP_CAN_DATA_FRAME      CAN_RTR_DATA
-#define BSP_CAN_REMOTE_FRAME    CAN_RTR_REMOTE
+#define BSP_CAN_DATA_FRAME      CAN_RTR_DATA                // 数据帧类型
+#define BSP_CAN_REMOTE_FRAME    CAN_RTR_REMOTE              // 遥控帧类型
 
 /*==============================================================================
  * 标准帧 16-bit 槽位格式宏
@@ -73,15 +76,6 @@
 /*==============================================================================
  * 结构体定义
  *============================================================================*/
-/**
- * @brief BSP层CAN实例结构体
- * @note 每个实例对应一个CAN外设 (0=CAN1, 1=CAN2)
- */
-typedef struct {
-    uint8_t  id;                        // CAN实例ID
-    CAN_HandleTypeDef *hcan;            // CAN硬件句柄
-    uint8_t  started;                   // 启动标志
-} BSP_CAN_t;
 
 /**
  * @brief CAN滤波器配置参数
@@ -128,18 +122,17 @@ typedef struct{
  *============================================================================*/
 /**
  * @brief 初始化BSP CAN层
- * @note 清空资源池，所有已注册实例失效，需重新注册
+ * @note 复位运行时启动状态。映射表为编译期常量，无需注册。
  */
 void BSP_CAN_Init(void);
 
 /**
- * @brief 注册一个CAN实例到资源池
- * @param id   CAN实例ID（0=CAN1, 1=CAN2）
- * @param hcan CAN硬件句柄（来自CubeMX生成的can.h）
- * @retval 1: 注册成功
- * @retval 0: 注册失败（参数无效/重复注册/资源池已满）
+ * @brief 根据CAN句柄获取实例ID
+ * @param hcan CAN硬件句柄
+ * @retval 0~BSP_CAN_MAX_NUM-1: 对应实例ID
+ * @retval 0xFF: 未找到
  */
-uint8_t BSP_CAN_Register(uint8_t id, CAN_HandleTypeDef *hcan);
+uint8_t BSP_CAN_GetIdByHcan(CAN_HandleTypeDef *hcan);
 
 /*==============================================================================
  * 控制函数
@@ -188,12 +181,5 @@ uint8_t BSP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg);
  * @note 非阻塞发送，通过HAL_CAN_AddTxMessage将帧加入硬件发送邮箱。
  */
 uint8_t BSP_CAN_SendMsg(uint8_t id, uint32_t can_id, uint8_t is_extid, uint8_t is_remote, uint8_t *data, uint8_t len);
-
-/*==============================================================================
- * 接收函数（FreeRTOS 下无需使用，保留用于裸机/轮询环境）
- *============================================================================*/
-#if 0
-uint8_t BSP_CAN_ReadRxMsg(uint8_t id, CAN_RxHeaderTypeDef *header, uint8_t *data);
-#endif
 
 #endif

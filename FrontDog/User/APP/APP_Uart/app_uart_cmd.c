@@ -1,5 +1,5 @@
 /**
- * @file app_usart_cmd.c
+ * @file app_uart_cmd.c
  * @brief 命令分发（配置表驱动）
  * @author 李嘉图
  * @date 2026-6-5
@@ -12,38 +12,37 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
 #include "main.h"
-#include <stdint.h>
-#include "app_usart_cmd.h"
-#include "app_usart.h"
-#include "app_servo.h"
 #include "common.h"
+#include "app_uart_cmd.h"
+// 功能包含
+#include "app_uart.h"
+#include "app_servo.h"
+#include "bsp_gpio.h"
 
 /*==============================================================================
  * 命令处理函数
  *============================================================================*/
-static void APP_USART_AA(uint8_t *payload, uint8_t len)
+static void APP_UART_AA(uint8_t *payload, uint8_t len)
 {
     (void)payload;
     (void)len;
-    APP_Servo_SetTarget(1, -125);
+    BSP_GPIO_SetLevel(2, GPIO_LEVEL_HIGH);
 }
 
-static void APP_USART_A9(uint8_t *payload, uint8_t len)
+static void APP_UART_A9(uint8_t *payload, uint8_t len)
 {
     (void)payload;
     (void)len;
-    APP_Servo_SetTarget(1, 125);
+    BSP_GPIO_SetLevel(2, GPIO_LEVEL_LOW);
 }
 
-static void APP_USART_A8(uint8_t *payload, uint8_t len)
+static void APP_UART_A8(uint8_t *payload, uint8_t len)
 {
     (void)payload;
     (void)len;
-    for (uint8_t i = 0; i < 10; i++)
-    {
-        APP_USART_BuildTxPacket(1, 0xA8, &i, 1);
-    }
+    BSP_GPIO_Toggle(2);
 }
 
 /*==============================================================================
@@ -52,12 +51,12 @@ static void APP_USART_A8(uint8_t *payload, uint8_t len)
 typedef struct {
     uint8_t  cmd;
     void     (*handler)(uint8_t *payload, uint8_t len);
-} usart_cmd_entry_t;
+} uart_cmd_entry_t;
 
-static const usart_cmd_entry_t CMD_TABLE[] = {
-    { .cmd = 0xAA, .handler = APP_USART_AA },
-    { .cmd = 0xA9, .handler = APP_USART_A9 },
-    { .cmd = 0xA8, .handler = APP_USART_A8 },
+static const uart_cmd_entry_t CMD_TABLE[] = {
+    { .cmd = 0xAA, .handler = APP_UART_AA },
+    { .cmd = 0xA9, .handler = APP_UART_A9 },
+    { .cmd = 0xA8, .handler = APP_UART_A8 },
 };
 
 /*==============================================================================
@@ -69,7 +68,7 @@ static const usart_cmd_entry_t CMD_TABLE[] = {
  * @param payload 命令数据
  * @param len 数据长度
  */
-void APP_USART_Cmd(uint8_t cmd, uint8_t *payload, uint8_t len)
+void APP_UART_Cmd(uint8_t cmd, uint8_t *payload, uint8_t len)
 {
     for (uint8_t i = 0; i < ARRAY_SIZE(CMD_TABLE); i++)
     {

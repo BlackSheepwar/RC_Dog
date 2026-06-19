@@ -4,7 +4,9 @@
  * @author 李嘉图
  * @date 2026-06-01
  *
- * @note 使用静态资源池管理CAN实例。
+ * @note 硬件映射表（id → hcan）在此文件中静态定义，
+ *       上层通过 id 调用，无需知道具体 CAN 外设。
+ *       映射表为编译期常量，运行时不修改。
  *       支持双CAN（hcan1/hcan2），滤波器28个平均分配。
  *       滤波器 id1~id4 直通 HAL 寄存器字段，不介入位运算。
  */
@@ -12,47 +14,72 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "main.h"
-#include "bsp_can.h"
+// 固定包含
+#include <stdint.h>
 #include <string.h>
+#include "common.h"
+#include "bsp_can.h"
+#include "main.h"           /* CAN_F0/F1_QHandle, CAN_TX_BSHandle */
 
 /*==============================================================================
- * 静态资源池
+ * CAN 硬件映射表（编译期常量）
+ *
+ * 将逻辑 ID（上层使用的 CAN 实例编号）映射到具体 CAN 硬件句柄。
+ * 当前映射：
+ *   id 0 → hcan1（CAN1）
+ *   id 1 → hcan2（CAN2）
+ *
+ * ★ 此表为 BSP 内部实现，上层不可见。可根据需要扩展 ★
  *============================================================================*/
-static BSP_CAN_t bsp_can_pool[BSP_CAN_MAX_NUM];
-static uint8_t bsp_can_count = 0;
+/**
+ * @brief CAN实例配置
+ * @note 编译期固定的硬件映射，运行时不修改
+ */
+typedef struct {
+    uint8_t      id;             // CAN实例ID (0=CAN1, 1=CAN2)
+    CAN_HandleTypeDef *hcan;     // CAN硬件句柄
+} BSP_CAN_Map_t;
+
+/** @brief CAN硬件映射表 */
+static const BSP_CAN_Map_t BSP_CAN_MAP[BSP_CAN_MAX_NUM] = {
+    { .id = 0, .hcan = &hcan1 },
+    { .id = 1, .hcan = &hcan2 },
+};
+
+/** @brief CAN实例启动状态（运行时可变） */
+static uint8_t bsp_can_started[BSP_CAN_MAX_NUM] = {0};
 
 /*==============================================================================
  * 内部函数
  *============================================================================*/
 /**
- * @brief 根据ID查找CAN实例（O(n)）
+ * @brief 根据 ID 查找 CAN 硬件映射
  * @param id CAN实例ID
- * @retval 非NULL：返回对应CAN实例结构体指针
+ * @retval 非NULL：找到
  * @retval NULL：未找到
  */
-static BSP_CAN_t *BSP_CAN_GetById(uint8_t id)
+static const BSP_CAN_Map_t *BSP_CAN_FindMap(uint8_t id)
 {
-    for (uint8_t i = 0; i < bsp_can_count; i++)
+    for (uint8_t i = 0; i < ARRAY_SIZE(BSP_CAN_MAP); i++)
     {
-        if (bsp_can_pool[i].id == id)
-            return &bsp_can_pool[i];
+        if (BSP_CAN_MAP[i].id == id)
+            return &BSP_CAN_MAP[i];
     }
     return NULL;
 }
 
 /**
- * @brief 根据句柄查找CAN实例（O(n)）
- * @param hcan CAN实例句柄
- * @retval 非NULL：返回对应CAN实例结构体指针
+ * @brief 根据句柄查找 CAN 硬件映射
+ * @param hcan CAN硬件句柄
+ * @retval 非NULL：找到
  * @retval NULL：未找到
  */
-static BSP_CAN_t *BSP_CAN_GetByHcan(CAN_HandleTypeDef *hcan)
+static const BSP_CAN_Map_t *BSP_CAN_FindByHcan(CAN_HandleTypeDef *hcan)
 {
-    for (uint8_t i = 0; i < bsp_can_count; i++)
+    for (uint8_t i = 0; i < ARRAY_SIZE(BSP_CAN_MAP); i++)
     {
-        if (bsp_can_pool[i].hcan == hcan)
-            return &bsp_can_pool[i];
+        if (BSP_CAN_MAP[i].hcan == hcan)
+            return &BSP_CAN_MAP[i];
     }
     return NULL;
 }
@@ -62,42 +89,26 @@ static BSP_CAN_t *BSP_CAN_GetByHcan(CAN_HandleTypeDef *hcan)
  *============================================================================*/
 /**
  * @brief 初始化BSP CAN层
- * @note 清空整个资源池，已注册实例全部失效
+ * @note 映射表为编译期常量，仅复位运行时启动状态
  */
 void BSP_CAN_Init(void)
 {
-    memset(bsp_can_pool, 0, sizeof(bsp_can_pool));
-    bsp_can_count = 0;
+    /* 消耗 CubeMX 生成的初始计数值（初始=1→0，适配 ISR 信号模式） */
+    osSemaphoreAcquire(CAN_TX_BSHandle, 0);
+
+    memset(bsp_can_started, 0, sizeof(bsp_can_started));
 }
 
 /**
- * @brief 注册一个CAN实例到资源池
- * @param id   CAN实例ID（0=CAN1, 1=CAN2）
- * @param hcan CAN硬件句柄（来自CubeMX生成代码）
- * @retval 1: 注册成功
- * @retval 0: 注册失败（参数无效/重复注册/资源池已满）
- *
- * @note 注册仅保存句柄，不操作硬件。启动CAN需额外调用 BSP_CAN_Start。
+ * @brief 根据CAN句柄获取实例ID
+ * @param hcan CAN硬件句柄
+ * @retval 0~BSP_CAN_MAX_NUM-1: 对应实例ID
+ * @retval 0xFF: 未找到
  */
-uint8_t BSP_CAN_Register(uint8_t id, CAN_HandleTypeDef *hcan)
+uint8_t BSP_CAN_GetIdByHcan(CAN_HandleTypeDef *hcan)
 {
-    /* ---------- 参数检查 ---------- */
-    if (!hcan) return 0;            // 无效句柄
-
-    /* ---------- 查重（O(n)） ---------- */
-    if (BSP_CAN_GetById(id) != NULL) return 0;  // 已存在
-
-    /* ---------- 容量检查 ---------- */
-    if (bsp_can_count >= BSP_CAN_MAX_NUM) return 0;  // 资源池已满
-
-    /* ---------- 写入资源池 ---------- */
-    BSP_CAN_t *can = &bsp_can_pool[bsp_can_count];
-    can->id     = id;
-    can->hcan   = hcan;
-    can->started = 0;
-
-    bsp_can_count++;
-    return 1;
+    const BSP_CAN_Map_t *map = BSP_CAN_FindByHcan(hcan);
+    return map ? map->id : 0xFF;
 }
 
 /*==============================================================================
@@ -109,29 +120,34 @@ uint8_t BSP_CAN_Register(uint8_t id, CAN_HandleTypeDef *hcan)
  * @retval 1: 启动成功
  * @retval 0: 启动失败
  *
- * @note 启动后自动使能 FIFO0/FIFO1 消息挂起中断及溢出中断。
+ * @note 启动后自动使能 FIFO0/FIFO1 消息挂起中断及溢出中断，
+ *       以及发送邮箱空中断（用于上层 TX 缓冲排空）。
  *       重复调用安全，已启动则直接返回成功。
  */
 uint8_t BSP_CAN_Start(uint8_t id)
 {
     /* ---------- 查找实例 ---------- */
-    BSP_CAN_t *can = BSP_CAN_GetById(id);
-    if (!can) return 0;             // 未找到
+    const BSP_CAN_Map_t *map = BSP_CAN_FindMap(id);
+    if (!map) return 0;                     // 未找到
+    uint8_t idx = map - BSP_CAN_MAP;        // 计算索引
 
-    if (can->started) return 1;     // 已启动，直接返回
+    if (bsp_can_started[idx]) return 1;     // 已启动，直接返回
 
     /* ---------- HAL启动CAN ---------- */
-    if (HAL_CAN_Start(can->hcan) != HAL_OK) return 0;   // 启动失败
+    if (HAL_CAN_Start(map->hcan) != HAL_OK) return 0;   // 启动失败
 
     /* ---------- 使能FIFO接收中断 ---------- */
-    __HAL_CAN_ENABLE_IT(can->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
-    __HAL_CAN_ENABLE_IT(can->hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
+    __HAL_CAN_ENABLE_IT(map->hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+    __HAL_CAN_ENABLE_IT(map->hcan, CAN_IT_RX_FIFO1_MSG_PENDING);
 
     /* ---------- 使能FIFO溢出中断 ---------- */
-    __HAL_CAN_ENABLE_IT(can->hcan, CAN_IT_RX_FIFO0_OVERRUN);
-    __HAL_CAN_ENABLE_IT(can->hcan, CAN_IT_RX_FIFO1_OVERRUN);
+    __HAL_CAN_ENABLE_IT(map->hcan, CAN_IT_RX_FIFO0_OVERRUN);
+    __HAL_CAN_ENABLE_IT(map->hcan, CAN_IT_RX_FIFO1_OVERRUN);
 
-    can->started = 1;
+    /* ---------- 使能发送邮箱空中断 ---------- */
+    __HAL_CAN_ENABLE_IT(map->hcan, CAN_IT_TX_MAILBOX_EMPTY);
+
+    bsp_can_started[idx] = 1;
     return 1;
 }
 
@@ -151,8 +167,8 @@ uint8_t BSP_CAN_Start(uint8_t id)
 uint8_t BSP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg)
 {
     /* ---------- 参数检查 ---------- */
-    BSP_CAN_t *can = BSP_CAN_GetById(id);
-    if (!can || !cfg) return 0;             // 实例未找到或参数为空
+    const BSP_CAN_Map_t *map = BSP_CAN_FindMap(id);
+    if (!map || !cfg) return 0;             // 实例未找到或参数为空
 
     if (cfg->filter_bank > 27) return 0;    // F405滤波器序号0-27
 
@@ -173,7 +189,7 @@ uint8_t BSP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg)
     filter.FilterMaskIdLow   = cfg->id4;
 
     /* ---------- 写入硬件 ---------- */
-    if (HAL_CAN_ConfigFilter(can->hcan, &filter) != HAL_OK)
+    if (HAL_CAN_ConfigFilter(map->hcan, &filter) != HAL_OK)
         return 0;   // HAL配置失败
 
     return 1;
@@ -198,8 +214,8 @@ uint8_t BSP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg)
 uint8_t BSP_CAN_SendMsg(uint8_t id, uint32_t can_id, uint8_t is_extid, uint8_t is_remote, uint8_t *data, uint8_t len)
 {
     /* ---------- 参数检查 ---------- */
-    BSP_CAN_t *can = BSP_CAN_GetById(id);
-    if (!can) return 0;                     // 实例未找到
+    const BSP_CAN_Map_t *map = BSP_CAN_FindMap(id);
+    if (!map) return 0;                     // 实例未找到
 
     if (len > BSP_CAN_DATA_LEN) return 0;   // 长度非法
     if (!is_remote && !data) return 0;      // 数据帧必须有数据
@@ -227,7 +243,7 @@ uint8_t BSP_CAN_SendMsg(uint8_t id, uint32_t can_id, uint8_t is_extid, uint8_t i
     tx_header.DLC = len;
 
     /* ---------- 加入硬件发送邮箱 ---------- */
-    if (HAL_CAN_AddTxMessage(can->hcan, &tx_header, data, &used_mailbox) != HAL_OK)
+    if (HAL_CAN_AddTxMessage(map->hcan, &tx_header, data, &used_mailbox) != HAL_OK)
         return 0;   // 发送失败（邮箱满或CAN未启动）
 
     return 1;
@@ -239,15 +255,14 @@ uint8_t BSP_CAN_SendMsg(uint8_t id, uint32_t can_id, uint8_t is_extid, uint8_t i
 /**
  * @brief HAL库CAN接收FIFO0消息挂起中断回调
  * @param hcan 触发中断的CAN句柄
- * @note 释放 CAN_F0_BS 二进制信号量唤醒对应任务。
- *       由任务上下文调用 HAL_CAN_GetRxMessage 并排空所有待处理帧。
+ * @note 将接收帧放入 CAN_F0_QHandle 消息队列，由 Task_CAN_RXF0 处理。
  */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    BSP_CAN_t* port = BSP_CAN_GetByHcan(hcan);
-    if (!port) return;
+    const BSP_CAN_Map_t *map = BSP_CAN_FindByHcan(hcan);
+    if (!map) return;
     BSP_CAN_Packet_t rx_pkt;
-    rx_pkt.id = port->id;
+    rx_pkt.id = map->id;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_pkt.header, rx_pkt.data);
     osMessageQueuePut(CAN_F0_QHandle, &rx_pkt, 0, 0);
 }
@@ -255,37 +270,50 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 /**
  * @brief HAL库CAN接收FIFO1消息挂起中断回调
  * @param hcan 触发中断的CAN句柄
- * @note 释放 CAN_F1_BS 二进制信号量唤醒对应任务。
+ * @note 将接收帧放入 CAN_F1_QHandle 消息队列，由 Task_CAN_RXF1 处理。
  */
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-    BSP_CAN_t* port = BSP_CAN_GetByHcan(hcan);
-    if (!port) return;
+    const BSP_CAN_Map_t *map = BSP_CAN_FindByHcan(hcan);
+    if (!map) return;
     BSP_CAN_Packet_t rx_pkt;
-    rx_pkt.id = port->id;
+    rx_pkt.id = map->id;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rx_pkt.header, rx_pkt.data);
     osMessageQueuePut(CAN_F1_QHandle, &rx_pkt, 0, 0);
 }
 
 /*==============================================================================
- * CAN错误中断回调
+ * CAN TX 完成中断回调
+ *
+ * HAL 在任一发送邮箱空出后调用此回调，释放信号量唤醒 TX 服务任务。
+ * 由 TX 服务任务在任务上下文中排空软件发送缓冲。
  *============================================================================*/
 /**
- * @brief HAL库CAN错误中断回调
- * @param hcan 触发错误中断的CAN句柄
- * @note 清除溢出标志。如需统计丢帧可在此处累加计数器。
+ * @brief HAL库CAN发送邮箱0完成回调
+ * @param hcan 触发中断的CAN句柄
  */
-void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
 {
-    /* ---------- 清除FIFO0溢出标志 ---------- */
-    if (__HAL_CAN_GET_FLAG(hcan, CAN_FLAG_FOV0))
-    {
-        __HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FOV0);
-    }
+    (void)hcan;
+    osSemaphoreRelease(CAN_TX_BSHandle);
+}
 
-    /* ---------- 清除FIFO1溢出标志 ---------- */
-    if (__HAL_CAN_GET_FLAG(hcan, CAN_FLAG_FOV1))
-    {
-        __HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_FOV1);
-    }
+/**
+ * @brief HAL库CAN发送邮箱1完成回调
+ * @param hcan 触发中断的CAN句柄
+ */
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+    (void)hcan;
+    osSemaphoreRelease(CAN_TX_BSHandle);
+}
+
+/**
+ * @brief HAL库CAN发送邮箱2完成回调
+ * @param hcan 触发中断的CAN句柄
+ */
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+    (void)hcan;
+    osSemaphoreRelease(CAN_TX_BSHandle);
 }

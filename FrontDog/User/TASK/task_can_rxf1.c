@@ -1,5 +1,5 @@
 /**
- * @file task_can_f1.c
+ * @file task_can_rxf1.c
  * @brief CAN FIFO1 接收处理任务
  * @author 李嘉图
  * @date 2026-06-01
@@ -12,34 +12,27 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
+#include <stdint.h>
 #include "main.h"
-#include "bsp_can.h"
+#include "common.h"
+// 功能包含
+#include "app_can.h"
 #include "app_can_cmd.h"
 #include "app_can_cfg.h"
-#include "common.h"
-
-/*==============================================================================
- * 外部变量声明
- *============================================================================*/
-extern CAN_HandleTypeDef hcan1;
 
 /*==============================================================================
  * CAN 端口路由表
  *============================================================================*/
-typedef struct {
-    uint8_t id;
-    void    (*handler)(CAN_RxHeaderTypeDef *header, uint8_t *data);
-} can_fifo1_routing_entry_t;
-
-static const can_fifo1_routing_entry_t CAN_FIFO1_ROUTING_TABLE[] = {
+static const can_fifo_routing_entry_t CAN_FIFO1_ROUTING_TABLE[] = {
     { .id = 1, .handler = APP_CAN1_F1_Cmd },
-    // { .id = 2, .handler = APP_CAN2_F1_Cmd },  // CAN2 暂未启用
+    { .id = 2, .handler = APP_CAN2_F1_Cmd },
 };
 
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-void Task_CAN_F1(void *argument)
+void Task_CAN_RXF1(void *argument)
 {
     for (;;)
     {

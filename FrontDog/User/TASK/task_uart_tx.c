@@ -1,6 +1,6 @@
 /**
- * @file task_tx.c
- * @brief 实现USART发送处理任务
+ * @file task_uart_tx.c
+ * @brief 实现UART发送处理任务
  * @author 李嘉图
  * @date 2026-5-4
  */
@@ -8,16 +8,19 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "app_usart.h"
+// 固定包含
+#include "main.h"
+ // 功能包含
+#include "app_uart.h"
 
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-void Task_TX(void *argument)
+void Task_UART_TX(void *argument)
 {
   for(;;)
   {
-    osSemaphoreAcquire(TX_BSHandle, osWaitForever);
-    APP_USART_SendTxPacket();
+    osSemaphoreAcquire(UART_TX_BSHandle, osWaitForever);
+    APP_UART_SendTxPacket();
   }
 }

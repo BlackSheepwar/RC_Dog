@@ -1,7 +1,23 @@
+/**
+ * @file font.c
+ * @brief 字体库
+ *
+ * @attention
+ * 本字体库与波特律动OLED驱动配套使用
+ * 英文字库已包含
+ * 中文字库请使用波特律动LED取模工具生成(https://led.baud-dance.com)
+ * 图模也使用波特律动LED取模工具生成
+ */
 #ifndef __FONT_H
 #define __FONT_H
-#include "stdint.h"
-#include "string.h"
+
+/*==============================================================================
+ * 头文件包含
+ *============================================================================*/
+// 固定包含
+#include <stdint.h>
+#include <string.h>
+
 typedef struct ASCIIFont {
   uint8_t h;
   uint8_t w;

@@ -20,16 +20,19 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
 #include <stdint.h>
-#include "gpio.h"
 
 /*==============================================================================
  * 宏定义与常量
  *============================================================================*/
-#define GPIO_MAX_NUM    20    /* 最大支持 GPIO 点数（含未使用槽位） */
+#define GPIO_MAX_NUM    20    /* 最大支持 GPIO 数量） */
 
 #define GPIO_LEVEL_LOW  0    /* 低电平 */
 #define GPIO_LEVEL_HIGH 1    /* 高电平 */
+
+#define GPIO_DIR_IN     0    /* 输入方向 */
+#define GPIO_DIR_OUT    1    /* 输出方向 */
 
 /*==============================================================================
  * 初始化
@@ -45,9 +48,9 @@ void BSP_GPIO_Init(void);
 /**
  * @brief 读取 GPIO 引脚电平
  * @param gpio_id 逻辑编号（对应 GPIO_HW_MAP 中的映射）
- * @retval GPIO_LEVEL_HIGH (1): 高电平
- * @retval GPIO_LEVEL_LOW  (0): 低电平
- * @retval 0xFF: 未找到对应引脚
+ * @retval 1: 高电平
+ * @retval 0: 低电平
+ * @retval 0xFF: 失败（gpio_id 无效或非输入引脚）
  */
 uint8_t BSP_GPIO_ReadLevel(uint8_t gpio_id);
 
@@ -58,16 +61,19 @@ uint8_t BSP_GPIO_ReadLevel(uint8_t gpio_id);
  * @brief 设置 GPIO 引脚电平
  * @param gpio_id 逻辑编号
  * @param level   电平：GPIO_LEVEL_HIGH 或 GPIO_LEVEL_LOW
- * @note 引脚必须在 CubeMX 中配置为输出模式，否则无效
+ * @retval 1: 成功
+ * @retval 0: 失败（gpio_id 无效或非输出引脚）
  */
-void BSP_GPIO_SetLevel(uint8_t gpio_id, uint8_t level);
+uint8_t BSP_GPIO_SetLevel(uint8_t gpio_id, uint8_t level);
 
 /**
  * @brief 翻转 GPIO 引脚电平
  * @param gpio_id 逻辑编号
+ * @retval 1: 成功
+ * @retval 0: 失败（gpio_id 无效或非输出引脚）
  * @note 高→低 或 低→高
  */
-void BSP_GPIO_Toggle(uint8_t gpio_id);
+uint8_t BSP_GPIO_Toggle(uint8_t gpio_id);
 
 /*==============================================================================
  * 查询

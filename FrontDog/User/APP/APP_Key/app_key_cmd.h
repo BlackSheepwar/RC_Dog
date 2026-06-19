@@ -2,7 +2,7 @@
  * @file app_key_cmd.h
  * @brief 按键命令分发
  * @author 李嘉图
- * @date 2026-04-18
+ * @date 2026-06-18
  */
 
 #ifndef __APP_KEY_CMD_H__
@@ -11,16 +11,9 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "debounce.h"
-
-/*==============================================================================
- * 事件配置表
- *============================================================================*/
-typedef struct {
-    uint8_t             key_id;
-    Debounce_Event_t    event;
-    void                (*handler)(void);
-} key_dispatch_entry_t;
+// 固定包含
+#include <stdint.h>
+#include "app_key.h"
 
 /*==============================================================================
  * 命令分发
@@ -28,6 +21,6 @@ typedef struct {
 /**
  * @brief 按键命令分发
  */
-void App_Key_CMD_Packet(uint8_t id, Debounce_Event_t event);
+void App_Key_CMD_Packet(uint8_t key_id, App_Key_Event_t event);
 
 #endif

@@ -1,6 +1,6 @@
 /**
- * @file bsp_usart.c
- * @brief STM32 USART DMA+IDLE 接收驱动
+ * @file bsp_uart.c
+ * @brief STM32 UART DMA+IDLE 接收驱动
  *        仅负责串口接收与缓存管理，不解析协议、不处理业务
  * @author 李嘉图
  * @date 2026-5-4
@@ -9,16 +9,18 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "main.h"
-#include "usart.h"
+// 固定包含
 #include <string.h>
-#include "bsp_usart.h"
+#include "main.h"
+#include "bsp_uart.h"
+// 功能包含
+#include "usart.h"
 
 /*==============================================================================
  * 串口实例池
  *============================================================================*/
-static BSP_USART_t bsp_usart_pool[USART_MAX_PORTS];
-static uint8_t bsp_usart_count = 0;
+static BSP_UART_t bsp_uart_pool[UART_MAX_PORTS];
+static uint8_t bsp_uart_count = 0;
 
 /*==============================================================================
  * 内部函数
@@ -29,13 +31,13 @@ static uint8_t bsp_usart_count = 0;
  * @retval 非NULL：返回对应串口实例结构体指针
  * @retval NULL：未找到
  */
-static BSP_USART_t *BSP_USART_GetById(uint8_t id)
+static BSP_UART_t *BSP_UART_GetById(uint8_t id)
 {
-    for (uint8_t i = 0; i < bsp_usart_count; i++)
+    for (uint8_t i = 0; i < bsp_uart_count; i++)
     {
-        if (bsp_usart_pool[i].id == id)
+        if (bsp_uart_pool[i].id == id)
         {
-            return &bsp_usart_pool[i];
+            return &bsp_uart_pool[i];
         }
     }
     return NULL;
@@ -47,12 +49,12 @@ static BSP_USART_t *BSP_USART_GetById(uint8_t id)
  * @retval 非NULL：返回对应串口实例结构体指针
  * @retval NULL：未找到
  */
-static BSP_USART_t *BSP_USART_GetHuartById(UART_HandleTypeDef *huart)
+static BSP_UART_t *BSP_UART_GetHuartById(UART_HandleTypeDef *huart)
 {
-    for (uint8_t i = 0; i < bsp_usart_count; i++)
+    for (uint8_t i = 0; i < bsp_uart_count; i++)
     {
-        if (bsp_usart_pool[i].huart == huart)
-            return &bsp_usart_pool[i];
+        if (bsp_uart_pool[i].huart == huart)
+            return &bsp_uart_pool[i];
     }
     return NULL;
 }
@@ -62,9 +64,9 @@ static BSP_USART_t *BSP_USART_GetHuartById(UART_HandleTypeDef *huart)
  * @param port 串口实例指针
  * @note 每次接收完成后调用，保证 DMA 可以接收新数据
  */
-static void BSP_USART_restart_dma(BSP_USART_t *port)
+static void BSP_UART_restart_dma(BSP_UART_t *port)
 {
-    HAL_UARTEx_ReceiveToIdle_DMA(port->huart, port->dma_buf, USART_BUF_SIZE);
+    HAL_UARTEx_ReceiveToIdle_DMA(port->huart, port->dma_buf, UART_BUF_SIZE);
     __HAL_DMA_DISABLE_IT(port->huart->hdmarx, DMA_IT_HT);
 }
 
@@ -77,7 +79,7 @@ static void BSP_USART_restart_dma(BSP_USART_t *port)
  * @note 此函数负责将数据从DMA缓冲区安全地拷贝到环形FIFO中。
  *       它从port->rx_size获取数据长度，并在处理完毕后将其清零。
  */
-static void BSP_USART_enqueue_dma_data_to_fifo(BSP_USART_t *port)
+static void BSP_UART_enqueue_dma_data_to_fifo(BSP_UART_t *port)
 {
     if (port->rx_size == 0)
     {
@@ -127,9 +129,9 @@ static void BSP_USART_enqueue_dma_data_to_fifo(BSP_USART_t *port)
  * @param read_len  需要读取的字节数
  * @retval uint16_t: 实际读取字节数
  */
-static uint16_t BSP_USART_fifo_read_bytes(uint8_t id, uint8_t *buf, uint16_t read_len)
+static uint16_t BSP_UART_fifo_read_bytes(uint8_t id, uint8_t *buf, uint16_t read_len)
 {
-    BSP_USART_t *port = BSP_USART_GetById(id);
+    BSP_UART_t *port = BSP_UART_GetById(id);
 
     // 计算第一段长度
     uint16_t first_chunk = UART_FIFO_SIZE - port->fifo_tail;
@@ -158,10 +160,13 @@ static uint16_t BSP_USART_fifo_read_bytes(uint8_t id, uint8_t *buf, uint16_t rea
  * @brief 初始化 BSP 层
  * @note 清空端口状态，FIFO 和 DMA 状态
  */
-void BSP_USART_Init(void)
+void BSP_UART_Init(void)
 {
-    memset(bsp_usart_pool, 0, sizeof(bsp_usart_pool));
-    bsp_usart_count = 0;
+    /* 消耗 CubeMX 生成的初始计数值（初始=1→0，适配 ISR 信号模式） */
+    osSemaphoreAcquire(UART_TX_BSHandle, 0);
+    
+    memset(bsp_uart_pool, 0, sizeof(bsp_uart_pool));
+    bsp_uart_count = 0;
 }
 
 /**
@@ -172,21 +177,21 @@ void BSP_USART_Init(void)
  * @retval 1: 注册成功
  * @retval 0: 注册失败
  */
-uint8_t BSP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
+uint8_t BSP_UART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
 {
     if (!huart)
         return 0;
 
     /* 池满则失败 */
-    if (bsp_usart_count >= USART_MAX_PORTS)
+    if (bsp_uart_count >= UART_MAX_PORTS)
         return 0;
 
     /* 防止重复注册同一 ID */
-    if (BSP_USART_GetById(id) != NULL)
+    if (BSP_UART_GetById(id) != NULL)
         return 0;
 
     /* 使用下一个空闲槽位 */
-    BSP_USART_t *port = &bsp_usart_pool[bsp_usart_count];
+    BSP_UART_t *port = &bsp_uart_pool[bsp_uart_count];
     port->id         = id;
     port->data_ready = 0;
     port->rx_size    = 0;
@@ -195,12 +200,12 @@ uint8_t BSP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
     port->fifo_tail  = 0;
     port->tx_busy    = 0;
 
-    memset(port->dma_buf, 0, USART_BUF_SIZE);
+    memset(port->dma_buf, 0, UART_BUF_SIZE);
     memset(port->fifo, 0, UART_FIFO_SIZE);
 
-    BSP_USART_restart_dma(port);
+    BSP_UART_restart_dma(port);
 
-    bsp_usart_count++;   /* 已注册数加一 */
+    bsp_uart_count++;   /* 已注册数加一 */
     return 1;
 }
 
@@ -214,9 +219,9 @@ uint8_t BSP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
  * @param len  数据长度
  * @note 使用 DMA 发送数据，非阻塞
  */
-void BSP_USART_Send(uint8_t id, uint8_t *buf, uint16_t len)
+void BSP_UART_Send(uint8_t id, uint8_t *buf, uint16_t len)
 {
-    BSP_USART_t *port = BSP_USART_GetById(id);
+    BSP_UART_t *port = BSP_UART_GetById(id);
     if (!port || !buf || len == 0)
     return;
 
@@ -228,9 +233,9 @@ void BSP_USART_Send(uint8_t id, uint8_t *buf, uint16_t len)
  * @retval 1 忙
  * @retval 0 空闲
  */
-uint8_t BSP_USART_ReadTxBusy(uint8_t id)
+uint8_t BSP_UART_ReadTxBusy(uint8_t id)
 {
-    BSP_USART_t *port = BSP_USART_GetById(id);
+    BSP_UART_t *port = BSP_UART_GetById(id);
     if (!port) return 0;
     return port->tx_busy;
 }
@@ -238,9 +243,9 @@ uint8_t BSP_USART_ReadTxBusy(uint8_t id)
 /**
  * @brief 设置UART发送忙状态为1，表示发送中
  */
-void BSP_USART_WriteTxBusy(uint8_t id)
+void BSP_UART_WriteTxBusy(uint8_t id)
 {
-    BSP_USART_t *port = BSP_USART_GetById(id);
+    BSP_UART_t *port = BSP_UART_GetById(id);
     if (!port) return;
     port->tx_busy = 1;
 }
@@ -248,9 +253,9 @@ void BSP_USART_WriteTxBusy(uint8_t id)
 /**
  * @brief 设置UART发送忙状态为0，表示发送完成
  */
-void BSP_USART_WriteTxBusyFree(uint8_t id)
+void BSP_UART_WriteTxBusyFree(uint8_t id)
 {
-    BSP_USART_t *port = BSP_USART_GetById(id);
+    BSP_UART_t *port = BSP_UART_GetById(id);
     if (!port) return;
     port->tx_busy = 0;
 }
@@ -266,9 +271,9 @@ void BSP_USART_WriteTxBusyFree(uint8_t id)
  * @retval uint16_t 实际读取字节数，0 表示 FIFO 空
  * @note 数据按 FIFO 顺序读取，读完后更新尾指针
  */
-uint16_t BSP_USART_ReadRawData(uint8_t id, uint8_t *buf, uint16_t buf_size)
+uint16_t BSP_UART_ReadRawData(uint8_t id, uint8_t *buf, uint16_t buf_size)
 {
-    BSP_USART_t *port = BSP_USART_GetById(id);
+    BSP_UART_t *port = BSP_UART_GetById(id);
 
     if (!port || !buf || buf_size == 0)
         return 0;
@@ -280,7 +285,7 @@ uint16_t BSP_USART_ReadRawData(uint8_t id, uint8_t *buf, uint16_t buf_size)
         return 0;
 
     // 调用内部函数
-    return BSP_USART_fifo_read_bytes(id, buf, fifo_count);
+    return BSP_UART_fifo_read_bytes(id, buf, fifo_count);
 }
 
 /*==============================================================================
@@ -293,7 +298,7 @@ uint16_t BSP_USART_ReadRawData(uint8_t id, uint8_t *buf, uint16_t buf_size)
  */
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    BSP_USART_t* port = BSP_USART_GetHuartById(huart);
+    BSP_UART_t* port = BSP_UART_GetHuartById(huart);
     if (!port)
     {
         // 对于未注册的串口中断，仅重启其DMA以避免中断风暴
@@ -308,14 +313,14 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         uint8_t id = port->id;
 
         // 2. 将数据从DMA缓冲区快速拷贝到软件FIFO，防止数据被覆盖
-        BSP_USART_enqueue_dma_data_to_fifo(port);
+        BSP_UART_enqueue_dma_data_to_fifo(port);
 
         // 3. 发送通知到消息队列，告知处理任务有新数据到达
-        osMessageQueuePut(RX_QHandle, &id, 0, 0);
+        osMessageQueuePut(UART_RX_QHandle, &id, 0, 0);
     }
 
     // 4. 重新启动DMA接收，为下一次数据接收做准备
-    BSP_USART_restart_dma(port);
+    BSP_UART_restart_dma(port);
 }
 
 /**
@@ -324,7 +329,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
  */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-    BSP_USART_t* port = BSP_USART_GetHuartById(huart);
+    BSP_UART_t* port = BSP_UART_GetHuartById(huart);
     if (!port)
     {
         // 对于未注册的串口中断，仅重启其DMA以避免中断风暴
@@ -332,9 +337,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
         return;
     }
 
-    if (BSP_USART_ReadTxBusy(port->id) == 1)
+    if (BSP_UART_ReadTxBusy(port->id) == 1)
     {
-        BSP_USART_WriteTxBusyFree(port->id);
-        osSemaphoreRelease(TX_BSHandle);
+        BSP_UART_WriteTxBusyFree(port->id);
+        osSemaphoreRelease(UART_TX_BSHandle);
     }
 }

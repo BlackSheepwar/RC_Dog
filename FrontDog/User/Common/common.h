@@ -11,24 +11,16 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+/*==============================================================================
+ * 头文件包含
+ *============================================================================*/
+// 固定包含
 #include <stdint.h>
 #include <stddef.h>
 
 /*==============================================================================
  * 平台抽象
  *============================================================================*/
-/* 字节序（小端为目标平台） */
-#define IS_LITTLE_ENDIAN_PLATFORM   1
-
-/* 结构体打包（不同编译器兼容） */
-#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
-    #define PACKED      __packed
-#elif defined(__GNUC__) || defined(__clang__)
-    #define PACKED      __attribute__((packed))
-#else
-    #define PACKED
-#endif
-
 /* 计算静态数组元素个数 */
 #define ARRAY_SIZE(arr)     (sizeof(arr) / sizeof((arr)[0]))
 
@@ -43,19 +35,5 @@ typedef enum {
     ERR_LOCKED  = -4,    // 全局锁定（紧急停止/致命错误）
     ERR_UNKNOWN = -5,    // 未知错误
 } ErrorCode_t;
-
-/*==============================================================================
- * 硬件版本（烧录前选择）
- *
- * 同一份代码编译到两块 MCU 上，用此宏区分：
- *   HW_MCU_FRONT → 前腿，舵机ID 1-6，响应 CAN 0x201/0x202
- *   HW_MCU_REAR  → 后腿，舵机ID 7-12，响应 CAN 0x203/0x204
- *============================================================================*/
-#define HW_MCU_FRONT    1
-#define HW_MCU_REAR     2
-
-#ifndef HW_VERSION
-#define HW_VERSION      HW_MCU_FRONT   // 默认前腿，烧录到后腿MCU时改为 HW_MCU_REAR
-#endif
 
 #endif /* __COMMON_H__ */

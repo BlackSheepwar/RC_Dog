@@ -47,11 +47,12 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-extern osMessageQueueId_t RX_QHandle;
-extern osMessageQueueId_t KEY_QHandle;
+extern osMessageQueueId_t UART_RX_QHandle;
+extern osMessageQueueId_t KEY_CMD_QHandle;
 extern osMessageQueueId_t CAN_F0_QHandle;
 extern osMessageQueueId_t CAN_F1_QHandle;
-extern osSemaphoreId_t TX_BSHandle;
+extern osSemaphoreId_t UART_TX_BSHandle;
+extern osSemaphoreId_t CAN_TX_BSHandle;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

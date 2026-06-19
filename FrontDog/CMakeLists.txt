@@ -46,8 +46,8 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     # APP
-    User/APP/APP_Usart/app_usart.c
-    User/APP/APP_Usart/app_usart_cmd.c
+    User/APP/APP_Uart/app_uart.c
+    User/APP/APP_Uart/app_uart_cmd.c
     User/APP/APP_Key/app_key.c
     User/APP/APP_Key/app_key_cmd.c
     User/APP/APP_Servo/app_servo.c
@@ -61,12 +61,12 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     
     # BSP
     User/BSP/BSP_GPIO/bsp_gpio.c
-    User/BSP/BSP_Usart/bsp_usart.c
+    User/BSP/BSP_Sys/bsp_sys.c
+    User/BSP/BSP_Uart/bsp_uart.c
     User/BSP/BSP_PWM/bsp_pwm.c
     User/BSP/BSP_CAN/bsp_can.c
 
     # Middlewares
-    User/Middlewares/Debounce/debounce.c
     User/Middlewares/Codec/codec.c
     User/Middlewares/IK/ik_two_link.c
     User/Middlewares/IK/ik_two_link.h
@@ -74,13 +74,13 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Third_Party/OLED/oled_extend.c
     User/Third_Party/OLED/font.c
     # TASK
-    User/TASK/task_rx.c
-    User/TASK/task_tx.c
+    User/TASK/task_uart_rx.c
+    User/TASK/task_uart_tx.c
     User/TASK/task_key.c
-    User/TASK/task_par.c
+    User/TASK/task_key_cmd.c
     User/TASK/task_servo.c
-    User/TASK/task_can_f0.c
-    User/TASK/task_can_f1.c
+    User/TASK/task_can_rxf0.c
+    User/TASK/task_can_rxf1.c
     User/TASK/task_oled.c
 )
 
@@ -88,7 +88,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     # APP
-    User/APP/APP_Usart
+    User/APP/APP_Uart
     User/APP/APP_Key
     User/APP/APP_Servo
     User/APP/APP_Motion
@@ -99,12 +99,12 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
     # BSP
     User/BSP/BSP_GPIO
-    User/BSP/BSP_Usart
+    User/BSP/BSP_Sys
+    User/BSP/BSP_Uart
     User/BSP/BSP_PWM
     User/BSP/BSP_CAN
 
     # Middlewares
-    User/Middlewares/Debounce
     User/Middlewares/Codec
     User/Middlewares/IK
     User/Third_Party/OLED

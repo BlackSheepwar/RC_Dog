@@ -1,5 +1,5 @@
 /**
- * @file app_usart.c
+ * @file app_uart.c
  * @brief 串口应用模块
  * @author 李嘉图
  * @date 2026-5-4
@@ -8,17 +8,21 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-#include "main.h"
-#include "string.h"
-#include "app_usart.h"
-#include "app_usart_cmd.h"
+// 标准库
 #include <stdint.h>
+#include <string.h>
+// 固定包含
+#include "main.h"
+#include "app_uart.h"
+#include "common.h"
+// 功能包含
+#include "app_uart_cmd.h"
 
 /*==============================================================================
  * 数据包FIFO队列和相关工具函数
  *============================================================================*/
-static APP_USART_PacketFIFO_t rxpacketFIFO = {0};   // 接收队列
-static APP_USART_PacketFIFO_t txPacketFIFO = {0};   // 发送队列
+static APP_UART_PacketFIFO_t rxpacketFIFO = {0};   // 接收队列
+static APP_UART_PacketFIFO_t txPacketFIFO = {0};   // 发送队列
 
 /**
  * @brief  FIFO 入队（Push）
@@ -28,7 +32,7 @@ static APP_USART_PacketFIFO_t txPacketFIFO = {0};   // 发送队列
  * @return -1:  队列已满
  * @note   本函数只修改 tail，可安全在中断中调用（单生产者场景）
  */
-static int APP_USART_PacketFIFO_Push(APP_USART_PacketFIFO_t *fifo, const Codec_Packet_t *pkt)
+static int APP_UART_PacketFIFO_Push(APP_UART_PacketFIFO_t *fifo, const Codec_Packet_t *pkt)
 {
     if (!fifo || !pkt)
         return -1;
@@ -50,7 +54,7 @@ static int APP_USART_PacketFIFO_Push(APP_USART_PacketFIFO_t *fifo, const Codec_P
  * @return -1:  队列已满
  * @note   本函数只修改 head，与 Push 无共享写变量，无需临界区
  */
-static int APP_USART_PacketFIFO_Pop(APP_USART_PacketFIFO_t *fifo, Codec_Packet_t *pkt)
+static int APP_UART_PacketFIFO_Pop(APP_UART_PacketFIFO_t *fifo, Codec_Packet_t *pkt)
 {
     if (!fifo || !pkt)
         return -1;
@@ -66,7 +70,7 @@ static int APP_USART_PacketFIFO_Pop(APP_USART_PacketFIFO_t *fifo, Codec_Packet_t
 /*==============================================================================
  * 数据包解析静态池
  *============================================================================*/
-static APP_USART_t app_port_pool[USART_MAX_PORTS];
+static APP_UART_t app_port_pool[UART_MAX_PORTS];
 static uint8_t app_port_count = 0;
 
 /**
@@ -75,7 +79,7 @@ static uint8_t app_port_count = 0;
  * @return 非NULL：找到返回指针
  * @return NULL：未找到
  */
-static APP_USART_t *app_find_port_by_id(uint8_t id)
+static APP_UART_t *app_find_port_by_id(uint8_t id)
 {
     for (uint8_t i = 0; i < app_port_count; i++) {
         if (app_port_pool[i].id == id) {
@@ -92,10 +96,10 @@ static APP_USART_t *app_find_port_by_id(uint8_t id)
  * @brief APP初始化
  * @note 串口注册
  */
-void APP_USART_Init(void)
+void APP_UART_Init(void)
 {
     /* 1. 初始化底层串口 */
-    BSP_USART_Init();
+    BSP_UART_Init();
 
     /* 2. 清空FIFO（防止复位残留） */
     rxpacketFIFO.head = 0;
@@ -116,14 +120,14 @@ void APP_USART_Init(void)
  * @retval 1：注册成功
  * @retval 0：注册失败
  */
-uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
+uint8_t APP_UART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
 {
     // 检查池是否已满
-    if (app_port_count >= USART_MAX_PORTS) return 0;
+    if (app_port_count >= UART_MAX_PORTS) return 0;
     // 检查 id 是否已被注册
     if (app_find_port_by_id(id) != NULL) return 0;
 
-    APP_USART_t *port = &app_port_pool[app_port_count];
+    APP_UART_t *port = &app_port_pool[app_port_count];
     port->id     = id;
     port->rx_len = 0;
     memset(port->rx_buf, 0, RX_BUF_MAX);
@@ -131,7 +135,7 @@ uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
     port->last_rx_time = 0;
 
     // 在底层 BSP 注册
-    BSP_USART_RegisterPort(id, huart);
+    BSP_UART_RegisterPort(id, huart);
 
     app_port_count++;
     return 1;
@@ -146,12 +150,12 @@ uint8_t APP_USART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart)
  * @retval 1：成功消费一个数据包
  * @retval 0：没有数据包可消费
  */
-uint8_t APP_USART_SendRxPacket(void)
+uint8_t APP_UART_SendRxPacket(void)
 {
     Codec_Packet_t pkt;
     // 调用 FIFO_Pop 函数完成出队
-    if (APP_USART_PacketFIFO_Pop(&rxpacketFIFO, &pkt) != 0) return 0; // 队列空
-    APP_USART_Cmd(pkt.cmd, pkt.payload, pkt.len);
+    if (APP_UART_PacketFIFO_Pop(&rxpacketFIFO, &pkt) != 0) return 0; // 队列空
+    APP_UART_Cmd(pkt.cmd, pkt.payload, pkt.len);
     return 1;
 }
 
@@ -161,36 +165,36 @@ uint8_t APP_USART_SendRxPacket(void)
  * @retval 1：超时
  * @retval 0：未超时
  */
-static inline uint8_t APP_USART_IsTimeout(uint32_t last)
+static inline uint8_t APP_UART_IsTimeout(uint32_t last)
 {
-    return (osKernelGetTickCount() - last) > USART_RX_TIMEOUT_MS;
+    return (osKernelGetTickCount() - last) > UART_RX_TIMEOUT_MS;
 }
 
 /**
  * @brief 解包并推入接收 FIFO 队列（基于单包解析器）
  * @param id 串口编号
  */
-void APP_USART_BuildRxPacket(uint8_t id)
+void APP_UART_BuildRxPacket(uint8_t id)
 {
     /* 1. 查找端口实例 */
-    APP_USART_t *app = app_find_port_by_id(id);
+    APP_UART_t *app = app_find_port_by_id(id);
     if (app == NULL) {
         return;
     }
 
     /* 2. 超时处理（半包丢弃） */
-    if (app->rx_len > 0 && APP_USART_IsTimeout(app->last_rx_time)) {
+    if (app->rx_len > 0 && APP_UART_IsTimeout(app->last_rx_time)) {
         app->rx_len = 0;
     }
 
     /* 3. 从 BSP 读取数据 */
-    uint8_t tmp_buf[USART_BUF_SIZE];
+    uint8_t tmp_buf[UART_BUF_SIZE];
     while (1) {
         uint16_t space = RX_BUF_MAX - app->rx_len;
         if (space == 0) break;
 
-        uint16_t to_read = (space < USART_BUF_SIZE) ? space : USART_BUF_SIZE;
-        uint16_t n = BSP_USART_ReadRawData(id, tmp_buf, to_read);
+        uint16_t to_read = (space < UART_BUF_SIZE) ? space : UART_BUF_SIZE;
+        uint16_t n = BSP_UART_ReadRawData(id, tmp_buf, to_read);
         if (n == 0) break;
 
         memcpy(app->rx_buf + app->rx_len, tmp_buf, n);
@@ -223,7 +227,7 @@ void APP_USART_BuildRxPacket(uint8_t id)
         /* 推入FIFO */
         pkt.id = id;
 
-        if (APP_USART_PacketFIFO_Push(&rxpacketFIFO, &pkt) != 0) {
+        if (APP_UART_PacketFIFO_Push(&rxpacketFIFO, &pkt) != 0) {
             // FIFO满 → 停止解析（不能继续消费）
             break;
         }
@@ -254,11 +258,11 @@ void APP_USART_BuildRxPacket(uint8_t id)
  /**
  * @brief 数据包发送调度器
  */
-void APP_USART_TxScheduler(uint8_t id)
+void APP_UART_TxScheduler(uint8_t id)
 {
-    if (BSP_USART_ReadTxBusy(id) == 0)
+    if (BSP_UART_ReadTxBusy(id) == 0)
     {
-        osSemaphoreRelease(TX_BSHandle);
+        osSemaphoreRelease(UART_TX_BSHandle);
     }
 }
 
@@ -266,13 +270,13 @@ void APP_USART_TxScheduler(uint8_t id)
  * @brief 发送 FIFO 队列的数据包，一次发送一个数据包
  * @note  从 txPacketFIFO 中取出一个包，组装成完整帧并通过底层发送
  */
-void APP_USART_SendTxPacket(void)
+void APP_UART_SendTxPacket(void)
 {
     Codec_Packet_t pkt;
-    if (APP_USART_PacketFIFO_Pop(&txPacketFIFO, &pkt) != 0)
+    if (APP_UART_PacketFIFO_Pop(&txPacketFIFO, &pkt) != 0)
         return;
 
-    uint8_t txbuf[USART_BUF_SIZE];
+    uint8_t txbuf[UART_BUF_SIZE];
 
     /* 帧格式: HEAD1 HEAD2 LEN CMD [PAYLOAD] CHK
      * pkt.len = 总帧长（含帧头） = payload_len + 5
@@ -289,8 +293,8 @@ void APP_USART_SendTxPacket(void)
         memcpy(&txbuf[4], pkt.payload, pay_len);
     txbuf[4 + pay_len] = pkt.chk;
 
-    BSP_USART_WriteTxBusy(pkt.id);
-    BSP_USART_Send(pkt.id, txbuf, pkt.len);   // 总发送字节数 = pkt.len
+    BSP_UART_WriteTxBusy(pkt.id);
+    BSP_UART_Send(pkt.id, txbuf, pkt.len);   // 总发送字节数 = pkt.len
 }
 
 
@@ -303,7 +307,7 @@ void APP_USART_SendTxPacket(void)
  * @retval 1：成功打包并入队
  * @retval 0：失败（参数非法、队列满等）
  */
-uint8_t APP_USART_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data, uint8_t len)
+uint8_t APP_UART_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data, uint8_t len)
 {
     // 1. 调用打包函数构造数据包
     Codec_Packet_t pkt = Codec_BuildTxPacket(id, cmd, data, len+5);
@@ -313,12 +317,12 @@ uint8_t APP_USART_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data, ui
     }
 
     // 2. 压入发送 FIFO
-    if (APP_USART_PacketFIFO_Push(&txPacketFIFO, &pkt) != 0) {
+    if (APP_UART_PacketFIFO_Push(&txPacketFIFO, &pkt) != 0) {
         return 0;   // 队列满
     }
 
     // 3. 启用调度器
-    APP_USART_TxScheduler(id);
+    APP_UART_TxScheduler(id);
 
     return 1;       // 成功
 }

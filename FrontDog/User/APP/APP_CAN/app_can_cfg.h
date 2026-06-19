@@ -17,10 +17,12 @@
 #include "bsp_can.h"
 
 /*==============================================================================
- * CAN 实例配置
+ * CAN 端口路由表
  *============================================================================*/
-#define CAN1_INSTANCE_ID    1   // CAN1 端口ID
-// #define CAN2_INSTANCE_ID   2   // CAN2 暂未启用
+typedef struct {
+    uint8_t id;
+    void    (*handler)(CAN_RxHeaderTypeDef *header, uint8_t *data);
+} can_fifo_routing_entry_t;
 
 /*==============================================================================
  * CAN1 FIFO0 滤波器配置（高优先级：舵机控制帧 0x201~0x204）

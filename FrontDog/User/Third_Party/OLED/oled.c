@@ -21,12 +21,17 @@
  * 为保证中文显示正常 请将编译器的字符集设置为UTF-8
  *
  */
-#include "oled.h"
-#include "i2c.h"
+/*==============================================================================
+ * 头文件包含
+ *============================================================================*/
+// 固定包含
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "oled.h"
+// 功能包含
+#include "i2c.h"
 
 // OLED器件地址
 #define OLED_ADDRESS 0x78
