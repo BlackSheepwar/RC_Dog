@@ -264,7 +264,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     BSP_CAN_Packet_t rx_pkt;
     rx_pkt.id = map->id;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_pkt.header, rx_pkt.data);
-    osMessageQueuePut(CAN_F0_QHandle, &rx_pkt, 0, 0);
+    osMessageQueuePut(CAN_RXF0_QHandle, &rx_pkt, 0, 0);
 }
 
 /**
@@ -279,7 +279,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
     BSP_CAN_Packet_t rx_pkt;
     rx_pkt.id = map->id;
     HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rx_pkt.header, rx_pkt.data);
-    osMessageQueuePut(CAN_F1_QHandle, &rx_pkt, 0, 0);
+    osMessageQueuePut(CAN_RXF1_QHandle, &rx_pkt, 0, 0);
 }
 
 /*==============================================================================

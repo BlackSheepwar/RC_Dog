@@ -76,7 +76,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # TASK
     User/TASK/task_uart_rx.c
     User/TASK/task_uart_tx.c
-    User/TASK/task_key.c
+    User/TASK/task_key_debounce.c
     User/TASK/task_key_cmd.c
     User/TASK/task_servo.c
     User/TASK/task_can_rxf0.c

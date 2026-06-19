@@ -51,16 +51,16 @@ typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for KEY_T */
-osThreadId_t KEY_THandle;
-uint32_t KEY_TBuffer[ 256 ];
-osStaticThreadDef_t KEY_TControlBlock;
-const osThreadAttr_t KEY_T_attributes = {
-  .name = "KEY_T",
-  .cb_mem = &KEY_TControlBlock,
-  .cb_size = sizeof(KEY_TControlBlock),
-  .stack_mem = &KEY_TBuffer[0],
-  .stack_size = sizeof(KEY_TBuffer),
+/* Definitions for KEY_Debounce_T */
+osThreadId_t KEY_Debounce_THandle;
+uint32_t KEY_Debounce_TBuffer[ 128 ];
+osStaticThreadDef_t KEY_Debounce_TControlBlock;
+const osThreadAttr_t KEY_Debounce_T_attributes = {
+  .name = "KEY_Debounce_T",
+  .cb_mem = &KEY_Debounce_TControlBlock,
+  .cb_size = sizeof(KEY_Debounce_TControlBlock),
+  .stack_mem = &KEY_Debounce_TBuffer[0],
+  .stack_size = sizeof(KEY_Debounce_TBuffer),
   .priority = (osPriority_t) osPriorityRealtime4,
 };
 /* Definitions for KEY_CMD_T */
@@ -89,7 +89,7 @@ const osThreadAttr_t UART_RX_T_attributes = {
 };
 /* Definitions for UART_TX_T */
 osThreadId_t UART_TX_THandle;
-uint32_t UART_TX_TBuffer[ 256 ];
+uint32_t UART_TX_TBuffer[ 128 ];
 osStaticThreadDef_t UART_TX_TControlBlock;
 const osThreadAttr_t UART_TX_T_attributes = {
   .name = "UART_TX_T",
@@ -113,7 +113,7 @@ const osThreadAttr_t SERVO_T_attributes = {
 };
 /* Definitions for OLED_T */
 osThreadId_t OLED_THandle;
-uint32_t OLED_TBuffer[ 256 ];
+uint32_t OLED_TBuffer[ 128 ];
 osStaticThreadDef_t OLED_TControlBlock;
 const osThreadAttr_t OLED_T_attributes = {
   .name = "OLED_T",
@@ -181,27 +181,27 @@ const osMessageQueueAttr_t KEY_CMD_Q_attributes = {
   .mq_mem = &KEY_CMD_QBuffer,
   .mq_size = sizeof(KEY_CMD_QBuffer)
 };
-/* Definitions for CAN_F0_Q */
-osMessageQueueId_t CAN_F0_QHandle;
-uint8_t CAN_F0_QBuffer[ 16 * sizeof( BSP_CAN_Packet_t ) ];
-osStaticMessageQDef_t CAN_F0_QControlBlock;
-const osMessageQueueAttr_t CAN_F0_Q_attributes = {
-  .name = "CAN_F0_Q",
-  .cb_mem = &CAN_F0_QControlBlock,
-  .cb_size = sizeof(CAN_F0_QControlBlock),
-  .mq_mem = &CAN_F0_QBuffer,
-  .mq_size = sizeof(CAN_F0_QBuffer)
+/* Definitions for CAN_RXF0_Q */
+osMessageQueueId_t CAN_RXF0_QHandle;
+uint8_t CAN_RXF0_QBuffer[ 16 * sizeof( BSP_CAN_Packet_t ) ];
+osStaticMessageQDef_t CAN_RXF0_QControlBlock;
+const osMessageQueueAttr_t CAN_RXF0_Q_attributes = {
+  .name = "CAN_RXF0_Q",
+  .cb_mem = &CAN_RXF0_QControlBlock,
+  .cb_size = sizeof(CAN_RXF0_QControlBlock),
+  .mq_mem = &CAN_RXF0_QBuffer,
+  .mq_size = sizeof(CAN_RXF0_QBuffer)
 };
-/* Definitions for CAN_F1_Q */
-osMessageQueueId_t CAN_F1_QHandle;
-uint8_t CAN_F1_QBuffer[ 16 * sizeof( BSP_CAN_Packet_t ) ];
-osStaticMessageQDef_t CAN_F1_QControlBlock;
-const osMessageQueueAttr_t CAN_F1_Q_attributes = {
-  .name = "CAN_F1_Q",
-  .cb_mem = &CAN_F1_QControlBlock,
-  .cb_size = sizeof(CAN_F1_QControlBlock),
-  .mq_mem = &CAN_F1_QBuffer,
-  .mq_size = sizeof(CAN_F1_QBuffer)
+/* Definitions for CAN_RXF1_Q */
+osMessageQueueId_t CAN_RXF1_QHandle;
+uint8_t CAN_RXF1_QBuffer[ 16 * sizeof( BSP_CAN_Packet_t ) ];
+osStaticMessageQDef_t CAN_RXF1_QControlBlock;
+const osMessageQueueAttr_t CAN_RXF1_Q_attributes = {
+  .name = "CAN_RXF1_Q",
+  .cb_mem = &CAN_RXF1_QControlBlock,
+  .cb_size = sizeof(CAN_RXF1_QControlBlock),
+  .mq_mem = &CAN_RXF1_QBuffer,
+  .mq_size = sizeof(CAN_RXF1_QBuffer)
 };
 /* Definitions for UART_TX_BS */
 osSemaphoreId_t UART_TX_BSHandle;
@@ -225,7 +225,7 @@ const osSemaphoreAttr_t CAN_TX_BS_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
-void Task_KEY(void *argument);
+void Task_KEY_Debounce(void *argument);
 void TASK_KEY_CMD(void *argument);
 void Task_UART_RX(void *argument);
 void Task_UART_TX(void *argument);
@@ -273,19 +273,19 @@ void MX_FREERTOS_Init(void) {
   /* creation of KEY_CMD_Q */
   KEY_CMD_QHandle = osMessageQueueNew (16, sizeof(App_Key_EventPacket_t), &KEY_CMD_Q_attributes);
 
-  /* creation of CAN_F0_Q */
-  CAN_F0_QHandle = osMessageQueueNew (16, sizeof(BSP_CAN_Packet_t), &CAN_F0_Q_attributes);
+  /* creation of CAN_RXF0_Q */
+  CAN_RXF0_QHandle = osMessageQueueNew (16, sizeof(BSP_CAN_Packet_t), &CAN_RXF0_Q_attributes);
 
-  /* creation of CAN_F1_Q */
-  CAN_F1_QHandle = osMessageQueueNew (16, sizeof(BSP_CAN_Packet_t), &CAN_F1_Q_attributes);
+  /* creation of CAN_RXF1_Q */
+  CAN_RXF1_QHandle = osMessageQueueNew (16, sizeof(BSP_CAN_Packet_t), &CAN_RXF1_Q_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of KEY_T */
-  KEY_THandle = osThreadNew(Task_KEY, NULL, &KEY_T_attributes);
+  /* creation of KEY_Debounce_T */
+  KEY_Debounce_THandle = osThreadNew(Task_KEY_Debounce, NULL, &KEY_Debounce_T_attributes);
 
   /* creation of KEY_CMD_T */
   KEY_CMD_THandle = osThreadNew(TASK_KEY_CMD, NULL, &KEY_CMD_T_attributes);
@@ -321,22 +321,22 @@ void MX_FREERTOS_Init(void) {
 
 }
 
-/* USER CODE BEGIN Header_Task_KEY */
+/* USER CODE BEGIN Header_Task_KEY_Debounce */
 /**
-  * @brief  Function implementing the KEY_T thread.
+  * @brief  Function implementing the KEY_Debounce_T thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_Task_KEY */
-__weak void Task_KEY(void *argument)
+/* USER CODE END Header_Task_KEY_Debounce */
+__weak void Task_KEY_Debounce(void *argument)
 {
-  /* USER CODE BEGIN Task_KEY */
+  /* USER CODE BEGIN Task_KEY_Debounce */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END Task_KEY */
+  /* USER CODE END Task_KEY_Debounce */
 }
 
 /* USER CODE BEGIN Header_TASK_KEY_CMD */

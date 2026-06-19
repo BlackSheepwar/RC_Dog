@@ -1,5 +1,5 @@
 /**
- * @file task_key.c
+ * @file task_key_debounce.c
  * @brief 实现按键扫描与消息发送任务
  * @author 李嘉图
  * @date 2026-06-17
@@ -22,7 +22,7 @@
 /*==============================================================================
  * 任务函数
  *============================================================================*/
-void Task_KEY(void *argument)
+void Task_KEY_Debounce(void *argument)
 {
     App_Key_Init();
 

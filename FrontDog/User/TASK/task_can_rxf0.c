@@ -46,7 +46,7 @@ void Task_CAN_RXF0(void *argument)
     for (;;)
     {
         BSP_CAN_Packet_t rx_pkt;
-        osMessageQueueGet(CAN_F0_QHandle, &rx_pkt, NULL, osWaitForever);
+        osMessageQueueGet(CAN_RXF0_QHandle, &rx_pkt, NULL, osWaitForever);
 
         /* 查表分发到对应 CAN 端口的处理函数 */
         for (uint8_t i = 0; i < ARRAY_SIZE(CAN_FIFO0_ROUTING_TABLE); i++)
