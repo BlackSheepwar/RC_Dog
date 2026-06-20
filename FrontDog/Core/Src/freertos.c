@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "app_key.h"
 #include "bsp_can.h"
+#include "app_uart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,6 +160,18 @@ const osThreadAttr_t CAN_TX_T_attributes = {
   .stack_size = sizeof(CAN_TX_TBuffer),
   .priority = (osPriority_t) osPriorityAboveNormal5,
 };
+/* Definitions for UART_RX_CMD */
+osThreadId_t UART_RX_CMDHandle;
+uint32_t UART_RX_CMDBuffer[ 128 ];
+osStaticThreadDef_t UART_RX_CMDControlBlock;
+const osThreadAttr_t UART_RX_CMD_attributes = {
+  .name = "UART_RX_CMD",
+  .cb_mem = &UART_RX_CMDControlBlock,
+  .cb_size = sizeof(UART_RX_CMDControlBlock),
+  .stack_mem = &UART_RX_CMDBuffer[0],
+  .stack_size = sizeof(UART_RX_CMDBuffer),
+  .priority = (osPriority_t) osPriorityRealtime2,
+};
 /* Definitions for UART_RX_Q */
 osMessageQueueId_t UART_RX_QHandle;
 uint8_t UART_RX_QBuffer[ 16 * sizeof( uint8_t ) ];
@@ -203,13 +216,16 @@ const osMessageQueueAttr_t CAN_RXF1_Q_attributes = {
   .mq_mem = &CAN_RXF1_QBuffer,
   .mq_size = sizeof(CAN_RXF1_QBuffer)
 };
-/* Definitions for UART_TX_BS */
-osSemaphoreId_t UART_TX_BSHandle;
-osStaticSemaphoreDef_t UART_TX_BSControlBlock;
-const osSemaphoreAttr_t UART_TX_BS_attributes = {
-  .name = "UART_TX_BS",
-  .cb_mem = &UART_TX_BSControlBlock,
-  .cb_size = sizeof(UART_TX_BSControlBlock),
+/* Definitions for UART_TX_Q */
+osMessageQueueId_t UART_TX_QHandle;
+uint8_t UART_TX_QBuffer[ 16 * sizeof( APP_TxFrame_t ) ];
+osStaticMessageQDef_t UART_TX_QControlBlock;
+const osMessageQueueAttr_t UART_TX_Q_attributes = {
+  .name = "UART_TX_Q",
+  .cb_mem = &UART_TX_QControlBlock,
+  .cb_size = sizeof(UART_TX_QControlBlock),
+  .mq_mem = &UART_TX_QBuffer,
+  .mq_size = sizeof(UART_TX_QBuffer)
 };
 /* Definitions for CAN_TX_BS */
 osSemaphoreId_t CAN_TX_BSHandle;
@@ -218,6 +234,14 @@ const osSemaphoreAttr_t CAN_TX_BS_attributes = {
   .name = "CAN_TX_BS",
   .cb_mem = &CAN_TX_BSControlBlock,
   .cb_size = sizeof(CAN_TX_BSControlBlock),
+};
+/* Definitions for UART_RX_BS */
+osSemaphoreId_t UART_RX_BSHandle;
+osStaticSemaphoreDef_t UART_RX_BSControlBlock;
+const osSemaphoreAttr_t UART_RX_BS_attributes = {
+  .name = "UART_RX_BS",
+  .cb_mem = &UART_RX_BSControlBlock,
+  .cb_size = sizeof(UART_RX_BSControlBlock),
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -234,6 +258,7 @@ void Task_OLED(void *argument);
 void Task_CAN_RXF0(void *argument);
 void Task_CAN_RXF1(void *argument);
 void Task_CAN_TX(void *argument);
+void Task_UART_RX_CMD(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -252,11 +277,11 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
-  /* creation of UART_TX_BS */
-  UART_TX_BSHandle = osSemaphoreNew(1, 1, &UART_TX_BS_attributes);
-
   /* creation of CAN_TX_BS */
   CAN_TX_BSHandle = osSemaphoreNew(1, 1, &CAN_TX_BS_attributes);
+
+  /* creation of UART_RX_BS */
+  UART_RX_BSHandle = osSemaphoreNew(1, 1, &UART_RX_BS_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -278,6 +303,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of CAN_RXF1_Q */
   CAN_RXF1_QHandle = osMessageQueueNew (16, sizeof(BSP_CAN_Packet_t), &CAN_RXF1_Q_attributes);
+
+  /* creation of UART_TX_Q */
+  UART_TX_QHandle = osMessageQueueNew (16, sizeof(APP_TxFrame_t), &UART_TX_Q_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -310,6 +338,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of CAN_TX_T */
   CAN_TX_THandle = osThreadNew(Task_CAN_TX, NULL, &CAN_TX_T_attributes);
+
+  /* creation of UART_RX_CMD */
+  UART_RX_CMDHandle = osThreadNew(Task_UART_RX_CMD, NULL, &UART_RX_CMD_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -481,6 +512,24 @@ __weak void Task_CAN_TX(void *argument)
     osDelay(1);
   }
   /* USER CODE END Task_CAN_TX */
+}
+
+/* USER CODE BEGIN Header_Task_UART_RX_CMD */
+/**
+* @brief Function implementing the UART_RX_CMD thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Task_UART_RX_CMD */
+__weak void Task_UART_RX_CMD(void *argument)
+{
+  /* USER CODE BEGIN Task_UART_RX_CMD */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Task_UART_RX_CMD */
 }
 
 /* Private application code --------------------------------------------------*/

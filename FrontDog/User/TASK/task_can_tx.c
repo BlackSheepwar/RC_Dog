@@ -36,7 +36,7 @@ void Task_CAN_TX(void *argument)
     {
         /* ---------- 等待 TX 完成信号量 ---------- */
         osSemaphoreAcquire(CAN_TX_BSHandle, osWaitForever);
-
+        
         /* ---------- 排空所有端口的发送缓冲 ---------- */
         for (uint8_t i = 0; i < BSP_CAN_MAX_NUM; i++)
         {

@@ -36,7 +36,7 @@
  * @note 编译期固定的硬件映射，运行时不修改
  */
 typedef struct {
-    uint8_t      id;             // CAN实例ID (0=CAN1, 1=CAN2)
+    uint8_t      id;             // CAN实例ID
     CAN_HandleTypeDef *hcan;     // CAN硬件句柄
 } BSP_CAN_Map_t;
 

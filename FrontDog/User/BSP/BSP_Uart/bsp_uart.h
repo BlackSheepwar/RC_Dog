@@ -1,9 +1,18 @@
 /**
  * @file bsp_uart.h
- * @brief STM32 UART DMA+IDLE 接收驱动
- *        支持多串口接收与编号管理，使用环形队列缓存接收数据
+ * @brief UART硬件接口
  * @author 李嘉图
- * @date 2026-5-4
+ * @date 2026-06-20
+ *
+ * @note 硬件映射表（id → huart）在此文件中静态定义，
+ *       上层通过 id 调用，无需知道具体 UART 外设。
+ *       映射表为编译期常量，运行时不修改。
+ *
+ *       遵循 CAN 接口风格：BSP 层仅负责硬件配置与数据收发，
+ *       不做任何缓冲管理，不持有软件 FIFO。
+ *
+ *       DMA 循环缓冲区由 APP 层分配，通过 ConfigDMARx 注入 BSP。
+ *       三个中断入口（IDLE/HT/TC）统一通知任务，不拷贝数据。
  */
 
 #ifndef __BSP_UART_H__
@@ -20,86 +29,82 @@
 /*==============================================================================
  * 宏定义与常量
  *============================================================================*/
-#define UART_MAX_PORTS     2           // 支持最大串口数量
-#define UART_BUF_SIZE      128         // 数据接收缓冲区大小
-#define UART_FIFO_SIZE      256         // 环形队列缓存长度
-
-/*==============================================================================
- * 结构体定义
- *============================================================================*/
-/**
- * @brief BSP层串口端口的内部数据结构
- */
-typedef struct {
-    uint8_t             id;             // 串口编号，由注册时指定
-    uint8_t             data_ready;     // 数据准备标志，1 表示有新数据
-    uint16_t            rx_size;        // 本次DMA接收到的数据长度
-    UART_HandleTypeDef  *huart;         // UART 硬件句柄
-    uint8_t             dma_buf[UART_BUF_SIZE]; // DMA 接收缓冲区
-    uint8_t             fifo[UART_FIFO_SIZE]; // 环形队列缓存
-    uint16_t            fifo_head;     // FIFO 写入指针
-    uint16_t            fifo_tail;     // FIFO 读取指针
-    uint8_t             tx_busy;       // 发送忙标志位 0表示空闲，1表示发送中
-} BSP_UART_t;
+#define BSP_UART_MAX_NUM        2           // UART 实例最大数量
 
 /*==============================================================================
  * 初始化函数
  *============================================================================*/
 /**
- * @brief 初始化 BSP 层（仅初始化内部状态，注册端口时启动 DMA）
+ * @brief 初始化 BSP UART 层
+ * @note 复位运行时 DMA 上下文状态。
+ *       映射表为编译期常量，无需注册。
  */
 void BSP_UART_Init(void);
 
 /**
- * @brief 注册一个 BSP 串口实例
- * @note 初始化 FIFO 和 DMA 接收，使用结构体内部的 DMA 缓冲区
- * @param id        串口编号（逻辑编号，不要求等于数组下标）
- * @param huart     UART 硬件句柄（DMA句柄从 huart->hdmarx 自动获取）
- * @retval 1: 注册成功
- * @retval 0: 注册失败
+ * @brief 根据 UART 句柄获取实例 ID
+ * @param huart UART 硬件句柄
+ * @retval 0~BSP_UART_MAX_NUM-1: 对应实例 ID
+ * @retval 0xFF: 未找到
  */
-uint8_t BSP_UART_RegisterPort(uint8_t id, UART_HandleTypeDef *huart);
+uint8_t BSP_UART_GetIdByHuart(UART_HandleTypeDef *huart);
+
+/*==============================================================================
+ * DMA 接收配置
+ *============================================================================*/
+/**
+ * @brief 配置并启动 DMA 循环接收
+ * @param id    UART 实例 ID
+ * @param buf   DMA 接收缓冲区（APP 层提供，BSP 只配置地址）
+ * @param size  缓冲区大小（字节）
+ * @note 启动后 DMA 以循环模式持续写入，永不停止。
+ *       同时使能 HT/TC/IDLE 中断，触发后通知任务取数据。
+ *       重复调用安全，先停止旧 DMA 再重启。
+ */
+void BSP_UART_ConfigDMARx(uint8_t id, uint8_t *buf, uint16_t size);
+
+/**
+ * @brief 获取当前 DMA 写入位置
+ * @param id UART 实例 ID
+ * @return 当前 DMA 在循环缓冲区中的写入偏移（0 ~ size-1）
+ * @note 通过 DMA 的 Counter 寄存器计算，开销仅 2 次总线访问。
+ */
+uint16_t BSP_UART_GetDMAPos(uint8_t id);
 
 /*==============================================================================
  * 发送函数
  *============================================================================*/
 /**
- * @brief BSP 层发送数据接口
- * @param id   串口编号
- * @param buf  数据缓冲区指针
- * @param len  数据长度
- * @note 使用 DMA 发送数据，非阻塞
+ * @brief 通过 DMA 发送数据（非阻塞）
+ * @param id  UART 实例 ID
+ * @param buf 待发送数据指针
+ * @param len 发送长度
+ * @note 调用前需确保前一次 DMA 发送已完成（通过 BSP_UART_IsTxBusy 检查）。
+ *       CRC 与帧格式由上层 Codec 层处理，BSP 不关心内容。
  */
-void BSP_UART_Send(uint8_t id, uint8_t *buf, uint16_t len);
+void BSP_UART_SendDMA(uint8_t id, const uint8_t *buf, uint16_t len);
 
 /**
- * @brief 获取UART发送忙状态
- * @retval 1 忙
- * @retval 0 空闲
+ * @brief 查询 DMA 发送是否忙
+ * @param id UART 实例 ID
+ * @retval 1: 发送中
+ * @retval 0: 空闲
  */
-uint8_t BSP_UART_ReadTxBusy(uint8_t id);
-
-/**
- * @brief 设置UART发送忙状态为1，表示发送中
- */
-void BSP_UART_WriteTxBusy(uint8_t id);
-
-/**
- * @brief 设置UART发送忙状态为0，表示发送完成
- */
-void BSP_UART_WriteTxBusyFree(uint8_t id);
+uint8_t BSP_UART_IsTxBusy(uint8_t id);
 
 /*==============================================================================
- * 接收函数
+ * TX 完成回调（用于上层双缓冲等扩展功能）
  *============================================================================*/
-/**
- * @brief 读取 FIFO 中的数据
- * @param id        串口编号
- * @param buf       输出缓冲区指针
- * @param buf_size  输出缓冲区大小
- * @retval uint16_t 实际读取字节数，0 表示 FIFO 空
- * @note 数据按 FIFO 顺序读取，读完后更新尾指针
- */
-uint16_t BSP_UART_ReadRawData(uint8_t id, uint8_t *buf, uint16_t buf_size);
+/** @brief TX 完成回调函数类型 */
+typedef void (*BSP_UART_TxCpltFn_t)(uint8_t id);
 
-#endif
+/**
+ * @brief 注册 TX 完成回调
+ * @param fn 回调函数（NULL = 取消注册）
+ * @note 在 HAL_UART_TxCpltCallback ISR 末尾被调用，
+ *       函数内需保持 ISR 级别的约束（不阻塞、不操作互斥量）。
+ *       典型用途：双缓冲 DMA 切换、释放 TX 信号量等。
+ */
+void BSP_UART_SetTxCpltFn(BSP_UART_TxCpltFn_t fn);
+
+#endif /* __BSP_UART_H__ */

@@ -1,11 +1,13 @@
 /**
  * @file task_uart_rx.c
- * @brief 实现UART接收处理任务
+ * @brief UART 接收处理任务
  * @author 李嘉图
- * @date 2026-06-05
+ * @date 2026-06-20
  *
- * @note UART 端口注册参数已提取到 app_uart_cfg.h，
- *       Task 层遍历配置表完成注册，新增串口只需在表中加一项。
+ * @note 收到 BSP 中断通知后，从 DMA 循环缓冲读取数据、
+ *       解析数据包，入描述符 FIFO，然后唤醒 CMD 任务处理。
+ *
+ *       命令分发已拆分到 UART_RX_CMD 任务。
  */
 
 /*==============================================================================
@@ -17,44 +19,26 @@
 #include "common.h"
 // 功能包含
 #include "app_uart.h"
-#include "app_uart_cfg.h"
 
 /*==============================================================================
  * 任务函数
  *============================================================================*/
 void Task_UART_RX(void *argument)
 {
+    /* 初始化 BSP + 所有串口端口 */
     APP_UART_Init();
-
-    for (uint8_t i = 0; i < ARRAY_SIZE(UART_PORT_TABLE); i++)
-    {
-        APP_UART_RegisterPort(UART_PORT_TABLE[i].id,
-                               UART_PORT_TABLE[i].huart);
-    }
 
     uint8_t id;
 
+    /* 主循环：等待中断通知 → 处理数据 → 通知 CMD 任务 */
     for (;;)
     {
         osMessageQueueGet(UART_RX_QHandle, &id, NULL, osWaitForever);
 
-        APP_UART_BuildRxPacket(id);
+        /* 从 DMA 循环缓冲读取新数据并解析（入描述符 FIFO） */
+        APP_UART_ProcessRxData(id);
 
-        uint8_t count = 0;
-
-        while (1)
-        {
-            if (APP_UART_SendRxPacket() == 0)
-                break;
-
-            count++;
-
-            // 每连续处理5个包，让出CPU
-            if (count >= 5)
-            {
-                count = 0;
-                osDelay(2);
-            }
-        }
+        /* 唤醒 CMD 任务消费描述符 */
+        osSemaphoreRelease(UART_RX_BSHandle);
     }
 }

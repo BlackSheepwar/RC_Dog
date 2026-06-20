@@ -75,6 +75,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Third_Party/OLED/font.c
     # TASK
     User/TASK/task_uart_rx.c
+    User/TASK/task_uart_rx_cmd.c
     User/TASK/task_uart_tx.c
     User/TASK/task_key_debounce.c
     User/TASK/task_key_cmd.c
