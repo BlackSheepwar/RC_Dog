@@ -82,6 +82,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/TASK/task_servo.c
     User/TASK/task_can_rxf0.c
     User/TASK/task_can_rxf1.c
+    User/TASK/task_can_tx.c
     User/TASK/task_oled.c
 )
 

@@ -1,0 +1,8 @@
+device STM32F103C8
+si SWD
+speed 4000
+connect
+loadfile build/Debug/RemoteControl.elf
+r
+g
+exit
