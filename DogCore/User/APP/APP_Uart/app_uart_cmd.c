@@ -20,24 +20,23 @@
 #include "app_uart.h"
 #include "app_servo.h"
 #include "bsp_gpio.h"
-#include "stm32h7xx_hal_gpio.h"
 
 /*==============================================================================
  * 命令处理函数
  *============================================================================*/
 static void APP_UART_AA(uint8_t *payload, uint8_t len)
 {
-    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_3);
+    BSP_GPIO_Toggle(2);
 }
 
 static void APP_UART_A9(uint8_t *payload, uint8_t len)
 {
-
+    BSP_GPIO_Toggle(2);
 }
 
 static void APP_UART_A8(uint8_t *payload, uint8_t len)
 {
-
+    BSP_GPIO_Toggle(2);
 }
 
 /*==============================================================================

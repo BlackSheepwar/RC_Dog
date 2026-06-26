@@ -26,22 +26,16 @@
  *============================================================================*/
 static void APP_UART_AA(uint8_t *payload, uint8_t len)
 {
-    (void)payload;
-    (void)len;
-    BSP_GPIO_SetLevel(2, GPIO_LEVEL_HIGH);
+    BSP_GPIO_Toggle(2);
 }
 
 static void APP_UART_A9(uint8_t *payload, uint8_t len)
 {
-    (void)payload;
-    (void)len;
-    BSP_GPIO_SetLevel(2, GPIO_LEVEL_LOW);
+    BSP_GPIO_Toggle(2);
 }
 
 static void APP_UART_A8(uint8_t *payload, uint8_t len)
 {
-    (void)payload;
-    (void)len;
     BSP_GPIO_Toggle(2);
 }
 

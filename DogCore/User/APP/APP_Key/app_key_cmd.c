@@ -35,40 +35,9 @@ typedef struct {
 /*==============================================================================
  * 按键事件处理函数
  *============================================================================*/
-
- // /**
-//  * @brief 按键1按下：四腿姿态切换
-//  * @note 每按一次在「中立」和「弯曲」两态间切换。
-//  *       4条腿（舵机1~8）同步动作，每条腿 [髋, 膝]。
-//  */
-// static void Key1_OnDown(void)
-// {
-//     static uint8_t pose = 0;    /* 0=中立, 1=弯曲 */
-//     pose ^= 1;                  /* 翻转状态 */
-
-//     int16_t hip, knee;
-//     if (pose)
-//     {
-//         hip  = 10;     /* 髋前摆 */
-//         knee = -65;    /* 膝弯曲 */
-//     }
-//     else
-//     {
-//         hip  = 0;
-//         knee = 0;
-//     }
-
-//     for (uint8_t i = 0; i < 4; i++)
-//     {
-//         APP_Servo_SetTarget(2 * i + 1, hip);
-//         APP_Servo_SetTarget(2 * i + 2, knee);
-//     }
-//     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_2);
-// }
-
 static void Key1_OnDown(void)
 {
-    BSP_GPIO_Toggle(2);
+    APP_UART_BuildTxPacket(2, 0xAA, NULL, 5);
 }
 
 static void Key1_OnClick(void)
@@ -80,8 +49,8 @@ static void Key1_OnLong(void)
 }
 
 static void Key1_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(2, GPIO_LEVEL_LOW);
+{    
+    BSP_GPIO_Toggle(2);
 }
 
 /*==============================================================================

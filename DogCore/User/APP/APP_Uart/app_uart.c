@@ -36,7 +36,7 @@
 /** @brief APP 层管理的串口 ID 列表（运行时不受理热注册） */
 static const uint8_t APP_UART_PORT_IDS[] = { 1, 2 };
 
-static APP_UART_Port_t app_port_pool[ARRAY_SIZE(APP_UART_PORT_IDS)];
+static APP_UART_Port_t app_port_pool[ARRAY_SIZE(APP_UART_PORT_IDS)] __attribute__((section(".dma_buffer")));
 static uint8_t app_port_count = 0;
 
 /*==============================================================================
@@ -57,7 +57,7 @@ typedef struct {
 } APP_TxDualBuf_t;
 
 /** @brief 双缓冲上下文池 */
-static APP_TxDualBuf_t tx_dual_pool[ARRAY_SIZE(APP_UART_PORT_IDS)];
+static APP_TxDualBuf_t tx_dual_pool[ARRAY_SIZE(APP_UART_PORT_IDS)] __attribute__((section(".dma_buffer")));
 
 /*==============================================================================
  * 共享接收数据池
@@ -385,9 +385,9 @@ void APP_UART_ProcessRxData(uint8_t id)
 
         /* 完整包：payload 写入共享池 */
         pkt.id = id;
-        uint16_t pay_len = (pkt.len > 5) ? (pkt.len - 5) : 0;
+        uint16_t data_len = (pkt.len > 5) ? (pkt.len - 5) : 0;   /* 数据长度 */
 
-        uint16_t pool_off = app_rx_pool_write(pkt.payload, pay_len);
+        uint16_t pool_off = app_rx_pool_write(pkt.payload, data_len);
         if (pool_off == 0xFFFF)
         {
             /* 池满 → 停止解析 */
@@ -397,7 +397,7 @@ void APP_UART_ProcessRxData(uint8_t id)
         /* 描述符入 FIFO */
         APP_RxDesc_t desc;
         desc.offset = pool_off;
-        desc.len    = pay_len;
+        desc.len    = data_len;
         desc.cmd    = pkt.cmd;
         desc.id     = id;
 
@@ -439,20 +439,20 @@ uint8_t APP_UART_SendRxPacket(void)
 
     /* 从共享池读取 payload */
     uint8_t pool_data[APP_TX_BUF_SIZE];
-    uint16_t pay_len = desc.len;
+    uint16_t data_len = desc.len;           /* 数据负载长度 */
 
-    if (pay_len > 0)
+    if (data_len > 0)
     {
-        if (pay_len > APP_TX_BUF_SIZE)
-            pay_len = APP_TX_BUF_SIZE;
-        app_rx_pool_read(desc.offset, pool_data, pay_len);
+        if (data_len > APP_TX_BUF_SIZE)
+            data_len = APP_TX_BUF_SIZE;
+        app_rx_pool_read(desc.offset, pool_data, data_len);
     }
 
     /* 推进池读指针释放空间 */
-    app_rx_pool_advance(pay_len);
+    app_rx_pool_advance(data_len);
 
     /* 调用命令处理 */
-    APP_UART_Cmd(desc.cmd, (pay_len > 0) ? pool_data : NULL, pay_len);
+    APP_UART_Cmd(desc.cmd, (data_len > 0) ? pool_data : NULL, data_len);
 
     return 1;
 }
@@ -577,43 +577,39 @@ void APP_UART_TrySendDual(const APP_TxFrame_t *frame)
  *============================================================================*/
 /**
  * @brief 打包并推入发送队列
- * @param id   目标串口 ID
- * @param cmd  命令字
- * @param data 数据内容
- * @param len  数据长度
+ * @param id       目标串口 ID
+ * @param cmd      命令字
+ * @param data     payload 指针（data_len == 0 时可为 NULL）
+ * @param data_len 数据负载长度（0~123）
  * @retval 1: 成功入队
  * @retval 0: 失败
  */
 uint8_t APP_UART_BuildTxPacket(uint8_t id, uint8_t cmd,
-                                const uint8_t *data, uint8_t len)
+                                const uint8_t *data, uint8_t data_len)
 {
-    /* 1. Codec 打包 */
-    Codec_Packet_t pkt = Codec_BuildTxPacket(id, cmd, data, len + 5);
+    /* 1. Codec 打包（传入 data_len，内部拼全长） */
+    Codec_Packet_t pkt = Codec_BuildTxPacket(id, cmd, data, data_len);
     if (pkt.len == (uint8_t)-1)
         return 0;
 
-    /* 2. 编码为线缆格式 */
+    uint8_t full_len = pkt.len;             /* 包全长 = data_len + 5 */
+
     APP_TxFrame_t frame;
     frame.id  = id;
-    frame.len = pkt.len;
+    frame.len = full_len;
 
     frame.data[0] = PACKET_HEAD1;
     frame.data[1] = PACKET_HEAD2;
-    frame.data[2] = (uint8_t)(pkt.len - 2);
+    frame.data[2] = full_len;                   /* 包全长 */
     frame.data[3] = pkt.cmd;
 
-    uint8_t pay_len = (pkt.len > 5) ? (pkt.len - 5) : 0;
-    if (pay_len > 0)
-        memcpy(&frame.data[4], pkt.payload, pay_len);
+    if (data_len > 0)
+        memcpy(&frame.data[4], pkt.payload, data_len);
 
-    frame.data[4 + pay_len] = pkt.chk;
+    frame.data[4 + data_len] = pkt.chk;
 
-    /* 3. 入队 */
     if (osMessageQueuePut(UART_TX_QHandle, &frame, 0, 0) != osOK)
         return 0;
-
-    /* 4. 触发发送调度（osMessageQueuePut 已唤醒 TX 任务，此行仅占位） */
-    (void)id;
 
     return 1;
 }

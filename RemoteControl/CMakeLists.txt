@@ -70,7 +70,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Third_Party
     User/Third_Party/OLED/oled.c
     User/Third_Party/OLED/oled_extend.c
-    User/Third_Party/OLED/font.c    
+    User/Third_Party/OLED/font.c
+    User/Third_Party/OLED/oled_ui.c
 )
 
 # Add include paths

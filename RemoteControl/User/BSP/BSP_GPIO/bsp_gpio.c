@@ -45,9 +45,27 @@ typedef struct {
 } BSP_GPIO_Map_t;
 
 static const BSP_GPIO_Map_t GPIO_HW_MAP[GPIO_MAX_NUM] = {
-    { .gpio_id = 1, .GPIOx = GPIOC, .Pin = GPIO_PIN_13, .dir = GPIO_DIR_IN  },
-    { .gpio_id = 2, .GPIOx = GPIOB, .Pin = GPIO_PIN_2,  .dir = GPIO_DIR_OUT },
-};
+    // 生命灯
+    { .gpio_id = 0, .GPIOx = GPIOC, .Pin = GPIO_PIN_13, .dir = GPIO_DIR_OUT},
+    // 按键
+    { .gpio_id = 1, .GPIOx = K1_GPIO_Port, .Pin = K1_Pin,  .dir = GPIO_DIR_IN },
+    { .gpio_id = 2, .GPIOx = K2_GPIO_Port, .Pin = K2_Pin,  .dir = GPIO_DIR_IN },
+    { .gpio_id = 3, .GPIOx = K3_GPIO_Port, .Pin = K3_Pin,  .dir = GPIO_DIR_IN },
+    { .gpio_id = 4, .GPIOx = K4_GPIO_Port, .Pin = K4_Pin,  .dir = GPIO_DIR_IN },
+    { .gpio_id = 5, .GPIOx = K5_GPIO_Port, .Pin = K5_Pin,  .dir = GPIO_DIR_IN },
+    { .gpio_id = 6, .GPIOx = K6_GPIO_Port, .Pin = K6_Pin,  .dir = GPIO_DIR_IN },
+    // LED
+    { .gpio_id = 7, .GPIOx = LED1_GPIO_Port, .Pin = LED1_Pin, .dir = GPIO_DIR_OUT  },
+    { .gpio_id = 8, .GPIOx = LED2_GPIO_Port, .Pin = LED2_Pin, .dir = GPIO_DIR_OUT  },
+    { .gpio_id = 9, .GPIOx = LED3_GPIO_Port, .Pin = LED3_Pin, .dir = GPIO_DIR_OUT  },
+    // 编码器
+    // 编码器1
+    { .gpio_id = 10, .GPIOx = E1A_GPIO_Port, .Pin = E1A_Pin,  .dir = GPIO_DIR_IN },
+    { .gpio_id = 11, .GPIOx = E1B_GPIO_Port, .Pin = E1B_Pin,  .dir = GPIO_DIR_IN },
+    // 编码器2
+    { .gpio_id = 12, .GPIOx = E2A_GPIO_Port, .Pin = E2A_Pin,  .dir = GPIO_DIR_IN },
+    { .gpio_id = 13, .GPIOx = E2B_GPIO_Port, .Pin = E2B_Pin,  .dir = GPIO_DIR_IN },
+};  
 
 /**
  * @brief 根据 gpio_id 查找硬件映射

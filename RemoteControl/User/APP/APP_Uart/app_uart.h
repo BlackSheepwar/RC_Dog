@@ -27,7 +27,7 @@
  *============================================================================*/
 #define APP_RX_DMA_BUF_SIZE     512         // DMA 循环接收缓冲区大小（每串口）
 #define APP_RX_BUF_MAX          256         // 拼包缓冲区大小
-#define APP_RX_POOL_SIZE       1024         // 共享接收数据池大小
+#define APP_RX_POOL_SIZE       2048         // 共享接收数据池大小
 #define APP_RX_DESC_MAX          20         // 每串口描述符 FIFO 深度
 #define APP_RX_TIMEOUT_MS        50         // 半包超时（ms）
 
@@ -42,10 +42,10 @@
  *       仅 6 字节，大幅节约 FIFO 内存
  */
 typedef struct {
-    uint16_t offset;        // 在共享池中的偏移
-    uint8_t  len;           // payload 长度
-    uint8_t  cmd;           // 命令字
-    uint8_t  id;            // 来源串口 ID
+    uint16_t offset;        /**< 在共享池中的偏移 */
+    uint8_t  len;           /**< 数据负载长度 (data_len) */
+    uint8_t  cmd;           /**< 命令字 */
+    uint8_t  id;            /**< 来源串口 ID */
 } APP_RxDesc_t;
 
 /**
@@ -121,12 +121,12 @@ uint8_t APP_UART_SendRxPacket(void);
  * @brief 打包并推入发送队列
  * @param id   目标串口 ID
  * @param cmd  命令字
- * @param data 数据内容（len==0 时可为 NULL）
- * @param len  数据长度
+ * @param data 数据内容（data_len == 0 时可为 NULL）
+ * @param data_len  数据负载长度（0~123，0=无负载）
  * @retval 1: 成功入队
  * @retval 0: 失败（队列满/参数错误）
  */
-uint8_t APP_UART_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data, uint8_t len);
+uint8_t APP_UART_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data, uint8_t data_len);
 
 /**
  * @brief 发送一帧数据（由 TX 任务调用）

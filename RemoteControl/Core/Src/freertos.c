@@ -60,7 +60,7 @@ const osThreadAttr_t defaultTask_attributes = {
 };
 /* Definitions for KEY_Debounce_T */
 osThreadId_t KEY_Debounce_THandle;
-uint32_t KEY_Debounce_TBuffer[ 64 ];
+uint32_t KEY_Debounce_TBuffer[ 128 ];
 osStaticThreadDef_t KEY_Debounce_TControlBlock;
 const osThreadAttr_t KEY_Debounce_T_attributes = {
   .name = "KEY_Debounce_T",
@@ -72,7 +72,7 @@ const osThreadAttr_t KEY_Debounce_T_attributes = {
 };
 /* Definitions for KEY_CMD_T */
 osThreadId_t KEY_CMD_THandle;
-uint32_t KEY_CMD_TBuffer[ 128 ];
+uint32_t KEY_CMD_TBuffer[ 256 ];
 osStaticThreadDef_t KEY_CMD_TControlBlock;
 const osThreadAttr_t KEY_CMD_T_attributes = {
   .name = "KEY_CMD_T",
@@ -84,7 +84,7 @@ const osThreadAttr_t KEY_CMD_T_attributes = {
 };
 /* Definitions for UART_RX_T */
 osThreadId_t UART_RX_THandle;
-uint32_t UART_RX_TBuffer[ 64 ];
+uint32_t UART_RX_TBuffer[ 128 ];
 osStaticThreadDef_t UART_RX_TControlBlock;
 const osThreadAttr_t UART_RX_T_attributes = {
   .name = "UART_RX_T",
@@ -96,7 +96,7 @@ const osThreadAttr_t UART_RX_T_attributes = {
 };
 /* Definitions for UART_TX_T */
 osThreadId_t UART_TX_THandle;
-uint32_t UART_TX_TBuffer[ 64 ];
+uint32_t UART_TX_TBuffer[ 128 ];
 osStaticThreadDef_t UART_TX_TControlBlock;
 const osThreadAttr_t UART_TX_T_attributes = {
   .name = "UART_TX_T",
@@ -272,8 +272,7 @@ __weak void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    osDelay(500);
+    osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
 }

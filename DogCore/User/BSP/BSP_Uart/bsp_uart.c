@@ -166,8 +166,8 @@ void BSP_UART_ConfigDMARx(uint8_t id, uint8_t *buf, uint16_t size)
     map->huart->hdmarx->Init.Mode = DMA_CIRCULAR;
     HAL_DMA_Init(map->huart->hdmarx);
 
-    /* 启动 DMA 循环接收 */
-    HAL_UART_Receive_DMA(map->huart, buf, size);
+    /* 启动 DMA 循环接收（含空闲中断，CIRCULAR 模式持续触发 RxEventCallback） */
+    HAL_UARTEx_ReceiveToIdle_DMA(map->huart, buf, size);
 
     /* 使能半满中断（CubeMX 可能已配置，显式确保） */
     __HAL_DMA_ENABLE_IT(map->huart->hdmarx, DMA_IT_HT);

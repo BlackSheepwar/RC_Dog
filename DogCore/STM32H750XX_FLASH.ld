@@ -229,6 +229,17 @@ SECTIONS
   PROVIDE( __bss_start = __tbss_start );
   PROVIDE( __bss_size = __bss_end - __bss_start );
 
+  /* DMA 循环缓冲区（非缓存，DMA1 必须通过 AXI 总线访问，不能放在 DTCMRAM） */
+  .dma_buffer (NOLOAD) :
+  {
+    . = ALIGN(32);
+    _sdma_buffer = .;
+    *(.dma_buffer)
+    *(.dma_buffer*)
+    . = ALIGN(32);
+    _edma_buffer = .;
+  } >RAM
+
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack (NOLOAD) :
   {

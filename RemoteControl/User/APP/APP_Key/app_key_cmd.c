@@ -34,10 +34,10 @@ typedef struct {
 /*==============================================================================
  * 按键事件处理函数
  *============================================================================*/
-
+// key1
 static void Key1_OnDown(void)
 {
-    BSP_GPIO_Toggle(2);
+    APP_UART_BuildTxPacket(1, 0xAA, NULL, 0);
 }
 
 static void Key1_OnClick(void)
@@ -50,7 +50,103 @@ static void Key1_OnLong(void)
 
 static void Key1_OnLongUp(void)
 {
-    BSP_GPIO_SetLevel(2, GPIO_LEVEL_LOW);
+    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+}
+
+// key2
+static void Key2_OnDown(void)
+{
+    BSP_GPIO_Toggle(0);
+}
+
+static void Key2_OnClick(void)
+{
+}
+
+static void Key2_OnLong(void)
+{
+}
+
+static void Key2_OnLongUp(void)
+{
+    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+}
+
+// key3
+static void Key3_OnDown(void)
+{
+    BSP_GPIO_Toggle(0);
+}
+
+static void Key3_OnClick(void)
+{
+}
+
+static void Key3_OnLong(void)
+{
+}
+
+static void Key3_OnLongUp(void)
+{
+    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+}
+
+// key4
+static void Key4_OnDown(void)
+{
+    BSP_GPIO_Toggle(0);
+}
+
+static void Key4_OnClick(void)
+{
+}
+
+static void Key4_OnLong(void)
+{
+}
+
+static void Key4_OnLongUp(void)
+{
+    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+}
+
+// key5
+static void Key5_OnDown(void)
+{
+    BSP_GPIO_Toggle(0);
+}
+
+static void Key5_OnClick(void)
+{
+}
+
+static void Key5_OnLong(void)
+{
+}
+
+static void Key5_OnLongUp(void)
+{
+    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+}
+
+// key6
+static void Key6_OnDown(void)
+{
+    BSP_GPIO_Toggle(0);
+}
+
+static void Key6_OnClick(void)
+{
+}
+
+static void Key6_OnLong(void)
+{
+}
+
+
+static void Key6_OnLongUp(void)
+{
+    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
 }
 
 /*==============================================================================
@@ -58,10 +154,36 @@ static void Key1_OnLongUp(void)
  *============================================================================*/
 
 static const key_dispatch_entry_t KEY_DISPATCH_TABLE[] = {
+    /* Key1 */
     { .key_id = 1, .event = APP_KEY_EVENT_DOWN,    .handler = Key1_OnDown },
     { .key_id = 1, .event = APP_KEY_EVENT_CLICK,   .handler = Key1_OnClick },
     { .key_id = 1, .event = APP_KEY_EVENT_LONG,    .handler = Key1_OnLong },
     { .key_id = 1, .event = APP_KEY_EVENT_LONG_UP, .handler = Key1_OnLongUp },
+    /* Key2 */
+    { .key_id = 2, .event = APP_KEY_EVENT_DOWN,    .handler = Key2_OnDown },
+    { .key_id = 2, .event = APP_KEY_EVENT_CLICK,   .handler = Key2_OnClick },
+    { .key_id = 2, .event = APP_KEY_EVENT_LONG,    .handler = Key2_OnLong },
+    { .key_id = 2, .event = APP_KEY_EVENT_LONG_UP, .handler = Key2_OnLongUp },
+    /* Key3 */
+    { .key_id = 3, .event = APP_KEY_EVENT_DOWN,    .handler = Key3_OnDown },
+    { .key_id = 3, .event = APP_KEY_EVENT_CLICK,   .handler = Key3_OnClick },
+    { .key_id = 3, .event = APP_KEY_EVENT_LONG,    .handler = Key3_OnLong },
+    { .key_id = 3, .event = APP_KEY_EVENT_LONG_UP, .handler = Key3_OnLongUp },
+    /* Key4 */
+    { .key_id = 4, .event = APP_KEY_EVENT_DOWN,    .handler = Key4_OnDown },
+    { .key_id = 4, .event = APP_KEY_EVENT_CLICK,   .handler = Key4_OnClick },
+    { .key_id = 4, .event = APP_KEY_EVENT_LONG,    .handler = Key4_OnLong },
+    { .key_id = 4, .event = APP_KEY_EVENT_LONG_UP, .handler = Key4_OnLongUp },
+    /* Key5 */
+    { .key_id = 5, .event = APP_KEY_EVENT_DOWN,    .handler = Key5_OnDown },
+    { .key_id = 5, .event = APP_KEY_EVENT_CLICK,   .handler = Key5_OnClick },
+    { .key_id = 5, .event = APP_KEY_EVENT_LONG,    .handler = Key5_OnLong },
+    { .key_id = 5, .event = APP_KEY_EVENT_LONG_UP, .handler = Key5_OnLongUp },
+    /* Key6 */
+    { .key_id = 6, .event = APP_KEY_EVENT_DOWN,    .handler = Key6_OnDown },
+    { .key_id = 6, .event = APP_KEY_EVENT_CLICK,   .handler = Key6_OnClick },
+    { .key_id = 6, .event = APP_KEY_EVENT_LONG,    .handler = Key6_OnLong },
+    { .key_id = 6, .event = APP_KEY_EVENT_LONG_UP, .handler = Key6_OnLongUp },
 };
 
 /**

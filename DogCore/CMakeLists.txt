@@ -70,9 +70,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Middlewares/Codec/codec.c
     User/Middlewares/IK/ik_two_link.c
     User/Middlewares/IK/ik_two_link.h
-    User/Third_Party/OLED/oled.c
-    User/Third_Party/OLED/oled_extend.c
-    User/Third_Party/OLED/font.c
+
+
     # TASK
     User/TASK/task_uart_rx.c
     User/TASK/task_uart_rx_cmd.c
@@ -84,12 +83,18 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/TASK/task_can_rxf1.c
     User/TASK/task_can_tx.c
     User/TASK/task_oled.c
+
+    # Third Party
+    User/Third_Party/OLED/oled.c
+    User/Third_Party/OLED/oled_extend.c
+    User/Third_Party/OLED/font.c
+    User/Third_Party/OLED/oled_ui.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # User include directories
-        # APP
+    # APP
     User/APP/APP_Uart
     User/APP/APP_Key
     User/APP/APP_Servo
@@ -109,9 +114,12 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Middlewares
     User/Middlewares/Codec
     User/Middlewares/IK
-    User/Third_Party/OLED
+
     # TASK
     User/TASK
+
+    # Third Party
+    User/Third_Party/OLED
 )
 
 # Add project symbols (macros)

@@ -128,8 +128,8 @@ Task_UART_RX_CMD: osSemaphoreAcquire()
 ## 发送数据流（双缓冲）
 
 ```
-APP_UART_BuildTxPacket(id, cmd, data, len)
-  → Codec_BuildTxPacket() 打包
+APP_UART_BuildTxPacket(id, cmd, data, data_len)
+  → Codec_BuildTxPacket(id, cmd, data, data_len)  // data_len 可为 0
   → 编码为线缆格式
   → osMessageQueuePut(UART_TX_QHandle)     ← 入队
   ↓
@@ -385,4 +385,4 @@ BSP 配置在 [bsp_uart.h](..\User\BSP\BSP_Uart\bsp_uart.h#L32)：
 
 ---
 
-> 最后更新：2026-06-20
+> 最后更新：2026-06-26（协议 v3：byte[2] 改为包全长）
