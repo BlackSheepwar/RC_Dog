@@ -25,9 +25,9 @@
 /*==============================================================================
  * 宏定义与常量
  *============================================================================*/
-#define APP_RX_DMA_BUF_SIZE    512         // DMA 循环接收缓冲区大小（每串口）
+#define APP_RX_DMA_BUF_SIZE     512         // DMA 循环接收缓冲区大小（每串口）
 #define APP_RX_BUF_MAX          256         // 拼包缓冲区大小
-#define APP_RX_POOL_SIZE       4096         // 共享接收数据池大小
+#define APP_RX_POOL_SIZE       2048         // 共享接收数据池大小
 #define APP_RX_DESC_MAX          20         // 每串口描述符 FIFO 深度
 #define APP_RX_TIMEOUT_MS        50         // 半包超时（ms）
 
@@ -37,7 +37,7 @@
  * 结构体定义
  *============================================================================*/
 /**
- * @brief 接收数据池描述符
+ * @brief 数据池描述符（RX/TX 通用）
  * @note 指向共享池中的一段有效数据，代替原来直接存 Codec_Packet_t
  *       仅 6 字节，大幅节约 FIFO 内存
  */
@@ -46,27 +46,14 @@ typedef struct {
     uint8_t  len;           /**< 数据负载长度 (data_len) */
     uint8_t  cmd;           /**< 命令字 */
     uint8_t  id;            /**< 来源串口 ID */
-} APP_RxDesc_t;
+} APP_DataDesc_t;
 
-/**
- * @brief 描述符 FIFO（每串口一个）
- * @note head = 读位置, tail = 写位置
- *       空: head == tail
- *       满: (tail + 1) % APP_RX_DESC_MAX == head
- */
+/* (发送帧结构体：帧数据经 TX 池+描述符 FIFO 传递) */
+/* @compat CubeMX 生成的 UART_TX_Q 仍需此类型，保留兼容别名 */
 typedef struct {
-    APP_RxDesc_t buffer[APP_RX_DESC_MAX];
-    uint8_t head;
-    uint8_t tail;
-} APP_RxDescFIFO_t;
-
-/**
- * @brief 发送帧结构（通过 RTOS 消息队列传递）
- */
-typedef struct {
-    uint8_t id;                         // 目标串口 ID
-    uint8_t len;                        // 帧长度
-    uint8_t data[APP_TX_BUF_SIZE];      // 编码后的完整帧
+    uint8_t id;
+    uint8_t len;
+    uint8_t data[APP_TX_BUF_SIZE];
 } APP_TxFrame_t;
 
 /**
@@ -129,29 +116,13 @@ uint8_t APP_UART_SendRxPacket(void);
 uint8_t APP_UART_BuildTxPacket(uint8_t id, uint8_t cmd, const uint8_t *data, uint8_t data_len);
 
 /**
- * @brief 发送一帧数据（由 TX 任务调用）
- * @param frame 已编码的帧（含端口 ID、数据、长度）
- * @note 封装 BSP_SendDMA，保持分层清晰。
- *       TX 任务不要直接调用 BSP 层函数。
+ * @brief TX 任务阻塞取帧（从 tx_pool 读出完整帧数据）
+ * @param[out] buf  数据缓冲区（需 ≥ APP_TX_BUF_SIZE）
+ * @param[out] id   串口 ID
+ * @param[out] len  帧长度
+ * @retval 1: 成功
+ * @note 内部信号量阻塞直到有帧可发。
  */
-void APP_UART_SendFrame(const APP_TxFrame_t *frame);
-
-/*==============================================================================
- * 双缓冲发送接口
- *============================================================================*/
-/**
- * @brief 双缓冲发送一帧（由 TX 任务调用）
- * @param frame 待发送帧
- * @note 若 DMA 空闲则立即发，若忙但另一缓冲空闲则预装，
- *       若双缓冲均忙则放回队列末尾。
- */
-void APP_UART_TrySendDual(const APP_TxFrame_t *frame);
-
-/**
- * @brief TX 完成处理（由 TX 任务在收到标记帧后调用）
- * @param id 已完成发送的串口 ID
- * @note 尝试从队列取帧装填刚释放的缓冲。
- */
-void APP_UART_OnTxComplete(uint8_t id);
+uint8_t APP_UART_GetTxFrame(uint8_t *buf, uint8_t *id, uint8_t *len);
 
 #endif /* __APP_UART_H__ */

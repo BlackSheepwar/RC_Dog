@@ -232,7 +232,10 @@ void BSP_UART_SendDMA(uint8_t id, const uint8_t *buf, uint16_t len)
     uint8_t idx = map - BSP_UART_MAP;
     tx_busy[idx] = 1;
 
-    HAL_UART_Transmit_DMA(map->huart, buf, len);
+    if (HAL_UART_Transmit_DMA(map->huart, buf, len) != HAL_OK)
+    {
+        tx_busy[idx] = 0;   /* 发送启动失败，释放忙标志 */
+    }
 }
 
 /**

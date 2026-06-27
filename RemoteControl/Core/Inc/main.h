@@ -51,6 +51,7 @@ extern osMessageQueueId_t UART_RX_QHandle;
 extern osMessageQueueId_t UART_TX_QHandle;
 extern osMessageQueueId_t KEY_CMD_QHandle;
 extern osSemaphoreId_t UART_RX_BSHandle;
+extern osSemaphoreId_t UART_TX_CSHandle;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

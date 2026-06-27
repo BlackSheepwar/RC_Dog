@@ -38,7 +38,7 @@ typedef struct {
 
 /* 按键注册表：{key_id, gpio_id, long_press, active_level, debounce_ticks} */
 static const key_register_t KEY_REG_TABLE[] = {
-    { .key_id = 1, .gpio_id = 1, .long_press = 18, .active_level = 1, .debounce_ticks = 2 },
+    { .key_id = 1, .gpio_id = 0, .long_press = 18, .active_level = 1, .debounce_ticks = 2 },
 };
 
 #endif /* __APP_KEY_CFG_H__ */

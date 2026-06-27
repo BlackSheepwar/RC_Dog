@@ -1,12 +1,20 @@
 {
     "folders": [
         {
-            "name": "Gateway",
-            "path": "Gateway"
+            "name": "DogCore",
+            "path": "DogCore"
         },
         {
             "name": "FrontDog",
             "path": "FrontDog"
+        },
+        {
+            "name": "RemoteControl",
+            "path": "RemoteControl"
+        },
+        {
+            "name": "dogF103C8T6",
+            "path": "dogF103C8T6"
         }
     ],
     "settings": {

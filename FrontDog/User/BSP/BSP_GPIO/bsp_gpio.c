@@ -45,8 +45,8 @@ typedef struct {
 } BSP_GPIO_Map_t;
 
 static const BSP_GPIO_Map_t GPIO_HW_MAP[GPIO_MAX_NUM] = {
-    { .gpio_id = 1, .GPIOx = GPIOC, .Pin = GPIO_PIN_13, .dir = GPIO_DIR_IN  },
-    { .gpio_id = 2, .GPIOx = GPIOB, .Pin = GPIO_PIN_2,  .dir = GPIO_DIR_OUT },
+    { .gpio_id = 0, .GPIOx = GPIOC, .Pin = GPIO_PIN_13, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 1, .GPIOx = GPIOB, .Pin = GPIO_PIN_2,  .dir = GPIO_DIR_OUT },
 };
 
 /**

@@ -54,6 +54,7 @@ extern osMessageQueueId_t CAN_RXF0_QHandle;
 extern osMessageQueueId_t CAN_RXF1_QHandle;
 extern osSemaphoreId_t UART_RX_BSHandle;
 extern osSemaphoreId_t CAN_TX_BSHandle;
+extern osSemaphoreId_t UART_TX_CSHandle;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

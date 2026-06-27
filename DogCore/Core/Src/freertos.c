@@ -255,6 +255,14 @@ const osSemaphoreAttr_t UART_RX_BS_attributes = {
   .cb_mem = &UART_RX_BSControlBlock,
   .cb_size = sizeof(UART_RX_BSControlBlock),
 };
+/* Definitions for UART_TX_CS */
+osSemaphoreId_t UART_TX_CSHandle;
+osStaticSemaphoreDef_t UART_TX_CSControlBlock;
+const osSemaphoreAttr_t UART_TX_CS_attributes = {
+  .name = "UART_TX_CS",
+  .cb_mem = &UART_TX_CSControlBlock,
+  .cb_size = sizeof(UART_TX_CSControlBlock),
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -295,6 +303,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of UART_RX_BS */
   UART_RX_BSHandle = osSemaphoreNew(1, 1, &UART_RX_BS_attributes);
+
+  /* creation of UART_TX_CS */
+  UART_TX_CSHandle = osSemaphoreNew(16, 0, &UART_TX_CS_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */

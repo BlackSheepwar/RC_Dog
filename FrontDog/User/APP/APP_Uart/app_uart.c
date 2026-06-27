@@ -34,30 +34,35 @@
  *============================================================================*/
 
 /** @brief APP 层管理的串口 ID 列表（运行时不受理热注册） */
-static const uint8_t APP_UART_PORT_IDS[] = { 1, 2 };
+static const uint8_t APP_UART_PORT_IDS[] = {1, 2};
 
-static APP_UART_Port_t app_port_pool[ARRAY_SIZE(APP_UART_PORT_IDS)] __attribute__((section(".dma_buffer")));
+static APP_UART_Port_t app_port_pool[ARRAY_SIZE(APP_UART_PORT_IDS)];    // 需要 DMA 访问
 static uint8_t app_port_count = 0;
 
 /*==============================================================================
- * 双缓冲发送上下文
+ * TX 发送池（环形字节池）
  *
- * 每端口两个 DMA 缓冲区（ping-pong），
- * 硬件发 buf[A] 的同时任务可预装 buf[B]，
- * TX 完成 ISR 自动切到预装缓冲，消除帧间间隙。
+ * 与 RX 侧相同的池+描述符设计：
+ *   帧数据写入 app_tx_pool → 描述符入 tx_desc_fifo → 信号量通知 TX 任务
+ *   TX 任务收到信号量 → 弹出描述符 → 从池中读出数据 → DMA 发送
  *============================================================================*/
+#define APP_TX_POOL_SIZE    512             // TX 数据池大小
+#define APP_TX_DESC_MAX      16             // TX 描述符 FIFO 深度
 
-/** @brief 每端口双缓冲 TX 状态 */
+/** @brief TX 描述符 FIFO（复用 APP_DataDesc_t，offset 指向 tx_pool） */
 typedef struct {
-    uint8_t  buf[2][APP_TX_BUF_SIZE];   // 两个 DMA 发送缓冲区
-    uint8_t  len[2];                     // 各缓冲区数据长度
-    uint8_t  active;                     // 当前 DMA 正在发送的缓冲区号（0/1）
-    uint8_t  preloaded;                  // 1 = 非活跃缓冲区已有预装数据
-    volatile uint8_t in_progress;        // 1 = 有 DMA 发送正在进行
-} APP_TxDualBuf_t;
+    APP_DataDesc_t buffer[APP_TX_DESC_MAX];
+    uint8_t head;
+    uint8_t tail;
+} APP_TxDescFIFO_t;
 
-/** @brief 双缓冲上下文池 */
-static APP_TxDualBuf_t tx_dual_pool[ARRAY_SIZE(APP_UART_PORT_IDS)] __attribute__((section(".dma_buffer")));
+static uint8_t          app_tx_pool[APP_TX_POOL_SIZE];
+static uint16_t         app_tx_pool_wr = 0;
+static uint16_t         app_tx_pool_rd = 0;
+static APP_TxDescFIFO_t tx_desc_fifo   = {0};
+
+/** @brief TX 通知信号量（由 CubeMX 在 freertos.c 生成） */
+/* extern 声明在 main.h 中 */
 
 /*==============================================================================
  * 共享接收数据池
@@ -140,9 +145,16 @@ static void app_rx_pool_advance(uint16_t len)
 }
 
 /*==============================================================================
- * 描述符 FIFO 操作（共享，跨所有串口）
+ * RX 描述符 FIFO（内部类型 + 实例）
  *============================================================================*/
-static APP_RxDescFIFO_t rx_desc_fifo = {0};
+/** @brief RX 描述符 FIFO 类型（仅本文件内部使用，不暴露至 .h） */
+typedef struct {
+    APP_DataDesc_t buffer[APP_RX_DESC_MAX];
+    uint8_t head;
+    uint8_t tail;
+} APP_DataDescFIFO_t;
+
+static APP_DataDescFIFO_t rx_desc_fifo = {0};
 
 /**
  * @brief 描述符入队
@@ -150,7 +162,7 @@ static APP_RxDescFIFO_t rx_desc_fifo = {0};
  * @retval 0: 成功
  * @retval -1: 队列满
  */
-static int rx_desc_push(const APP_RxDesc_t *desc)
+static int rx_desc_push(const APP_DataDesc_t *desc)
 {
     uint8_t next = (rx_desc_fifo.tail + 1) % APP_RX_DESC_MAX;
     if (next == rx_desc_fifo.head)
@@ -167,13 +179,105 @@ static int rx_desc_push(const APP_RxDesc_t *desc)
  * @retval 0: 成功
  * @retval -1: 队列空
  */
-static int rx_desc_pop(APP_RxDesc_t *desc)
+static int rx_desc_pop(APP_DataDesc_t *desc)
 {
     if (rx_desc_fifo.head == rx_desc_fifo.tail)
         return -1;
 
     *desc = rx_desc_fifo.buffer[rx_desc_fifo.head];
     rx_desc_fifo.head = (rx_desc_fifo.head + 1) % APP_RX_DESC_MAX;
+    return 0;
+}
+
+/*==============================================================================
+ * TX 池操作
+ *============================================================================*/
+/**
+ * @brief 计算 TX 池中可用写入空间
+ */
+static uint16_t app_tx_pool_free(void)
+{
+    if (app_tx_pool_wr >= app_tx_pool_rd)
+        return APP_TX_POOL_SIZE - (app_tx_pool_wr - app_tx_pool_rd);
+    else
+        return app_tx_pool_rd - app_tx_pool_wr;
+}
+
+/**
+ * @brief 向 TX 池写入数据（环形回绕）
+ * @return 写入偏移，失败返回 0xFFFF
+ */
+static uint16_t app_tx_pool_write(const uint8_t *data, uint16_t len)
+{
+    if (len > app_tx_pool_free() - 1)
+        return 0xFFFF;
+
+    uint16_t pos = app_tx_pool_wr;
+    uint16_t first = APP_TX_POOL_SIZE - app_tx_pool_wr;
+
+    if (first >= len)
+        memcpy(&app_tx_pool[app_tx_pool_wr], data, len);
+    else
+    {
+        memcpy(&app_tx_pool[app_tx_pool_wr], data, first);
+        memcpy(&app_tx_pool[0], &data[first], len - first);
+    }
+
+    app_tx_pool_wr = (app_tx_pool_wr + len) % APP_TX_POOL_SIZE;
+    return pos;
+}
+
+/**
+ * @brief 从 TX 池读取数据（环形回绕）
+ */
+static void app_tx_pool_read(uint16_t offset, uint8_t *dst, uint16_t len)
+{
+    uint16_t first = APP_TX_POOL_SIZE - offset;
+
+    if (first >= len)
+        memcpy(dst, &app_tx_pool[offset], len);
+    else
+    {
+        memcpy(dst, &app_tx_pool[offset], first);
+        memcpy(dst + first, &app_tx_pool[0], len - first);
+    }
+}
+
+/**
+ * @brief 推进 TX 池读指针（释放已处理数据）
+ */
+static void app_tx_pool_advance(uint16_t len)
+{
+    app_tx_pool_rd = (app_tx_pool_rd + len) % APP_TX_POOL_SIZE;
+}
+
+/*==============================================================================
+ * TX 描述符 FIFO 操作
+ *============================================================================*/
+/**
+ * @brief TX 描述符入队
+ */
+static int tx_desc_push(const APP_DataDesc_t *desc)
+{
+    uint8_t next = (tx_desc_fifo.tail + 1) % APP_TX_DESC_MAX;
+    if (next == tx_desc_fifo.head)
+        return -1;
+
+    tx_desc_fifo.buffer[tx_desc_fifo.tail] = *desc;
+    tx_desc_fifo.tail = next;
+    return 0;
+}
+
+/**
+ * @brief TX 描述符出队
+ */
+static int tx_desc_pop(APP_DataDesc_t *desc)
+{
+    if (tx_desc_fifo.head == tx_desc_fifo.tail)
+        return -1;
+
+    *desc = tx_desc_fifo.buffer[tx_desc_fifo.head];
+    tx_desc_fifo.head = (tx_desc_fifo.head + 1) % APP_TX_DESC_MAX;
     return 0;
 }
 
@@ -193,21 +297,6 @@ static APP_UART_Port_t *app_find_port(uint8_t id)
             return &app_port_pool[i];
     }
     return NULL;
-}
-
-/**
- * @brief 查找端口在池中的索引
- * @param id 串口编号
- * @return 索引，0xFF 表示未找到
- */
-static uint8_t app_port_index(uint8_t id)
-{
-    for (uint8_t i = 0; i < app_port_count; i++)
-    {
-        if (app_port_pool[i].id == id)
-            return i;
-    }
-    return 0xFF;
 }
 
 /**
@@ -270,12 +359,6 @@ static uint16_t app_read_dma_data(APP_UART_Port_t *port, uint8_t *dst, uint16_t 
 }
 
 /*==============================================================================
- * 前向声明
- *============================================================================*/
-/** @brief TX 完成 ISR 回调（实现在双缓冲段落） */
-static void on_uart_tx_complete(uint8_t id);
-
-/*==============================================================================
  * 初始化函数
  *============================================================================*/
 /**
@@ -318,8 +401,8 @@ void APP_UART_Init(void)
         app_port_count++;
     }
 
-    /* 5. 注册 TX 完成回调（ISR → 双缓冲切换） */
-    BSP_UART_SetTxCpltFn(on_uart_tx_complete);
+    /* 5. TX 通知信号量由 CubeMX 在 freertos.c 中初始化（max=16, initial=0） */
+    /* UART_TX_CSHandle 在 main.h 中 extern 声明 */
 }
 
 /*==============================================================================
@@ -395,7 +478,7 @@ void APP_UART_ProcessRxData(uint8_t id)
         }
 
         /* 描述符入 FIFO */
-        APP_RxDesc_t desc;
+        APP_DataDesc_t desc;
         desc.offset = pool_off;
         desc.len    = data_len;
         desc.cmd    = pkt.cmd;
@@ -432,7 +515,7 @@ void APP_UART_ProcessRxData(uint8_t id)
  */
 uint8_t APP_UART_SendRxPacket(void)
 {
-    APP_RxDesc_t desc;
+    APP_DataDesc_t desc;
 
     if (rx_desc_pop(&desc) != 0)
         return 0;
@@ -458,170 +541,86 @@ uint8_t APP_UART_SendRxPacket(void)
 }
 
 /*==============================================================================
- * 双缓冲发送
- *============================================================================*/
-/**
- * @brief TX 完成 ISR 回调（由 BSP 注册，在中断上下文中调用）
- * @param id 已完成发送的串口 ID
- * @note 若有预装数据则立即切缓冲并启动下一轮 DMA，
- *       然后发标记帧通知 TX 任务去装填刚释放的缓冲。
- */
-static void on_uart_tx_complete(uint8_t id)
-{
-    uint8_t idx = app_port_index(id);
-    if (idx == 0xFF) return;
-
-    APP_TxDualBuf_t *db = &tx_dual_pool[idx];
-    db->in_progress = 0;
-
-    if (db->preloaded)
-    {
-        /* 切到预装缓冲，立即启动 DMA */
-        db->active = 1 - db->active;
-        db->preloaded = 0;
-        db->in_progress = 1;
-        BSP_UART_SendDMA(id, db->buf[db->active], db->len[db->active]);
-    }
-
-    /* 发标记帧唤醒 TX 任务（让其尝试装填刚释放的缓冲） */
-    APP_TxFrame_t marker;
-    marker.id  = id;
-    marker.len = 0;
-    osMessageQueuePut(UART_TX_QHandle, &marker, 0, 0);
-}
-
-/**
- * @brief 双缓冲发送：尝试发送或预装一帧
- * @param frame 待发送帧（函数内部不会修改）
- * @param idx   端口在 tx_dual_pool 中的索引
- * @retval 1: 已发送或预装成功
- * @retval 0: 双缓冲均忙，未处理
- */
-static uint8_t app_dual_try_send(const APP_TxFrame_t *frame, uint8_t idx)
-{
-    APP_TxDualBuf_t *db = &tx_dual_pool[idx];
-
-    if (!db->in_progress)
-    {
-        /* DMA 空闲 → 直接发送 */
-        db->active = 0;
-        db->len[0] = frame->len;
-        memcpy(db->buf[0], frame->data, frame->len);
-        db->in_progress = 1;
-        BSP_UART_SendDMA(frame->id, db->buf[0], frame->len);
-        return 1;
-    }
-
-    if (!db->preloaded)
-    {
-        /* DMA 正在发送，预装另一缓冲 */
-        uint8_t pre = 1 - db->active;
-        db->len[pre] = frame->len;
-        memcpy(db->buf[pre], frame->data, frame->len);
-        db->preloaded = 1;
-        return 1;
-    }
-
-    return 0;   /* 双缓冲均忙 */
-}
-
-/**
- * @brief TX 完成处理（由 TX 任务收到标记帧后调用）
- * @param id 已完成发送的串口 ID
- * @note 尝试从队列取帧装填刚释放的缓冲，
- *       实现 ISR 切缓冲后任务立即预装下一帧。
- */
-void APP_UART_OnTxComplete(uint8_t id)
-{
-    uint8_t idx = app_port_index(id);
-    if (idx == 0xFF) return;
-
-    /* 尝试从队列取帧 → 装填空闲缓冲 */
-    APP_TxFrame_t next;
-    while (osMessageQueueGet(UART_TX_QHandle, &next, NULL, 0) == osOK)
-    {
-        if (next.len == 0)
-            continue;                   /* 跳过其他标记帧 */
-
-        if (app_dual_try_send(&next, idx))
-            return;                     /* 成功装填本次释放的缓冲 */
-
-        /* 装填失败（可能目标端口不同），放回等下次 */
-        osMessageQueuePut(UART_TX_QHandle, &next, 0, 0);
-        return;
-    }
-}
-
-/**
- * @brief 双缓冲发送一帧（TX 任务入口）
- * @param frame 待发送帧
- * @note 若 DMA 空闲则立即发，若忙但单缓冲空闲则预装，
- *       若双缓冲均忙则放回队列末尾等下次通知。
- */
-void APP_UART_TrySendDual(const APP_TxFrame_t *frame)
-{
-    uint8_t idx = app_port_index(frame->id);
-    if (idx == 0xFF)
-        return;
-
-    if (app_dual_try_send(frame, idx))
-        return;     /* 已发送或预装成功 */
-
-    /* 双缓冲均忙 → 放回队尾 */
-    osMessageQueuePut(UART_TX_QHandle, frame, 0, 0);
-    osDelay(1);
-}
-
-/*==============================================================================
  * 发送函数
  *============================================================================*/
 /**
- * @brief 打包并推入发送队列
- * @param id       目标串口 ID
- * @param cmd      命令字
- * @param data     payload 指针（data_len == 0 时可为 NULL）
- * @param data_len 数据负载长度（0~123）
- * @retval 1: 成功入队
- * @retval 0: 失败
+ * @brief TX 任务阻塞取帧（从 tx_pool 读出数据）
+ * @param[out] buf    数据缓冲区
+ * @param[out] id     串口 ID
+ * @param[out] len    帧长度
+ * @retval 1: 成功
+ * @note 阻塞直到有数据可发。读取后自动推进池读指针释放空间。
  */
-uint8_t APP_UART_BuildTxPacket(uint8_t id, uint8_t cmd,
-                                const uint8_t *data, uint8_t data_len)
+uint8_t APP_UART_GetTxFrame(uint8_t *buf, uint8_t *id, uint8_t *len)
 {
-    /* 1. Codec 打包（传入 data_len，内部拼全长） */
-    Codec_Packet_t pkt = Codec_BuildTxPacket(id, cmd, data, data_len);
-    if (pkt.len == (uint8_t)-1)
+    if (!buf || !id || !len) return 0;
+
+    /* 等待信号量（有数据可发） */
+    osSemaphoreAcquire(UART_TX_CSHandle, osWaitForever);
+
+    /* 弹出描述符（复用 APP_DataDesc_t，offset 指向 tx_pool） */
+    APP_DataDesc_t desc;
+    if (tx_desc_pop(&desc) != 0)
         return 0;
 
-    uint8_t full_len = pkt.len;             /* 包全长 = data_len + 5 */
+    /* 从 TX 池中读出帧数据 */
+    app_tx_pool_read(desc.offset, buf, desc.len);
+    app_tx_pool_advance(desc.len);
 
-    APP_TxFrame_t frame;
-    frame.id  = id;
-    frame.len = full_len;
-
-    frame.data[0] = PACKET_HEAD1;
-    frame.data[1] = PACKET_HEAD2;
-    frame.data[2] = full_len;                   /* 包全长 */
-    frame.data[3] = pkt.cmd;
-
-    if (data_len > 0)
-        memcpy(&frame.data[4], pkt.payload, data_len);
-
-    frame.data[4 + data_len] = pkt.chk;
-
-    if (osMessageQueuePut(UART_TX_QHandle, &frame, 0, 0) != osOK)
-        return 0;
-
+    *id  = desc.id;
+    *len = desc.len;
     return 1;
 }
 
 /**
- * @brief 发送一帧数据
- * @param frame 已编码的帧
- * @note TX 任务使用此函数代替直接调用 BSP_SendDMA
+ * @brief 打包帧 → 写入 TX 池 → 描述符入 FIFO → 通知 TX 任务
+ * @param id       目标串口 ID
+ * @param cmd      命令字
+ * @param data     payload 指针（data_len == 0 时可为 NULL）
+ * @param data_len 数据负载长度（0~123）
+ * @retval 1: 成功
+ * @retval 0: 失败（池满/描述符满）
  */
-void APP_UART_SendFrame(const APP_TxFrame_t *frame)
+uint8_t APP_UART_BuildTxPacket(uint8_t id, uint8_t cmd,
+                                const uint8_t *data, uint8_t data_len)
 {
-    if (!frame || frame->len == 0)
-        return;
-    BSP_UART_SendDMA(frame->id, frame->data, frame->len);
+    /* 1. Codec 打包 */
+    Codec_Packet_t pkt = Codec_BuildTxPacket(id, cmd, data, data_len);
+    if (pkt.len == (uint8_t)-1)
+        return 0;
+
+    uint8_t full_len = pkt.len;
+
+    /* 2. 拼装完整帧到本地临时缓冲 */
+    uint8_t frame_buf[APP_TX_BUF_SIZE];
+    frame_buf[0] = PACKET_HEAD1;
+    frame_buf[1] = PACKET_HEAD2;
+    frame_buf[2] = full_len;
+    frame_buf[3] = pkt.cmd;
+    if (data_len > 0)
+        memcpy(&frame_buf[4], pkt.payload, data_len);
+    frame_buf[4 + data_len] = pkt.chk;
+
+    /* 3. 写入 TX 池 */
+    uint16_t off = app_tx_pool_write(frame_buf, full_len);
+    if (off == 0xFFFF)
+        return 0;   /* 池满 */
+
+    /* 4. 描述符入 FIFO（复用 APP_DataDesc_t，cmd 未使用） */
+    APP_DataDesc_t desc;
+    desc.offset = off;
+    desc.len    = full_len;
+    desc.cmd    = 0;  /* TX 不使用 cmd 字段 */
+    desc.id     = id;
+
+    if (tx_desc_push(&desc) != 0)
+    {
+        /* FIFO 满 → 池中数据作废（下次被覆盖） */
+        return 0;
+    }
+
+    /* 5. 通知 TX 任务 */
+    osSemaphoreRelease(UART_TX_CSHandle);
+    return 1;
 }
+

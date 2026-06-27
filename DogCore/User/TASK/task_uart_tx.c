@@ -26,21 +26,19 @@
  *============================================================================*/
 void Task_UART_TX(void *argument)
 {
-    APP_TxFrame_t frame;
+    static uint8_t buf[APP_TX_BUF_SIZE] __attribute__((section(".dma_buffer")));
+    uint8_t id, len;
 
     for (;;)
     {
-        /* 1. 等待队列（数据帧或标记帧） */
-        osMessageQueueGet(UART_TX_QHandle, &frame, NULL, osWaitForever);
+        /* 1. 阻塞等待帧数据（从 tx_pool 读出） */
+        APP_UART_GetTxFrame(buf, &id, &len);
 
-        /* 2. 标记帧 → TX 完成通知，尝试预装下一帧 */
-        if (frame.len == 0)
-        {
-            APP_UART_OnTxComplete(frame.id);
-            continue;
-        }
+        /* 2. 等待前一次 DMA 发送完成 */
+        while (BSP_UART_IsTxBusy(id))
+            osDelay(1);
 
-        /* 3. 数据帧 → 双缓冲发送 */
-        APP_UART_TrySendDual(&frame);
+        /* 3. 启动 DMA 发送 */
+        BSP_UART_SendDMA(id, buf, len);
     }
 }

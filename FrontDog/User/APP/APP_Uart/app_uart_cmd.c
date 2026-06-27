@@ -18,7 +18,6 @@
 #include "app_uart_cmd.h"
 // 功能包含
 #include "app_uart.h"
-#include "app_servo.h"
 #include "bsp_gpio.h"
 
 /*==============================================================================
@@ -26,17 +25,17 @@
  *============================================================================*/
 static void APP_UART_AA(uint8_t *payload, uint8_t len)
 {
-    BSP_GPIO_Toggle(2);
+   BSP_GPIO_Toggle(1);
 }
 
 static void APP_UART_A9(uint8_t *payload, uint8_t len)
 {
-    BSP_GPIO_Toggle(2);
+    BSP_GPIO_Toggle(1);
 }
 
 static void APP_UART_A8(uint8_t *payload, uint8_t len)
 {
-    BSP_GPIO_Toggle(2);
+    BSP_GPIO_Toggle(1);
 }
 
 /*==============================================================================

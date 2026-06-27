@@ -37,7 +37,8 @@ typedef struct {
  *============================================================================*/
 static void Key1_OnDown(void)
 {
-    APP_UART_BuildTxPacket(2, 0xAA, NULL, 5);
+    BSP_GPIO_Toggle(2);
+    APP_UART_BuildTxPacket(2, 0xAA, NULL, 0);
 }
 
 static void Key1_OnClick(void)
@@ -50,7 +51,6 @@ static void Key1_OnLong(void)
 
 static void Key1_OnLongUp(void)
 {    
-    BSP_GPIO_Toggle(2);
 }
 
 /*==============================================================================
