@@ -25,9 +25,10 @@
  *       新增舵机需同时在 bsp_pwm.c 的 PWM_HW_MAP 中添加映射。
  *============================================================================*/
 typedef struct {
-    uint8_t           id;
+    uint8_t           servo_id;   /**< 逻辑舵机 ID（分发表匹配用） */
+    uint8_t           pwm_id;     /**< PWM 映射 ID（BSP_PWM 寻址用） */
     Servo_HwConfig_t  hw;         // 硬件配置（安装后固定，含 offset/reverse/limit/phys_range）
-    float             speed_dps;  // 角速度 (°/s)，如 300.0f = 300°/s
+    float             speed_dps;  // 角速度 (°/s)，如 200.0f = 200°/s
 } servo_cfg_t;
 
 /*==============================================================================
@@ -35,37 +36,69 @@ typedef struct {
  *============================================================================*/
 
 static const servo_cfg_t SERVO_CFG[] = {
-    { .id = 1,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, 
-         .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, 
-         .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .servo_id = 1, .pwm_id = 1,                 // ID
+          .hw = { .phys_range = 300,                  // 物理范围 (°)
+          .offset = +2, .offset_max = 20,              // 偏移量 (°)
+          .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
+          .init_angle = 0, .reverse = 0,              // 初始角度 (°)
+          .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
+          .speed_dps = 100.6f },                      // 角速度 (°/s) 
 
-    { .id = 2,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, 
-         .limit_min = -130, .limit_max = 130, .init_angle = 130, .reverse = 0, 
-         .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .servo_id = 2, .pwm_id = 2,                 // ID
+          .hw = { .phys_range = 300,                  // 物理范围 (°)
+          .offset = 5, .offset_max = 20,              // 偏移量 (°)
+          .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
+          .init_angle = 90, .reverse = 0,              // 初始角度 (°)
+          .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
+          .speed_dps = 200.0f },                      // 角速度 (°/s) 
 
-    { .id = 3,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20,
-         .limit_min = -130, .limit_max = 130, .init_angle = -130, .reverse = 0,
-          .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .servo_id = 3, .pwm_id = 3,                 // ID
+          .hw = { .phys_range = 300,                  // 物理范围 (°)
+          .offset = 0, .offset_max = 20,              // 偏移量 (°)
+          .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
+          .init_angle = 0, .reverse = 0,              // 初始角度 (°)
+          .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
+          .speed_dps = 200.0f },                      // 角速度 (°/s) 
 
-    { .id = 4,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20,
-         .limit_min = -130, .limit_max = 130, .init_angle = 90, .reverse = 0,
-          .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .servo_id = 4, .pwm_id = 4,                 // ID
+          .hw = { .phys_range = 300,                  // 物理范围 (°)
+          .offset = 0, .offset_max = 20,              // 偏移量 (°)
+          .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
+          .init_angle = 0, .reverse = 0,              // 初始角度 (°)
+          .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
+          .speed_dps = 200.0f },                      // 角速度 (°/s) 
 
-    { .id = 5,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, 
-         .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, 
-         .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .servo_id = 5, .pwm_id = 5,                 // ID
+          .hw = { .phys_range = 300,                  // 物理范围 (°)
+          .offset = 0, .offset_max = 20,              // 偏移量 (°)
+          .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
+          .init_angle = 0, .reverse = 0,              // 初始角度 (°)
+          .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
+          .speed_dps = 200.0f },                      // 角速度 (°/s) 
 
-    { .id = 6,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20, 
-         .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 0, 
-         .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .servo_id = 6, .pwm_id = 6,                 // ID
+          .hw = { .phys_range = 300,                  // 物理范围 (°)
+          .offset = 0, .offset_max = 20,              // 偏移量 (°)
+          .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
+          .init_angle = 0, .reverse = 0,              // 初始角度 (°)
+          .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
+          .speed_dps = 200.0f },                      // 角速度 (°/s) 
 
-    { .id = 7,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20,
-         .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 1,
-          .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .servo_id = 7, .pwm_id = 7,                 // ID
+          .hw = { .phys_range = 300,                  // 物理范围 (°)
+          .offset = 0, .offset_max = 20,              // 偏移量 (°)
+          .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
+          .init_angle = 0, .reverse = 0,              // 初始角度 (°)
+          .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
+          .speed_dps = 200.0f },                      // 角速度 (°/s) 
 
-    { .id = 8,  .hw = { .phys_range = 300, .offset = 0, .offset_max = 20,
-         .limit_min = -130, .limit_max = 130, .init_angle = 0, .reverse = 1,
-          .pulse_min = 500, .pulse_max = 2500 }, .speed_dps = 125.0f },
+    { .servo_id = 8, .pwm_id = 8,                 // ID
+          .hw = { .phys_range = 300,                  // 物理范围 (°)
+          .offset = 0, .offset_max = 20,              // 偏移量 (°)
+          .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
+          .init_angle = 0, .reverse = 0,              // 初始角度 (°)
+          .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
+          .speed_dps = 200.0f },                      // 角速度 (°/s)
 };
 
 #endif /* __APP_SERVO_CFG_H__ */

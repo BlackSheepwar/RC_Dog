@@ -29,14 +29,40 @@ static void APP_UART_AA(uint8_t *payload, uint8_t len)
     BSP_GPIO_Toggle(2);
 }
 
-static void APP_UART_A9(uint8_t *payload, uint8_t len)
+static void APP_UART_F0(uint8_t *payload, uint8_t len)
 {
-    BSP_GPIO_Toggle(2);
+    APP_Servo_SetTarget(1, -38);
+    APP_Servo_SetTarget(2, 27);
+} 
+
+static void APP_UART_F1(uint8_t *payload, uint8_t len)
+{
+    APP_Servo_SetTarget(1, -77);
+    APP_Servo_SetTarget(2, -63);
+}  
+
+static void APP_UART_F2(uint8_t *payload, uint8_t len)
+{
+    APP_Servo_SetTarget(1, 0);
+    APP_Servo_SetTarget(2, 90);
 }
 
-static void APP_UART_A8(uint8_t *payload, uint8_t len)
+/**
+ * @brief 挡位调速命令（0xE0）
+ * @param payload[0] 挡位 0~10，0=停止，1=20°/s … 10=200°/s
+ * @param len 数据长度
+ * @note 速算：speed_dps = payload[0] * 20，超范围截断到 10
+ */
+static void APP_UART_E0(uint8_t *payload, uint8_t len)
 {
-    BSP_GPIO_Toggle(2);
+    if (payload == NULL || len == 0) return;
+
+    uint8_t gear = payload[0];
+    if (gear > 10) gear = 10;
+
+    float speed = (float)gear * 20.0f;
+    APP_Servo_SetSpeed(1, speed);
+    APP_Servo_SetSpeed(2, speed);
 }
 
 /*==============================================================================
@@ -48,9 +74,14 @@ typedef struct {
 } uart_cmd_entry_t;
 
 static const uart_cmd_entry_t CMD_TABLE[] = {
+    // 测试命令
     { .cmd = 0xAA, .handler = APP_UART_AA },
-    { .cmd = 0xA9, .handler = APP_UART_A9 },
-    { .cmd = 0xA8, .handler = APP_UART_A8 },
+    // 伺服命令
+    { .cmd = 0xF0, .handler = APP_UART_F0 },
+    { .cmd = 0xF1, .handler = APP_UART_F1 },
+    { .cmd = 0xF2, .handler = APP_UART_F2 },
+    // 挡位调速命令
+    { .cmd = 0xE0, .handler = APP_UART_E0 },
 };
 
 /*==============================================================================

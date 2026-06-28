@@ -31,7 +31,8 @@
  *============================================================================*/
 typedef struct
 {
-    uint8_t             id;              // 舵机ID
+    uint8_t             servo_id;        /**< 逻辑舵机 ID（分发表匹配用） */
+    uint8_t             pwm_id;          /**< PWM 映射 ID（BSP_PWM 寻址用） */
     Servo_HwConfig_t    hw;              // 硬件配置（安装后固定）
     float               current_angle;   // 当前角度（浮点，连续平滑）
     int16_t             target_angle;    // 目标角度（受 phys_range 和 offset_max 约束）
@@ -104,16 +105,16 @@ static APP_Servo_t app_servo_pool[TIM_MAX_SIZE];
 static uint8_t app_servo_count = 0;  /* 当前已注册的舵机数量 */
 
 /**
- * @brief 根据舵机编号查找实例
- * @param id 舵机编号
+ * @brief 根据逻辑舵机编号查找实例
+ * @param servo_id 逻辑舵机编号
  * @retval 非NULL：找到，返回指针
  * @retval NULL：未找到
  */
-static APP_Servo_t *APP_Servo_GetById(uint8_t id)
+static APP_Servo_t *APP_Servo_GetById(uint8_t servo_id)
 {
     for (uint8_t i = 0; i < app_servo_count; i++)
     {
-        if (app_servo_pool[i].id == id)
+        if (app_servo_pool[i].servo_id == servo_id)
             return &app_servo_pool[i];
     }
     return NULL;
@@ -134,29 +135,31 @@ void APP_Servo_Init(void)
 
 /**
  * @brief 注册一个舵机实例到控制池
- * @param id       舵机编号
- * @param hw       舵机硬件配置（安装后固定参数，注册时拷贝入结构体）
+ * @param servo_id  逻辑舵机编号（分发表匹配用）
+ * @param pwm_id    PWM 映射 ID（BSP_PWM 寻址用，须与 PWM_HW_MAP 一致）
+ * @param hw        舵机硬件配置（安装后固定参数，注册时拷贝入结构体）
  * @param speed_dps 角速度 (°/s)，例如 300.0f = 每秒转 300°
  * @retval 1: 注册成功
  * @retval 0: 注册失败（池满、ID 重复、参数无效）
- * @note 硬件定时器映射由 BSP 层内置，本函数不再需要 htim/Channel。
+ * @note servo_id 和 pwm_id 分离设计，逻辑标识与硬件映射解耦。
  *       注册时校验 offset ≤ offset_max、limit 截断到物理可用范围，
  *       校验通过后启动 PWM 并转到 init_angle 位置。
  *       hw 中的 offset 若 reverse=1 则自动取反。
  */
-uint8_t APP_Servo_Add(uint8_t id, const Servo_HwConfig_t *hw, float speed_dps)
+uint8_t APP_Servo_Add(uint8_t servo_id, uint8_t pwm_id, const Servo_HwConfig_t *hw, float speed_dps)
 {
     /* ---------- 容量检查 ---------- */
     if (app_servo_count >= TIM_MAX_SIZE) return 0;
     /* ---------- 重复检查 ---------- */
-    if (APP_Servo_GetById(id) != NULL) return 0;
+    if (APP_Servo_GetById(servo_id) != NULL) return 0;
     /* ---------- 参数校验 ---------- */
     if (hw == NULL) return 0;
     if (hw->phys_range == 0) return 0;
     if (abs(hw->offset) > hw->offset_max) return 0;
     /* ---------- 整体拷贝硬件配置 ---------- */
     APP_Servo_t *se = &app_servo_pool[app_servo_count];
-    se->id = id;
+    se->servo_id = servo_id;
+    se->pwm_id   = pwm_id;
     se->hw = *hw;
     /* 如果装了反转，offset 也要取反，否则方向会错 */
     if (se->hw.reverse)
@@ -178,9 +181,9 @@ uint8_t APP_Servo_Add(uint8_t id, const Servo_HwConfig_t *hw, float speed_dps)
     se->speed_dps     = speed_dps;
     se->enable        = 1;
     /* ── 先设脉宽，再启动 PWM，避免启动瞬间的异常脉冲 ── */
-    BSP_PWM_SetPulseUs(se->id, Servo_AngleToPulse(&se->hw, se->current_angle));
-    BSP_PWM_Start(se->id);
-    BSP_PWM_Reset(se->id);
+    BSP_PWM_SetPulseUs(se->pwm_id, Servo_AngleToPulse(&se->hw, se->current_angle));
+    BSP_PWM_Start(se->pwm_id);
+    BSP_PWM_Reset(se->pwm_id);
 
     app_servo_count++;
     return 1;
@@ -276,7 +279,7 @@ void APP_Servo_Scheduler(void)
         {
             se->current_angle = (float)se->target_angle;
             /* 即使已到位也输出 PWM，确保 Limb 层更新的角度即时反映到硬件 */
-            BSP_PWM_SetPulseUs(se->id, Servo_AngleToPulse(&se->hw, se->current_angle));
+            BSP_PWM_SetPulseUs(se->pwm_id, Servo_AngleToPulse(&se->hw, se->current_angle));
             continue;
         }
 
@@ -286,6 +289,6 @@ void APP_Servo_Scheduler(void)
         se->current_angle += (diff > 0.0f) ? move : -move;
 
         /* ── 角度 → 脉宽 ── */
-        BSP_PWM_SetPulseUs(se->id, Servo_AngleToPulse(&se->hw, se->current_angle));
+        BSP_PWM_SetPulseUs(se->pwm_id, Servo_AngleToPulse(&se->hw, se->current_angle));
     }
 }

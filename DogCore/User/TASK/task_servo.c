@@ -51,7 +51,8 @@ void Task_SERVO_T(void *argument)
     /* ---- 注册舵机 ---- */
     for (uint8_t i = 0; i < ARRAY_SIZE(SERVO_CFG); i++)
     {
-        APP_Servo_Add(SERVO_CFG[i].id,
+        APP_Servo_Add(SERVO_CFG[i].servo_id,
+                   SERVO_CFG[i].pwm_id,
                    &SERVO_CFG[i].hw,
                    SERVO_CFG[i].speed_dps);
     }

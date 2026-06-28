@@ -25,16 +25,6 @@
  *============================================================================*/
 static void APP_UART_AA(uint8_t *payload, uint8_t len)
 {
-    BSP_GPIO_Toggle(0);
-}
-
-static void APP_UART_A9(uint8_t *payload, uint8_t len)
-{
-    BSP_GPIO_Toggle(9);
-}
-
-static void APP_UART_A8(uint8_t *payload, uint8_t len)
-{
     BSP_GPIO_Toggle(9);
 }
 
@@ -48,8 +38,6 @@ typedef struct {
 
 static const uart_cmd_entry_t CMD_TABLE[] = {
     { .cmd = 0xAA, .handler = APP_UART_AA },
-    { .cmd = 0xA9, .handler = APP_UART_A9 },
-    { .cmd = 0xA8, .handler = APP_UART_A8 },
 };
 
 /*==============================================================================

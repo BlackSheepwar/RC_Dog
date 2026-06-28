@@ -41,8 +41,8 @@
 static const uint8_t LIMB_SERVO_MAP[LIMB_MAX][LIMB_JOINT_COUNT] = {
     {1, 2},   /* 肢体 0: 髋 → ID 1, 膝 → ID 2 */
     {3, 4},   /* 肢体 1: 髋 → ID 3, 膝 → ID 4 */
-    {0, 0},   /* 肢体 2: 未使用 */
-    {0, 0},   /* 肢体 3: 未使用 */
+    {5, 6},   /* 肢体 2: 未使用 */
+    {7, 8},   /* 肢体 3: 未使用 */
 };
 
 #endif /* __APP_LIMB_CFG_H__ */

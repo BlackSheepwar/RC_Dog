@@ -25,6 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "bsp_gpio.h"
 #include "app_key.h"
 #include "app_uart.h"
 /* USER CODE END Includes */
@@ -283,7 +284,8 @@ __weak void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    BSP_GPIO_Toggle(0);
+    osDelay(500);
   }
   /* USER CODE END StartDefaultTask */
 }

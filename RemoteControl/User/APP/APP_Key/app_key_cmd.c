@@ -38,12 +38,13 @@ typedef struct {
 // key1
 static void Key1_OnDown(void)
 {
-    BSP_GPIO_Toggle(0);
+    BSP_GPIO_Toggle(7);
     APP_UART_BuildTxPacket(1, 0xAA, NULL, 0);
 }
 
 static void Key1_OnClick(void)
 {
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 static void Key1_OnLong(void)
@@ -52,17 +53,19 @@ static void Key1_OnLong(void)
 
 static void Key1_OnLongUp(void)
 {
-    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 // key2
 static void Key2_OnDown(void)
 {
-    BSP_GPIO_Toggle(0);
+    BSP_GPIO_Toggle(7);
+    APP_UART_BuildTxPacket(1, 0xA9, NULL, 0);
 }
 
 static void Key2_OnClick(void)
 {
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 static void Key2_OnLong(void)
@@ -71,17 +74,19 @@ static void Key2_OnLong(void)
 
 static void Key2_OnLongUp(void)
 {
-    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 // key3
 static void Key3_OnDown(void)
 {
-    BSP_GPIO_Toggle(0);
+    APP_UART_BuildTxPacket(1, 0xA8, NULL, 0);
+    BSP_GPIO_Toggle(7);
 }
 
 static void Key3_OnClick(void)
 {
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 static void Key3_OnLong(void)
@@ -90,17 +95,19 @@ static void Key3_OnLong(void)
 
 static void Key3_OnLongUp(void)
 {
-    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 // key4
 static void Key4_OnDown(void)
 {
-    BSP_GPIO_Toggle(0);
+    APP_UART_BuildTxPacket(1, 0xA7, NULL, 0);
+    BSP_GPIO_Toggle(7);
 }
 
 static void Key4_OnClick(void)
 {
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 static void Key4_OnLong(void)
@@ -109,17 +116,19 @@ static void Key4_OnLong(void)
 
 static void Key4_OnLongUp(void)
 {
-    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 // key5
 static void Key5_OnDown(void)
 {
-    BSP_GPIO_Toggle(0);
+    APP_UART_BuildTxPacket(1, 0xA6, NULL, 0);
+    BSP_GPIO_Toggle(7);
 }
 
 static void Key5_OnClick(void)
 {
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 static void Key5_OnLong(void)
@@ -128,17 +137,19 @@ static void Key5_OnLong(void)
 
 static void Key5_OnLongUp(void)
 {
-    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 // key6
 static void Key6_OnDown(void)
 {
-    BSP_GPIO_Toggle(0);
+    APP_UART_BuildTxPacket(1, 0xA5, NULL, 0);
+    BSP_GPIO_Toggle(7);
 }
 
 static void Key6_OnClick(void)
 {
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 static void Key6_OnLong(void)
@@ -148,7 +159,7 @@ static void Key6_OnLong(void)
 
 static void Key6_OnLongUp(void)
 {
-    BSP_GPIO_SetLevel(0, GPIO_LEVEL_HIGH);
+    BSP_GPIO_SetLevel(7, GPIO_LEVEL_HIGH);
 }
 
 /*==============================================================================

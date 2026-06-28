@@ -57,17 +57,18 @@ void APP_Servo_Init(void);
 
 /**
  * @brief 注册一个舵机实例到控制池
- * @param id       舵机编号
- * @param hw       舵机硬件配置（安装后固定参数，注册时拷贝入结构体）
+ * @param servo_id  逻辑舵机编号（分发表匹配用）
+ * @param pwm_id    PWM 映射 ID（BSP_PWM 寻址用，须与 PWM_HW_MAP 一致）
+ * @param hw        舵机硬件配置（安装后固定参数，注册时拷贝入结构体）
  * @param speed_dps 角速度 (°/s)，例如 300.0f = 每秒转 300°
  * @retval 1: 注册成功
  * @retval 0: 注册失败（池满、ID 重复、参数无效）
- * @note 硬件定时器映射由 BSP 层内置（bsp_pwm.c 中的静态表），
- *       本函数不再需要 htim/Channel 参数。
+ * @note servo_id 和 pwm_id 分离设计，逻辑标识与硬件映射解耦。
+ *       例如：腿 #1 的舵机可以映射到任意 PWM 通道。
  *       注册时校验 offset ≤ offset_max、limit 截断到物理可用范围，
  *       校验通过后启动 PWM 并转到 init_angle 位置。
  */
-uint8_t APP_Servo_Add(uint8_t id, const Servo_HwConfig_t *hw, float speed_dps);
+uint8_t APP_Servo_Add(uint8_t servo_id, uint8_t pwm_id, const Servo_HwConfig_t *hw, float speed_dps);
 
 /*==============================================================================
  * 舵机控制函数
