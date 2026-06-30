@@ -160,16 +160,16 @@ const osThreadAttr_t CAN_RXF1_T_attributes = {
   .stack_size = sizeof(CAN_RXF1_TBuffer),
   .priority = (osPriority_t) osPriorityRealtime5,
 };
-/* Definitions for SERVO_T */
-osThreadId_t SERVO_THandle;
-uint32_t SERVO_TBuffer[ 128 ];
-osStaticThreadDef_t SERVO_TControlBlock;
-const osThreadAttr_t SERVO_T_attributes = {
-  .name = "SERVO_T",
-  .cb_mem = &SERVO_TControlBlock,
-  .cb_size = sizeof(SERVO_TControlBlock),
-  .stack_mem = &SERVO_TBuffer[0],
-  .stack_size = sizeof(SERVO_TBuffer),
+/* Definitions for Servo_T */
+osThreadId_t Servo_THandle;
+uint32_t Servo_TBuffer[ 128 ];
+osStaticThreadDef_t Servo_TControlBlock;
+const osThreadAttr_t Servo_T_attributes = {
+  .name = "Servo_T",
+  .cb_mem = &Servo_TControlBlock,
+  .cb_size = sizeof(Servo_TControlBlock),
+  .stack_mem = &Servo_TBuffer[0],
+  .stack_size = sizeof(Servo_TBuffer),
   .priority = (osPriority_t) osPriorityHigh6,
 };
 /* Definitions for OLED_T */
@@ -183,6 +183,18 @@ const osThreadAttr_t OLED_T_attributes = {
   .stack_mem = &OLED_TBuffer[0],
   .stack_size = sizeof(OLED_TBuffer),
   .priority = (osPriority_t) osPriorityLow6,
+};
+/* Definitions for Motion_T */
+osThreadId_t Motion_THandle;
+uint32_t Motion_TBuffer[ 256 ];
+osStaticThreadDef_t Motion_TControlBlock;
+const osThreadAttr_t Motion_T_attributes = {
+  .name = "Motion_T",
+  .cb_mem = &Motion_TControlBlock,
+  .cb_size = sizeof(Motion_TControlBlock),
+  .stack_mem = &Motion_TBuffer[0],
+  .stack_size = sizeof(Motion_TBuffer),
+  .priority = (osPriority_t) osPriorityHigh5,
 };
 /* Definitions for KEY_CMD_Q */
 osMessageQueueId_t KEY_CMD_QHandle;
@@ -278,8 +290,9 @@ void Task_UART_RX_CMD(void *argument);
 void Task_CAN_TX(void *argument);
 void Task_CAN_RXF0(void *argument);
 void Task_CAN_RXF1(void *argument);
-void Task_SERVO_T(void *argument);
+void Task_Servo(void *argument);
 void Task_OLED(void *argument);
+void Task_Motion(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -363,11 +376,14 @@ void MX_FREERTOS_Init(void) {
   /* creation of CAN_RXF1_T */
   CAN_RXF1_THandle = osThreadNew(Task_CAN_RXF1, NULL, &CAN_RXF1_T_attributes);
 
-  /* creation of SERVO_T */
-  SERVO_THandle = osThreadNew(Task_SERVO_T, NULL, &SERVO_T_attributes);
+  /* creation of Servo_T */
+  Servo_THandle = osThreadNew(Task_Servo, NULL, &Servo_T_attributes);
 
   /* creation of OLED_T */
   OLED_THandle = osThreadNew(Task_OLED, NULL, &OLED_T_attributes);
+
+  /* creation of Motion_T */
+  Motion_THandle = osThreadNew(Task_Motion, NULL, &Motion_T_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -542,22 +558,22 @@ __weak void Task_CAN_RXF1(void *argument)
   /* USER CODE END Task_CAN_RXF1 */
 }
 
-/* USER CODE BEGIN Header_Task_SERVO_T */
+/* USER CODE BEGIN Header_Task_Servo */
 /**
-* @brief Function implementing the SERVO_T thread.
+* @brief Function implementing the Servo_T thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_Task_SERVO_T */
-__weak void Task_SERVO_T(void *argument)
+/* USER CODE END Header_Task_Servo */
+__weak void Task_Servo(void *argument)
 {
-  /* USER CODE BEGIN Task_SERVO_T */
+  /* USER CODE BEGIN Task_Servo */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END Task_SERVO_T */
+  /* USER CODE END Task_Servo */
 }
 
 /* USER CODE BEGIN Header_Task_OLED */
@@ -576,6 +592,24 @@ __weak void Task_OLED(void *argument)
     osDelay(1);
   }
   /* USER CODE END Task_OLED */
+}
+
+/* USER CODE BEGIN Header_Task_Motion */
+/**
+* @brief Function implementing the Motion_T thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Task_Motion */
+__weak void Task_Motion(void *argument)
+{
+  /* USER CODE BEGIN Task_Motion */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Task_Motion */
 }
 
 /* Private application code --------------------------------------------------*/

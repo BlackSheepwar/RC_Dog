@@ -1,19 +1,18 @@
 /**
  * @file task_servo.c
- * @brief 舵机控制处理任务（顶层调度入口）
+ * @brief 舵机控制任务 — 注册 + 平滑输出
  * @author 李嘉图
  * @date 2026-06-05
  *
  * @note 舵机注册参数已提取到 app_servo_cfg.h，
- *       定时器频率配置已下沉到 bsp_pwm.c 的 PWM_TIM_CFG 表，
- *       Task 层只做：初始化 → 周期调度，加舵机调参数只需改 cfg 头文件。
+ *       定时器频率配置已下沉到 bsp_pwm.c 的 PWM_TIM_CFG 表。
  *
- *       运动控制链路（10ms 周期）：
- *       Gait_IK_Scheduler() → 步态相位推进 + IK 解算
- *         → Limb_SetTarget() → 肢体目标 + 过渡时间
- *       Limb_Scheduler()    → 时间基线性插值
- *         → APP_Servo_SetTarget() → 设置舵机目标角度
- *       APP_Servo_Scheduler() → 浮点平滑 + PWM 输出
+ *       Task 层只做：初始化 → 周期调度（舵机平滑 + PWM 输出）。
+ *       步态调度（Gait_IK + Limb）已拆到 Motion_T（task_motion.c）。
+ *
+ *       本任务只输出舵机目标角度，不参与步态/IK 计算。
+ *       Motion_T 10ms 算好目标 → APP_Servo_SetTarget 写入，
+ *       本任务 10ms 做浮点平滑 → PWM 输出。
  */
 
 /*==============================================================================
@@ -26,7 +25,6 @@
 // 功能包含
 #include "app_servo.h"
 #include "app_servo_cfg.h"
-#include "app_gait.h"
 
 /*==============================================================================
  * 任务函数
@@ -35,15 +33,14 @@
  *   1. APP_Servo_Init()        — 清空舵机池，初始化 PWM 底层
  *   2. BSP_PWM_SetAllFreq()    — 按 BSP 内置表配置所有定时器频率
  *   3. APP_Servo_Add(...)      — 注册所有舵机实例
- *   4. Gait_IK_Init()          — 初始化 Limb 层 + IK 步态状态
- *      （Gait_IK_Init 内部调用 Limb_Init，自动设定舵机高速跟随）
  *
- * 启动步态（在外部通过 CAN/UART/Key 命令调用）：
- *   Gait_IK_Start(&GAIT_IK_STAND) — 站立
- *   Gait_IK_Start(&GAIT_IK_WALK)  — 行走
- *   Gait_IK_Stop()                — 停止
+ * 运行时（10ms 周期）：
+ *   APP_Servo_Scheduler()      — 浮点平滑 → PWM 输出
+ *
+ * 步态调度（Gait_IK_Init / Gait_IK_Scheduler / Limb_Scheduler）
+ * 已在 Motion_T 中独立运行。
  *============================================================================*/
-void Task_SERVO_T(void *argument)
+void Task_Servo(void *argument)
 {
     /* ---- 初始化 ---- */
     APP_Servo_Init();
@@ -57,14 +54,9 @@ void Task_SERVO_T(void *argument)
                    SERVO_CFG[i].speed_dps);
     }
 
-    /* ---- 初始化 IK 步态（需在舵机注册后，内部调用 Limb_Init 设定舵机高速） ---- */
-    //Gait_IK_Init();
-
-    /* ---- 周期调度：Gait → Limb → Servo ---- */
+    /* ---- 周期调度：舵机平滑输出（步态调度已在 Motion_T 中独立运行） ---- */
     for (;;)
     {
-        //Gait_IK_Scheduler();    /* 步态相位推进 + IK 解算 → Limb_SetTarget */
-        //Limb_Scheduler();       /* 时间基插值 → APP_Servo_SetTarget */
         APP_Servo_Scheduler();  /* 浮点平滑 → PWM 输出 */
         osDelay(SERVO_TICK_MS);
     }

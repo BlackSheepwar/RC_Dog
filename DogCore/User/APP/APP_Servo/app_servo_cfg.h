@@ -42,7 +42,7 @@ static const servo_cfg_t SERVO_CFG[] = {
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 0, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
-          .speed_dps = 100.6f },                      // 角速度 (°/s) 
+          .speed_dps = 200.0f },                      // 初始角速度 (°/s) 
 
     { .servo_id = 2, .pwm_id = 2,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
@@ -50,15 +50,15 @@ static const servo_cfg_t SERVO_CFG[] = {
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 90, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
-          .speed_dps = 200.0f },                      // 角速度 (°/s) 
+          .speed_dps = 200.0f },                      // 初始角速度 (°/s) 
 
     { .servo_id = 3, .pwm_id = 3,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
           .offset = 0, .offset_max = 20,              // 偏移量 (°)
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
-          .init_angle = 0, .reverse = 0,              // 初始角度 (°)
+          .init_angle = 45, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
-          .speed_dps = 200.0f },                      // 角速度 (°/s) 
+          .speed_dps = 200.0f },                      // 初始角速度 (°/s) 
 
     { .servo_id = 4, .pwm_id = 4,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
@@ -66,7 +66,7 @@ static const servo_cfg_t SERVO_CFG[] = {
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 0, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
-          .speed_dps = 200.0f },                      // 角速度 (°/s) 
+          .speed_dps = 200.0f },                      // 初始角速度 (°/s) 
 
     { .servo_id = 5, .pwm_id = 5,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
@@ -74,7 +74,7 @@ static const servo_cfg_t SERVO_CFG[] = {
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 0, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
-          .speed_dps = 200.0f },                      // 角速度 (°/s) 
+          .speed_dps = 200.0f },                      // 初始角速度 (°/s) 
 
     { .servo_id = 6, .pwm_id = 6,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
@@ -82,7 +82,7 @@ static const servo_cfg_t SERVO_CFG[] = {
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 0, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
-          .speed_dps = 200.0f },                      // 角速度 (°/s) 
+          .speed_dps = 200.0f },                      // 初始角速度 (°/s) 
 
     { .servo_id = 7, .pwm_id = 7,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
@@ -90,7 +90,7 @@ static const servo_cfg_t SERVO_CFG[] = {
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 0, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
-          .speed_dps = 200.0f },                      // 角速度 (°/s) 
+          .speed_dps = 200.0f },                      // 初始角速度 (°/s) 
 
     { .servo_id = 8, .pwm_id = 8,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
@@ -98,7 +98,7 @@ static const servo_cfg_t SERVO_CFG[] = {
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 0, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
-          .speed_dps = 200.0f },                      // 角速度 (°/s)
+          .speed_dps = 200.0f },                      // 初始角速度 (°/s) 
 };
 
 #endif /* __APP_SERVO_CFG_H__ */

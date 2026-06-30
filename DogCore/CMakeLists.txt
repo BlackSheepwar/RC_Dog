@@ -45,16 +45,14 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # User sources
-        # APP
+    # APP
     User/APP/APP_Uart/app_uart.c
     User/APP/APP_Uart/app_uart_cmd.c
     User/APP/APP_Key/app_key.c
     User/APP/APP_Key/app_key_cmd.c
     User/APP/APP_Servo/app_servo.c
-    User/APP/APP_Motion/app_gait.c
-    User/APP/APP_Motion/app_gait.h
-    User/APP/APP_Motion/app_limb.c
-    User/APP/APP_Motion/app_limb.h
+    User/APP/APP_Motion/app_motion.c
+    User/APP/APP_Motion/app_motion_scheduler.c
     User/APP/APP_CAN/app_can.c
     User/APP/APP_CAN/app_can_cmd_1.c
     User/APP/APP_CAN/app_can_cmd_2.c
@@ -78,6 +76,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/TASK/task_uart_tx.c
     User/TASK/task_key_debounce.c
     User/TASK/task_key_cmd.c
+    User/TASK/task_motion.c
     User/TASK/task_servo.c
     User/TASK/task_can_rxf0.c
     User/TASK/task_can_rxf1.c

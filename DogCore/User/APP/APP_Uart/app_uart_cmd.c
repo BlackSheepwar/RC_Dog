@@ -20,15 +20,26 @@
 #include "app_uart.h"
 #include "app_servo.h"
 #include "bsp_gpio.h"
+#include "app_gait_seq.h"
+#include "app_motion_scheduler.h"
+#include <stdint.h>
 
 /*==============================================================================
  * 命令处理函数
  *============================================================================*/
 static void APP_UART_AA(uint8_t *payload, uint8_t len)
 {
-    BSP_GPIO_Toggle(2);
+    static uint8_t i = 0;
+    if (i == 0) {
+        MotionSched_Start(&GAIT_KICK0);  
+        i = i+1;
+    }
+    else{
+        MotionSched_Start(&GAIT_KICK1);
+        i = i-1;
+    }
 }
-
+ 
 static void APP_UART_F0(uint8_t *payload, uint8_t len)
 {
     APP_Servo_SetTarget(1, -38);
@@ -37,12 +48,14 @@ static void APP_UART_F0(uint8_t *payload, uint8_t len)
 
 static void APP_UART_F1(uint8_t *payload, uint8_t len)
 {
+    //APP_Servo_SetTarget(3, 45);
     APP_Servo_SetTarget(1, -77);
     APP_Servo_SetTarget(2, -63);
 }  
 
 static void APP_UART_F2(uint8_t *payload, uint8_t len)
 {
+    //APP_Servo_SetTarget(3, -10);
     APP_Servo_SetTarget(1, 0);
     APP_Servo_SetTarget(2, 90);
 }
