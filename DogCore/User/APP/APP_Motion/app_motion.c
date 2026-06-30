@@ -42,11 +42,11 @@
  * 每条腿独立配置：腿ID + 两个关节的全部映射参数（舵机绑定 + 速度上限 + 校准 + 反转 + 限位）。
  * 映射顺序（正向）：
  *   1. 限幅到 [limit_neg, limit_pos]
- *   2. 方向反转（reverse=1 时取反）
- *   3. 加校准偏移 calibration
+ *   2. 加校准偏移 calibration（先偏）
+ *   3. 方向反转（reverse=1 时取反）（后翻）
  *
- * 公式： servo = ((reverse ? -input : input) 限幅后) + calibration
- * 反向： input = reverse ? -(servo - calibration) : (servo - calibration)
+ * 公式： servo = reverse ? -(input + calibration) : (input + calibration)
+ * 反向： input = reverse ? (-servo - calibration) : (servo - calibration)
  *
  * 典型用途：
  *   calibration = -90 表示舵机 0° 在用户坐标系中是 90°
@@ -69,10 +69,10 @@ static const leg_cfg_t s_leg_cfg_init[MOTION_MAX_LEGS] = {
         .leg_id = 1,
         .servo_id    = {1, 2},
         .speed_max   = {200.0f, 200.0f},
-        .calibration = {0, 0},
-        .reverse     = {0, 0},
-        .limit_pos   = {130, 130},
-        .limit_neg   = {-130, -130},
+        .calibration = {-90, -90},
+        .reverse     = {1, 1},
+        .limit_pos   = {180, 180},
+        .limit_neg   = {0, 0},
     },
     {
         .leg_id = 2,
@@ -150,7 +150,9 @@ static inline float Motion_GetSpeedMax(uint8_t leg_id, uint8_t joint)
  * @param joint   关节索引
  * @param input   用户坐标系角度(°)
  * @return 映射后的舵机空间角度(°)
- * @note 依次执行：限幅 → 方向反转 → 校准偏移
+ * @note 映射顺序：限幅 → 校准偏移 → 方向反转
+ *       先偏后翻：reverse ? -(input + cal) : (input + cal)
+ *       这样校准用于修正零位，反转用于修正安装朝向
  */
 static inline int16_t Motion_MapToServo(uint8_t leg_id, uint8_t joint, int16_t input)
 {
@@ -163,11 +165,11 @@ static inline int16_t Motion_MapToServo(uint8_t leg_id, uint8_t joint, int16_t i
     if (out > cfg->limit_pos[joint]) out = cfg->limit_pos[joint];
     if (out < cfg->limit_neg[joint]) out = cfg->limit_neg[joint];
 
-    /* 2. 方向反转 */
-    if (cfg->reverse[joint]) out = -out;
-
-    /* 3. 校准偏移 */
+    /* 2. 校准偏移（先偏） */
     out += cfg->calibration[joint];
+
+    /* 3. 方向反转（后翻） */
+    if (cfg->reverse[joint]) out = -out;
 
     return out;
 }
@@ -178,7 +180,8 @@ static inline int16_t Motion_MapToServo(uint8_t leg_id, uint8_t joint, int16_t i
  * @param joint   关节索引
  * @param servo   舵机空间角度(°)
  * @return 用户坐标系角度(°)
- * @note 用于从舵机读数恢复 IK 坐标系的值；不做限幅
+ * @note 与正向映射对称：先反转归位 → 再减校准
+ *       用于从舵机读数恢复 IK 坐标系的值；不做限幅
  */
 static inline int16_t Motion_MapToUser(uint8_t leg_id, uint8_t joint, int16_t servo)
 {
@@ -187,11 +190,11 @@ static inline int16_t Motion_MapToUser(uint8_t leg_id, uint8_t joint, int16_t se
 
     int16_t in = servo;
 
-    /* 1. 先减校准偏移 */
-    in -= cfg->calibration[joint];
-
-    /* 2. 方向反转（逆运算） */
+    /* 1. 方向反转（先翻回来） */
     if (cfg->reverse[joint]) in = -in;
+
+    /* 2. 减校准偏移 */
+    in -= cfg->calibration[joint];
 
     return in;
 }

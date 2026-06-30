@@ -30,14 +30,14 @@ static const motion_gait_t GAIT_KICK0 = {
     .phases = (const motion_phase_t[]){
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .angle = {.hip = -77, .knee = -63} },
+                { .leg_id = 1, .angle = {.hip = 167, .knee = 153} },
             },
             .leg_count = 1,
             .speed = 100.0f,
         },
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .angle = {.hip = -38, .knee = 27} },
+                { .leg_id = 1, .angle = {.hip = 128, .knee = 63} },
             },
             .leg_count = 1,
             .speed = 61.8f,         
@@ -54,7 +54,7 @@ static const motion_gait_t GAIT_KICK1 = {
     .phases = (const motion_phase_t[]){
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .angle = {.hip = 0, .knee = 90} },
+                { .leg_id = 1, .angle = {.hip = 90, .knee = 0} },
             },
             .leg_count = 1,
             .speed = 50.0f,
