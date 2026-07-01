@@ -19,6 +19,7 @@
 
 #include "app_motion_scheduler.h"
 // 功能包含
+#include "app_motion_ik.h"   /* IK 协调层（自动按 mode 分发） */
 #include "app_motion.h"
 #include "bsp_sys.h"
 
@@ -133,23 +134,15 @@ uint8_t MotionSched_IsRunning(void)
  * @param phase_index 相位索引
  *
  * @details
- *       遍历该相位所有腿，每条腿以 phase->speed 调用 Motion_SetTarget。
- *       Motor_SetTarget 内部根据关节位移自动配速（快慢关节同步到达）。
- *       同相位不同腿各自独立运行，互不影响。
+ *       委托给 MotionIK_ApplyPhase()，由 gait->mode 自动选择：
+ *         mode=0：角度直通（原行为）
+ *         mode=1：二连杆 IK 解算坐标 → 角度
+ *
+ * @note 本层不再关心控制方式，全部由 IK 层封装
  */
 static void MotionSched_ApplyPhase(uint16_t phase_index)
 {
-    const motion_gait_t *gait = s_sched.gait;
-    if (gait == NULL) return;
-
-    const motion_phase_t *phase = &gait->phases[phase_index];
-
-    for (uint8_t i = 0; i < phase->leg_count; i++)
-    {
-        uint8_t leg_id = phase->legs[i].leg_id;
-        int16_t target[2] = {phase->legs[i].angle.hip, phase->legs[i].angle.knee};
-        Motion_SetTarget(leg_id, target, phase->speed);
-    }
+    MotionIK_ApplyPhase(s_sched.gait, phase_index);
 }
 
 /*==============================================================================

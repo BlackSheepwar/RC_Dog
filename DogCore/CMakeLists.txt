@@ -53,6 +53,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Servo/app_servo.c
     User/APP/APP_Motion/app_motion.c
     User/APP/APP_Motion/app_motion_scheduler.c
+    User/APP/APP_Motion/app_motion_ik.c
     User/APP/APP_CAN/app_can.c
     User/APP/APP_CAN/app_can_cmd_1.c
     User/APP/APP_CAN/app_can_cmd_2.c

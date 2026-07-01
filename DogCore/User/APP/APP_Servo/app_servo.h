@@ -80,30 +80,29 @@ uint8_t APP_Servo_Add(uint8_t servo_id, uint8_t pwm_id, const Servo_HwConfig_t *
 /**
  * @brief 设置舵机目标角度
  * @param id    舵机编号
- * @param angle 目标角度
+ * @param angle 目标角度（浮点，亚度精度）
  * @note 先限幅到物理可用范围 +/-(phys_range/2 - offset_max)，
  *       再限幅到软件机械限制 hw.limit_min / hw.limit_max
  */
-void APP_Servo_SetTarget(uint8_t id, int16_t angle);
+void APP_Servo_SetTarget(uint8_t id, float angle);
 
 /**
  * @brief 设置舵机目标角度（增量方式）
  * @param id    舵机编号
- * @param angle 角度增量（相对当前目标值）
+ * @param angle 角度增量（浮点，相对当前目标值）
  * @note 用于 CAN 或 UART 的增量式控制。
  *       先限幅到物理可用范围 +/-(phys_range/2 - offset_max)，
  *       再限幅到软件机械限制 hw.limit_min / hw.limit_max
  */
-void APP_Servo_SetincreaseTarget(uint8_t id, int16_t angle);
+void APP_Servo_SetincreaseTarget(uint8_t id, float angle);
 
 /**
  * @brief 获取舵机当前角度
  * @param id 舵机编号
- * @return 当前角度，四舍五入到整数
- * @note 内部 current_angle 是浮点数（精度高），
- *       此函数取整后返回，供外部查询或协议回传
+ * @return 当前角度（浮点，亚度精度）
+ * @note 内部 current_angle 是浮点数，直接返回无需取整
  */
-int16_t APP_Servo_GetCurrent(uint8_t id);
+float APP_Servo_GetCurrent(uint8_t id);
 
 /**
  * @brief 设置舵机运动角速度

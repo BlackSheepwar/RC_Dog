@@ -47,12 +47,16 @@ typedef struct {
 } BSP_PwmMap_t;
 
 static const BSP_PwmMap_t PWM_HW_MAP[TIM_MAX_SIZE] = {
-    { .pwm_id = 1,  .htim = &htim15, .channel = TIM_CHANNEL_1 },
-    { .pwm_id = 2,  .htim = &htim15, .channel = TIM_CHANNEL_2 },
+    // 左前腿
+    { .pwm_id = 1,  .htim = &htim15, .channel = TIM_CHANNEL_2 },
+    { .pwm_id = 2,  .htim = &htim15, .channel = TIM_CHANNEL_1 },
+    // 右前腿
     { .pwm_id = 3,  .htim = &htim14, .channel = TIM_CHANNEL_1 },
     { .pwm_id = 4,  .htim = &htim13, .channel = TIM_CHANNEL_1 },
-    { .pwm_id = 5,  .htim = &htim12, .channel = TIM_CHANNEL_1 },
-    { .pwm_id = 6,  .htim = &htim12, .channel = TIM_CHANNEL_2 },
+    // 左后后腿
+    { .pwm_id = 5,  .htim = &htim12, .channel = TIM_CHANNEL_2 },
+    { .pwm_id = 6,  .htim = &htim12, .channel = TIM_CHANNEL_1 },
+    // 右后腿
     { .pwm_id = 7,  .htim = &htim16, .channel = TIM_CHANNEL_1 },
     { .pwm_id = 8,  .htim = &htim17, .channel = TIM_CHANNEL_1 },
 };

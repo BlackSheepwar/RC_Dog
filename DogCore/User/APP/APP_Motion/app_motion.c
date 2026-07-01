@@ -42,15 +42,18 @@
  * 每条腿独立配置：腿ID + 两个关节的全部映射参数（舵机绑定 + 速度上限 + 校准 + 反转 + 限位）。
  * 映射顺序（正向）：
  *   1. 限幅到 [limit_neg, limit_pos]
- *   2. 加校准偏移 calibration（先偏）
- *   3. 方向反转（reverse=1 时取反）（后翻）
+ *   2. 预方向反转 pre_reverse（pre_rev=1 时取反）
+ *   3. 加校准偏移 calibration（后偏）
+ *   4. 后方向反转 post_reverse（post_rev=1 时再取反）
  *
- * 公式： servo = reverse ? -(input + calibration) : (input + calibration)
- * 反向： input = reverse ? (-servo - calibration) : (servo - calibration)
+ * 公式： servo = post_rev ? -((pre_rev ? -input : input) + cal)
+ *                      :   ((pre_rev ? -input : input) + cal)
+ * 反向： input = pre_rev  ? -((post_rev ? -servo : servo) - cal)
+ *                      :    ((post_rev ? -servo : servo) - cal)
  *
  * 典型用途：
  *   calibration = -90 表示舵机 0° 在用户坐标系中是 90°
- *   reverse    = 1   表示舵机安装方向相反
+ *   post_rev    = 1   表示舵机安装方向相反（输出侧反转）
  *============================================================================*/
 /** @brief 腿配置结构体（腿ID + 两个关节的全部映射参数） */
 typedef struct {
@@ -58,7 +61,8 @@ typedef struct {
     uint8_t servo_id[MOTION_JOINTS_PER_LEG];       /**< [髋, 膝] 舵机逻辑 ID */
     float   speed_max[MOTION_JOINTS_PER_LEG];        /**< [髋, 膝] 最快运动速度(°/s) */
     int16_t calibration[MOTION_JOINTS_PER_LEG];      /**< [髋, 膝] 校准偏移(°)：用户→舵机坐标差值 */
-    uint8_t reverse[MOTION_JOINTS_PER_LEG];          /**< [髋, 膝] 方向反转: 0=正转, 1=反转 */
+    uint8_t pre_reverse[MOTION_JOINTS_PER_LEG];      /**< [髋, 膝] 预反转（输入侧）: 0=正转, 1=反转 */
+    uint8_t post_reverse[MOTION_JOINTS_PER_LEG];     /**< [髋, 膝] 后反转（输出侧）: 0=正转, 1=反转 */
     int16_t limit_pos[MOTION_JOINTS_PER_LEG];        /**< [髋, 膝] 输入正限位(°) */
     int16_t limit_neg[MOTION_JOINTS_PER_LEG];        /**< [髋, 膝] 输入负限位(°) */
 } leg_cfg_t;
@@ -70,37 +74,42 @@ static const leg_cfg_t s_leg_cfg_init[MOTION_MAX_LEGS] = {
         .servo_id    = {1, 2},
         .speed_max   = {200.0f, 200.0f},
         .calibration = {-90, -90},
-        .reverse     = {1, 1},
-        .limit_pos   = {180, 180},
-        .limit_neg   = {0, 0},
+        .pre_reverse  = {0, 1},
+        .post_reverse = {0, 1},
+        .limit_pos   = {180, 0},
+        .limit_neg   = {0, -180},
     },
     {
         .leg_id = 2,
         .servo_id    = {3, 4},
         .speed_max   = {200.0f, 200.0f},
-        .calibration = {0, 0},
-        .reverse     = {0, 0},
-        .limit_pos   = {130, 130},
-        .limit_neg   = {-130, -130},
+        .calibration = {-90, -90},
+        .pre_reverse  = {0, 1},
+        .post_reverse = {0, 1},
+        .limit_pos   = {180, 0},
+        .limit_neg   = {0, -180},
     },
-    {
+        {
         .leg_id = 3,
         .servo_id    = {5, 6},
         .speed_max   = {200.0f, 200.0f},
-        .calibration = {0, 0},
-        .reverse     = {0, 0},
-        .limit_pos   = {130, 130},
-        .limit_neg   = {-130, -130},
+        .calibration = {-90, -90},
+        .pre_reverse  = {0, 1},
+        .post_reverse = {0, 1},
+        .limit_pos   = {180, 0},
+        .limit_neg   = {0, -180},
     },
     {
         .leg_id = 4,
         .servo_id    = {7, 8},
         .speed_max   = {200.0f, 200.0f},
-        .calibration = {0, 0},
-        .reverse     = {0, 0},
-        .limit_pos   = {130, 130},
-        .limit_neg   = {-130, -130},
+        .calibration = {-90, -90},
+        .pre_reverse  = {0, 1},
+        .post_reverse = {0, 1},
+        .limit_pos   = {180, 0},
+        .limit_neg   = {0, -180},
     },
+
 };
 
 /**
@@ -148,28 +157,31 @@ static inline float Motion_GetSpeedMax(uint8_t leg_id, uint8_t joint)
  * @brief 用户/IK 角度 → 舵机角度（正向映射）
  * @param leg_id  腿编号
  * @param joint   关节索引
- * @param input   用户坐标系角度(°)
- * @return 映射后的舵机空间角度(°)
- * @note 映射顺序：限幅 → 校准偏移 → 方向反转
- *       先偏后翻：reverse ? -(input + cal) : (input + cal)
- *       这样校准用于修正零位，反转用于修正安装朝向
+ * @param input   用户坐标系角度(°)（浮点，亚度精度）
+ * @return 映射后的舵机空间角度(°)（浮点）
+ * @note 映射顺序：限幅 → pre_rev → +cal → post_rev
+ *       servo = post_rev ? -((pre_rev ? -input : input) + cal)
+ *                       :   ((pre_rev ? -input : input) + cal)
  */
-static inline int16_t Motion_MapToServo(uint8_t leg_id, uint8_t joint, int16_t input)
+static inline float Motion_MapToServo(uint8_t leg_id, uint8_t joint, float input)
 {
     const leg_cfg_t *cfg = Motion_GetLegCfg(leg_id);
     if (cfg == NULL) return input;
 
-    int16_t out = input;
+    float out = input;
 
     /* 1. 输入限幅 */
-    if (out > cfg->limit_pos[joint]) out = cfg->limit_pos[joint];
-    if (out < cfg->limit_neg[joint]) out = cfg->limit_neg[joint];
+    if (out > (float)cfg->limit_pos[joint]) out = (float)cfg->limit_pos[joint];
+    if (out < (float)cfg->limit_neg[joint]) out = (float)cfg->limit_neg[joint];
 
-    /* 2. 校准偏移（先偏） */
-    out += cfg->calibration[joint];
+    /* 2. 预方向反转（输入侧） */
+    if (cfg->pre_reverse[joint]) out = -out;
 
-    /* 3. 方向反转（后翻） */
-    if (cfg->reverse[joint]) out = -out;
+    /* 3. 校准偏移 */
+    out += (float)cfg->calibration[joint];
+
+    /* 4. 后方向反转（输出侧） */
+    if (cfg->post_reverse[joint]) out = -out;
 
     return out;
 }
@@ -178,23 +190,28 @@ static inline int16_t Motion_MapToServo(uint8_t leg_id, uint8_t joint, int16_t i
  * @brief 舵机角度 → 用户/IK 角度（反向映射）
  * @param leg_id  腿编号
  * @param joint   关节索引
- * @param servo   舵机空间角度(°)
- * @return 用户坐标系角度(°)
- * @note 与正向映射对称：先反转归位 → 再减校准
+ * @param servo   舵机空间角度(°)（浮点）
+ * @return 用户坐标系角度(°)（浮点）
+ * @note 与正向映射对称：undo post_rev → -cal → undo pre_rev
+ *       input = pre_rev ? -((post_rev ? -servo : servo) - cal)
+ *                      :   ((post_rev ? -servo : servo) - cal)
  *       用于从舵机读数恢复 IK 坐标系的值；不做限幅
  */
-static inline int16_t Motion_MapToUser(uint8_t leg_id, uint8_t joint, int16_t servo)
+static inline float Motion_MapToUser(uint8_t leg_id, uint8_t joint, float servo)
 {
     const leg_cfg_t *cfg = Motion_GetLegCfg(leg_id);
     if (cfg == NULL) return servo;
 
-    int16_t in = servo;
+    float in = servo;
 
-    /* 1. 方向反转（先翻回来） */
-    if (cfg->reverse[joint]) in = -in;
+    /* 1. 撤销后方向反转 */
+    if (cfg->post_reverse[joint]) in = -in;
 
     /* 2. 减校准偏移 */
-    in -= cfg->calibration[joint];
+    in -= (float)cfg->calibration[joint];
+
+    /* 3. 撤销预方向反转 */
+    if (cfg->pre_reverse[joint]) in = -in;
 
     return in;
 }
@@ -241,7 +258,7 @@ void Motion_Init(void)
         for (uint8_t j = 0; j < MOTION_JOINTS_PER_LEG; j++)
         {
             uint8_t sid = Motion_GetServoId(leg_id, j);
-            int16_t pos = APP_Servo_GetCurrent(sid);
+            float pos = APP_Servo_GetCurrent(sid);
             s_legs[i].current_angle[j] = Motion_MapToUser(leg_id, j, pos);
             s_legs[i].target_angle[j]  = s_legs[i].current_angle[j];
             s_legs[i].reached[j] = 1;
@@ -262,8 +279,9 @@ void Motion_Init(void)
  *       1. 从舵机层读取当前实际角度作为起点
  *       2. 将用户坐标系角度 → 舵机坐标系
  *          a. 限幅到 [limit_neg, limit_pos]
- *          b. 方向反转（reverse=1 时取反）
+ *          b. 预方向反转（pre_reverse）
  *          c. 加校准偏移 calibration
+ *          d. 后方向反转（post_reverse）
  *       3. 在舵机空间计算各关节 delta
  *       4. 由 speed 计算实际运动时间：
  *          max_need = max(delta / (speed_max * speed / 100))
@@ -276,7 +294,7 @@ void Motion_Init(void)
  *       - 浮点精度 0.1，舵机层支持浮点速度，控速更精准
  *       - 映射参数在 s_leg_cfg_init（腿配置注册表）中配置
  */
-void Motion_SetTarget(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_PER_LEG],
+void Motion_SetTarget(uint8_t leg_id, const float target_angle[MOTION_JOINTS_PER_LEG],
                       float speed)
 {
     if (target_angle == NULL) return;
@@ -289,14 +307,14 @@ void Motion_SetTarget(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_P
     float speed_ratio = speed / 100.0f;
 
     /* ── 扇区1：读当前舵机位置，算映射后 delta ── */
-    int16_t target_servo[MOTION_JOINTS_PER_LEG];
-    int16_t delta[MOTION_JOINTS_PER_LEG];
+    float target_servo[MOTION_JOINTS_PER_LEG];
+    float delta[MOTION_JOINTS_PER_LEG];
     uint32_t max_need = 0;
 
     for (uint8_t j = 0; j < MOTION_JOINTS_PER_LEG; j++)
     {
         uint8_t  sid   = Motion_GetServoId(leg_id, j);
-        int16_t  start = APP_Servo_GetCurrent(sid);           /* 当前舵机空间位置 */
+        float    start = APP_Servo_GetCurrent(sid);           /* 当前舵机空间位置 */
         target_servo[j] = Motion_MapToServo(leg_id, j, target_angle[j]); /* 用户→舵机 */
 
         /* ── 更新状态池（用户空间值） ── */
@@ -304,13 +322,13 @@ void Motion_SetTarget(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_P
         leg->target_angle[j]  = target_angle[j];
         leg->reached[j] = 0;
 
-        int16_t diff = target_servo[j] - start;
-        delta[j] = (diff > 0) ? diff : -diff;
+        float diff = target_servo[j] - start;
+        delta[j] = (diff > 0.0f) ? diff : -diff;
 
-        if (delta[j] != 0)
+        if (delta[j] != 0.0f)
         {
             float j_speed = Motion_GetSpeedMax(leg_id, j) * speed_ratio;
-            uint32_t need_t = (uint32_t)((float)delta[j] / j_speed * 1000.0f + 0.5f);
+            uint32_t need_t = (uint32_t)(delta[j] / j_speed * 1000.0f + 0.5f);
             if (need_t > max_need) max_need = need_t;
         }
     }
@@ -325,7 +343,7 @@ void Motion_SetTarget(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_P
 
         float j_speed;
         float j_speed_max = Motion_GetSpeedMax(leg_id, j);
-        if (delta[j] == 0)
+        if (delta[j] == 0.0f)
             j_speed = j_speed_max;                   /* 已到位，维持快速 */
         else
             j_speed = (float)delta[j] / (float)actual_duration * 1000.0f;
@@ -359,7 +377,7 @@ void Motion_SetTarget(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_P
  * @warning 舵机内部仍有自己的平滑（最快速度逼近），并不是"瞬移"
  *          但本函数标记为已到位，不会阻塞调度器
  */
-void Motion_SetImmediate(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_PER_LEG])
+void Motion_SetImmediate(uint8_t leg_id, const float target_angle[MOTION_JOINTS_PER_LEG])
 {
     if (target_angle == NULL) return;
     motion_leg_t *leg = Motion_GetLeg(leg_id);
@@ -368,8 +386,8 @@ void Motion_SetImmediate(uint8_t leg_id, const int16_t target_angle[MOTION_JOINT
     for (uint8_t j = 0; j < MOTION_JOINTS_PER_LEG; j++)
     {
         uint8_t  sid    = Motion_GetServoId(leg_id, j);
-        int16_t  curr   = APP_Servo_GetCurrent(sid);
-        int16_t  mapped = Motion_MapToServo(leg_id, j, target_angle[j]);
+        float    curr   = APP_Servo_GetCurrent(sid);
+        float    mapped = Motion_MapToServo(leg_id, j, target_angle[j]);
 
         /* ── 更新状态池 ── */
         leg->current_angle[j] = Motion_MapToUser(leg_id, j, curr);
@@ -433,7 +451,7 @@ void Motion_Stop(uint8_t leg_id)
     for (uint8_t j = 0; j < MOTION_JOINTS_PER_LEG; j++)
     {
         uint8_t sid = Motion_GetServoId(leg_id, j);
-        int16_t curr = APP_Servo_GetCurrent(sid);
+        float curr = APP_Servo_GetCurrent(sid);
 
         /* 同步状态池 */
         leg->current_angle[j] = Motion_MapToUser(leg_id, j, curr);
@@ -489,14 +507,14 @@ void Motion_Scheduler(void)
         for (uint8_t j = 0; j < MOTION_JOINTS_PER_LEG; j++)
         {
             uint8_t  sid       = Motion_GetServoId(leg_id, j);
-            int16_t  servo_pos = APP_Servo_GetCurrent(sid);
+            float    servo_pos = APP_Servo_GetCurrent(sid);
             leg->current_angle[j] = Motion_MapToUser(leg_id, j, servo_pos);
 
             /* 计算到达误差 */
-            int16_t diff = leg->target_angle[j] - leg->current_angle[j];
-            if (diff < 0) diff = -diff;
+            float diff = leg->target_angle[j] - leg->current_angle[j];
+            if (diff < 0.0f) diff = -diff;
 
-            if (diff <= ANGLE_REACHED_THRESHOLD)
+            if (diff <= (float)ANGLE_REACHED_THRESHOLD)
                 leg->reached[j] = 1;
             else
                 all_reached = 0;
@@ -513,7 +531,7 @@ void Motion_Scheduler(void)
  * @param out_angle 输出数组 [hip_angle, knee_angle]
  * @note 用于 IK 层或外部协议获取当前姿态
  */
-void Motion_GetCurrentAngles(uint8_t leg_id, int16_t *out_angle)
+void Motion_GetCurrentAngles(uint8_t leg_id, float *out_angle)
 {
     if (out_angle == NULL) return;
     if (Motion_GetLeg(leg_id) == NULL) return;
@@ -521,7 +539,7 @@ void Motion_GetCurrentAngles(uint8_t leg_id, int16_t *out_angle)
     for (uint8_t j = 0; j < MOTION_JOINTS_PER_LEG; j++)
     {
         uint8_t  sid   = Motion_GetServoId(leg_id, j);
-        int16_t  servo = APP_Servo_GetCurrent(sid);
+        float    servo = APP_Servo_GetCurrent(sid);
         out_angle[j]   = Motion_MapToUser(leg_id, j, servo); /* 舵机→用户空间 */
     }
 }

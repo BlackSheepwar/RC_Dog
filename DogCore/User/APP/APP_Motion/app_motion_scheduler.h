@@ -29,7 +29,7 @@
  * 常量
  *============================================================================*/
 /** @brief 单相位最大执行时间(ms)，超时后强制推进防止死锁 */
-#define MOTION_PHASE_TIMEOUT_MS  1000
+#define MOTION_PHASE_TIMEOUT_MS  3000
 
 /*==============================================================================
  * 相位配置结构体
@@ -43,16 +43,32 @@
  *            正=弯曲, 负=过伸
  */
 typedef struct {
-    int16_t hip;   /* 髋关节角度(°) */
-    int16_t knee;  /* 膝关节角度(°) */
+    float hip;   /**< 髋关节角度(°) */
+    float knee;  /**< 膝关节角度(°) */
 } joint_angle_t;
 
 /**
+ * @brief 二连杆足端坐标(mm)
+ * @details
+ *       x: 足端 x 坐标（+x 前）
+ *       y: 足端 y 坐标（+y 下）
+ * @note 仅当 gait->mode=1 时使用
+ */
+typedef struct {
+    float x;  /**< 足端x坐标(mm) */
+    float y;  /**< 足端y坐标(mm) */
+} foot_pos_t;
+
+/**
  * @brief 单个相位中一条腿的数据
+ * @details
+ *       angle: 关节角度目标，mode=0（角度控制）时使用
+ *       pos:   足端坐标，mode=1（二连杆坐标控制）时使用
  */
 typedef struct {
     uint8_t leg_id;          /**< 腿编号 */
-    joint_angle_t angle;    /**< 该腿的关节角度目标 */
+    joint_angle_t angle;    /**< 关节角度目标(°)，mode=0时使用 */
+    foot_pos_t pos;         /**< 足端坐标(mm)，mode=1时使用 */
 } leg_phase_data_t;
 
 /**
@@ -71,11 +87,13 @@ typedef struct {
  *       phases:     相位数组，phase_count 项
  *       phase_count: 相位总数
  *       loop:       1=循环执行, 0=仅执行一遍
+ *       mode:       0=角度控制, 1=二连杆坐标控制
  */
 typedef struct {
     const motion_phase_t *phases;  /**< 相位数组 */
     uint16_t phase_count;          /**< 相位总数 */
     uint8_t loop;                  /**< 1=循环，0=仅执行一遍 */
+    uint8_t mode;                  /**< 0=角度控制, 1=二连杆坐标控制 */
 } motion_gait_t;
 
 /*==============================================================================

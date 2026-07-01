@@ -35,7 +35,7 @@ typedef struct
     uint8_t             pwm_id;          /**< PWM 映射 ID（BSP_PWM 寻址用） */
     Servo_HwConfig_t    hw;              // 硬件配置（安装后固定）
     float               current_angle;   // 当前角度（浮点，连续平滑）
-    int16_t             target_angle;    // 目标角度（受 phys_range 和 offset_max 约束）
+    float               target_angle;    // 目标角度（浮点，亚度精度）
     float               speed_dps;       // 角速度 (°/s)
     uint8_t             enable;          // 是否启用: 1=参与调度, 0=跳过
 } APP_Servo_t;
@@ -56,16 +56,16 @@ static inline int16_t Servo_GetAbsLimit(const Servo_HwConfig_t *hw)
 /**
  * @brief 角度限幅：先物理范围（扣除offset余量），再软件限位
  * @param hw    舵机硬件配置
- * @param angle 待限幅的角度
- * @return 限幅后的角度
+ * @param angle 待限幅的角度（浮点）
+ * @return 限幅后的角度（浮点）
  */
-static inline int16_t Servo_ClampAngle(const Servo_HwConfig_t *hw, int16_t angle)
+static inline float Servo_ClampAngle(const Servo_HwConfig_t *hw, float angle)
 {
-    int16_t abs_limit = Servo_GetAbsLimit(hw);
+    float abs_limit = (float)Servo_GetAbsLimit(hw);
     if (angle < -abs_limit) angle = -abs_limit;
     else if (angle > abs_limit) angle = abs_limit;
-    if (angle < hw->limit_min) angle = hw->limit_min;
-    if (angle > hw->limit_max) angle = hw->limit_max;
+    if (angle < (float)hw->limit_min) angle = (float)hw->limit_min;
+    if (angle > (float)hw->limit_max) angle = (float)hw->limit_max;
     return angle;
 }
 
@@ -177,13 +177,15 @@ uint8_t APP_Servo_Add(uint8_t servo_id, uint8_t pwm_id, const Servo_HwConfig_t *
         se->hw.limit_min = se->hw.limit_max;   /* 保底：交叉时以下限为准 */
     /* ---------- 初始化运行时状态 ---------- */
     se->current_angle = (float)hw->init_angle;
-    se->target_angle  = hw->init_angle;
+    se->target_angle  = (float)hw->init_angle;
     se->speed_dps     = speed_dps;
     se->enable        = 1;
-    /* ── 先设脉宽，再启动 PWM，避免启动瞬间的异常脉冲 ── */
+    /* ── 先设脉宽再启动 PWM ──
+     * BSP_PWM_Init 已通过 TIM_EGR_UG 将计数器归零，
+     * 启动后无需再次复位（复位会打断已运行的共享定时器，产生残缺脉冲 → 舵机上电抖动）
+     */
     BSP_PWM_SetPulseUs(se->pwm_id, Servo_AngleToPulse(&se->hw, se->current_angle));
     BSP_PWM_Start(se->pwm_id);
-    BSP_PWM_Reset(se->pwm_id);
 
     app_servo_count++;
     return 1;
@@ -204,7 +206,7 @@ uint8_t APP_Servo_Add(uint8_t servo_id, uint8_t pwm_id, const Servo_HwConfig_t *
  *       先限幅到物理可用范围 +/-(phys_range/2 - offset_max)，
  *       再限幅到软件机械限制 hw.limit_min / hw.limit_max。
  */
-void APP_Servo_SetTarget(uint8_t id, int16_t angle)
+void APP_Servo_SetTarget(uint8_t id, float angle)
 {
     APP_Servo_t *se = APP_Servo_GetById(id);
     if (se == NULL) return;
@@ -221,12 +223,12 @@ void APP_Servo_SetTarget(uint8_t id, int16_t angle)
  *       先限幅到物理可用范围 +/-(phys_range/2 - offset_max)，
  *       再限幅到软件机械限制 hw.limit_min / hw.limit_max。
  */
-void APP_Servo_SetincreaseTarget(uint8_t id, int16_t angle)
+void APP_Servo_SetincreaseTarget(uint8_t id, float angle)
 {
     APP_Servo_t *se = APP_Servo_GetById(id);
     if (se == NULL) return;
 
-    int16_t target = se->target_angle + angle;
+    float target = se->target_angle + angle;
     se->target_angle = Servo_ClampAngle(&se->hw, target);
 }
 
@@ -237,12 +239,11 @@ void APP_Servo_SetincreaseTarget(uint8_t id, int16_t angle)
  * @note 内部 current_angle 是浮点数（精度高），
  *       此函数取整后返回，供外部查询或协议回传
  */
-int16_t APP_Servo_GetCurrent(uint8_t id)
+float APP_Servo_GetCurrent(uint8_t id)
 {
     APP_Servo_t *se = APP_Servo_GetById(id);
-    if (se == NULL) return 0xFF;
-    /* +0.5f 实现四舍五入 */
-    return (int16_t)(se->current_angle + 0.5f);
+    if (se == NULL) return 0.0f;
+    return se->current_angle;
 }
 
 /**
@@ -274,10 +275,10 @@ void APP_Servo_Scheduler(void)
         if (se->enable == 0) continue;
 
         /* ── 算差值 + 到位检查 ── */
-        float diff = (float)se->target_angle - se->current_angle;
+        float diff = se->target_angle - se->current_angle;
         if (fabsf(diff) < 0.001f)
         {
-            se->current_angle = (float)se->target_angle;
+            se->current_angle = se->target_angle;
             /* 即使已到位也输出 PWM，确保 Limb 层更新的角度即时反映到硬件 */
             BSP_PWM_SetPulseUs(se->pwm_id, Servo_AngleToPulse(&se->hw, se->current_angle));
             continue;

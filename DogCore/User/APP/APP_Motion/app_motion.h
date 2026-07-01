@@ -2,9 +2,10 @@
  * @file app_motion.h
  * @brief 单腿运动控制层：百分比速度同步 + 关节级状态池
  * @author 李嘉图
- * @date 2026-06-30
+ * @date 2026-07-01
  *
- * @note 核心功能：输入两个关节角度（用户/IK 坐标系）+ 速度百分比
+ * @note 全链路浮点运算，所有角度接口均使用 float（亚度精度）。
+ *       核心功能：输入两个关节角度（用户/IK 坐标系）+ 速度百分比
  *       两个舵机自动同步到达（按百分比分配各关节速度）
  *       内部自动进行 校准偏移 + 方向反转 + 输入限幅 映射到舵机坐标系
  *       维护每关节 current/target/speed/reached 状态池。
@@ -14,6 +15,7 @@
  *       1. Motion_Init()          - 初始化（读取舵机位置填入状态池）
  *       2. Motion_SetTarget(...)  - 设置目标角度和速度百分比（用户坐标系）
  *       3. Motion_Scheduler()     - 每10ms调用一次（角度到达检测）
+ *       4. Motion_GetCurrentAngles() — 读取当前实际角度（浮点）
  */
 
 #ifndef __APP_MOTION_H__
@@ -26,7 +28,7 @@
  *============================================================================*/
 #define MOTION_MAX_LEGS    4        /* 最多支持4条腿 */
 #define MOTION_JOINTS_PER_LEG  2    /* 每条腿2个关节 */
-#define ANGLE_REACHED_THRESHOLD  2  /* 关节到达判定阈值(°) */
+#define ANGLE_REACHED_THRESHOLD  1  /* 关节到达判定阈值(°) */
 
 /*==============================================================================
  * 数据结构
@@ -34,8 +36,8 @@
 /** @brief 单条腿的运动控制状态 */
 typedef struct {
     /* ── 关节级状态池（用户空间，反转/校准前） ── */
-    int16_t current_angle[MOTION_JOINTS_PER_LEG]; /**< 当前实际角度(°) */
-    int16_t target_angle[MOTION_JOINTS_PER_LEG];  /**< 目标角度(°) */
+    float   current_angle[MOTION_JOINTS_PER_LEG]; /**< 当前实际角度(°) */
+    float   target_angle[MOTION_JOINTS_PER_LEG];  /**< 目标角度(°) */
     float   speed[MOTION_JOINTS_PER_LEG];         /**< 当前运行速度(°/s) */
     uint8_t reached[MOTION_JOINTS_PER_LEG];       /**< 1=该关节已到达目标 */
 
@@ -64,7 +66,7 @@ void Motion_Init(void);
  *       - speed=50.0  表示各关节以 50% speed_max 运动
  *       - 内部根据关节实际位移量自动配速，保证两关节同时到位
  */
-void Motion_SetTarget(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_PER_LEG],
+void Motion_SetTarget(uint8_t leg_id, const float target_angle[MOTION_JOINTS_PER_LEG],
                       float speed);
 
 /**
@@ -72,7 +74,7 @@ void Motion_SetTarget(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_P
  * @param leg_id      腿编号
  * @param target_angle 目标角度数组
  */
-void Motion_SetImmediate(uint8_t leg_id, const int16_t target_angle[MOTION_JOINTS_PER_LEG]);
+void Motion_SetImmediate(uint8_t leg_id, const float target_angle[MOTION_JOINTS_PER_LEG]);
 
 /**
  * @brief 周期调度器（每10ms调用一次）
@@ -110,7 +112,7 @@ void Motion_StopAll(void);
  * @param out_angle 输出数组 [hip_angle, knee_angle]，须由调用者分配
  * @note 用于 IK 层获取当前姿态反馈
  */
-void Motion_GetCurrentAngles(uint8_t leg_id, int16_t *out_angle);
+void Motion_GetCurrentAngles(uint8_t leg_id, float *out_angle);
 
 /**
  * @brief 获取腿级状态池指针（只读）

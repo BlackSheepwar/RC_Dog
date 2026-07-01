@@ -1,115 +1,96 @@
 /**
  * @file ik_two_link.c
- * @brief 二连杆逆运动学（IK）解算实现
+ * @brief 二连杆逆运动学（IK）解算实现 —— 改进版：支持两组解
  * @author 李嘉图
- * @date 2026-06-11
+ * @date 2026-07-01
  *
- * @note 关节角度约定：
- *       髋关节：正 = 前摆，负 = 后摆
- *       膝关节：正 = 弯曲，负 = 过伸（正常情况下不会出现）
- *       两连杆模型：髋 → 膝（L1）→ 足（L2）
+ * @note 实现标准平面二连杆逆运动学公式。
+ *       使用余弦定理求膝角，几何法求髋角。
+ *       返回两组解，输出单位为度。
  *
- *       用户坐标系：原点在髋关节，+x 前（平行身体平面），+y 下（垂直身体平面）
- *       标准数学坐标系：+x 右，+y 上
- *       坐标变换：x_math = x_user, y_math = -y_user
+ *       关节角度约定：
+ *       - 髋关节 θ1：正 = 前摆，负 = 后摆（相对于 +x 轴）
+ *       - 膝关节 θ2：正 = 正向弯曲，负 = 反向弯曲
  *
- *       标准IK公式（用变换后的坐标）：
- *       θ1 = atan2(y_math, x_math) - atan2(L2·sin(θ2), L1+L2·cos(θ2))
+ *       坐标系：+x 前，+y 上（标准数学坐标系）
+ *       调用方（如 app_motion_ik）负责从用户坐标系转换。
  */
 
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
-// 固定包含
-#include <stdint.h>
 #include <math.h>
 #include "ik_two_link.h"
 
 /*==============================================================================
- * IK 解算（弧度输出）
+ * 二连杆 IK 解算（输出角度）
  *============================================================================*/
 /**
- * @brief 二连杆逆运动学解算（输出弧度）
- * @param L1    大腿长度(mm)
- * @param L2    小腿长度(mm)
- * @param x     足端 x 坐标（用户坐标系，+x 前）
- * @param y     足端 y 坐标（用户坐标系，+y 下）
- * @param hip   输出：髋关节角度(rad)
- * @param knee  输出：膝关节角度(rad)
- * @return 1=可达，0=不可达（超出工作空间）
+ * @brief 二连杆逆运动学求解（平面，输出角度）
+ * @param L1    杆1（大腿）长度(mm)
+ * @param L2    杆2（小腿）长度(mm)
+ * @param x     末端 x 坐标（+x 前）
+ * @param y     末端 y 坐标（+y 上，标准数学坐标系）
+ * @param t1_1  输出：第1组解的 θ1 / 髋关节角度 (度)，膝向后解
+ * @param t2_1  输出：第1组解的 θ2 / 膝关节角度 (度)，θ2 ≥ 0
+ * @param t1_2  输出：第2组解的 θ1 / 髋关节角度 (度)，膝向前解
+ * @param t2_2  输出：第2组解的 θ2 / 膝关节角度 (度)，θ2 ≤ 0
+ * @return 解的个数：
+ *         0 — 不可达（超出工作空间）
+ *         1 — 边界奇异唯一解（足端在杆长和/差边界上）
+ *         2 — 两组解（正常情况）
  *
- * @details
- *       标准二连杆 IK 模型：
- *           髋 → L1 → 膝 → L2 → 足
- *
- *       用户坐标系：原点在髋关节，+x 前，+y 下。
- *       内部转换为数学坐标系（+x 右，+y 上）后求解。
- *
- *       求解步骤：
- *       1. 余弦定理算膝角
- *       2. 几何法算髋角
- *       3. atan2(-y, x) 做坐标系转换
- *
- * @note
- *       - 角度约定：髋正=前摆，膝正=弯曲
- *       - 不可达时返回 0，输出值不变
- *
- * @see IK_TwoLink_Deg 输出角度的版本
+ * @details 求解步骤：
+ *          1. 计算足端到原点的距离 d
+ *          2. 余弦定理求 cos(θ2)
+ *          3. atan2 求 θ2 的正/负两组解
+ *          4. 几何法求 θ1（第1组解：θ2>0；第2组解：θ2<0）
+ *          5. 弧度转角度
+ *          6. 边界情况判定（唯一解 or 两组解）
  */
-uint8_t IK_TwoLink(float L1, float L2, float x, float y,
-                   float *hip, float *knee)
+int ik_two_link(double L1, double L2, double x, double y,
+                double *t1_1, double *t2_1,
+                double *t1_2, double *t2_2)
 {
-    float d_sq = x * x + y * y;
-    float d    = sqrtf(d_sq);
+    const double eps = 1e-12;
+    double d2 = x * x + y * y;
+    double d  = sqrt(d2);
 
-    /* ── 可达性检查：足端必须在两杆之和/差范围内 ── */
-    if (d > L1 + L2 || d < fabsf(L1 - L2))
+    /* ── 不可达判断 ── */
+    if (d > L1 + L2 + eps || d < fabs(L1 - L2) - eps)
         return 0;
 
     /* ── 膝角（余弦定理） ── */
-    float cos_knee = (L1 * L1 + L2 * L2 - d_sq) / (2.0f * L1 * L2);
-    if (cos_knee > 1.0f)  cos_knee = 1.0f;
-    if (cos_knee < -1.0f) cos_knee = -1.0f;
-    *knee = acosf(cos_knee);
+    double c2 = (d2 - L1 * L1 - L2 * L2) / (2.0 * L1 * L2);
+    /* 数值钳位，防止浮点误差使反三角参数越界 */
+    if (c2 > 1.0)  c2 = 1.0;
+    if (c2 < -1.0) c2 = -1.0;
 
-    /* ── 髋角（几何法）── 用户坐标系转数学坐标系 ──
-       用户y向下，数学y向上，所以 y_math = -y_user
-       标准 IK：θ1 = atan2(y_math, x_math) - atan2(...) */
-    float alpha = atan2f(L2 * sinf(*knee), L1 + L2 * cosf(*knee));
-    *hip = atan2f(-y, x) - alpha;  /* -y 进行坐标系变换 */
+    /* 两组解：θ2 正负 √(1-c²) */
+    double s2       = sqrt(1.0 - c2 * c2);   /* |sinθ2| */
+    double theta2_1 = atan2(s2, c2);          /* θ2 ≥ 0：膝向后 */
+    double theta2_2 = atan2(-s2, c2);         /* θ2 ≤ 0：膝向前 */
 
-    return 1;
-}
+    /* ── 髋角（几何法） ── */
+    double psi  = atan2(y, x);
+    double phi1 = atan2(L2 * sin(theta2_1), L1 + L2 * cos(theta2_1));
+    double phi2 = atan2(L2 * sin(theta2_2), L1 + L2 * cos(theta2_2));
 
-/*==============================================================================
- * IK 解算（角度输出）
- *============================================================================*/
-/**
- * @brief 二连杆逆运动学解算（输出角度）
- * @param L1       大腿长度(mm)
- * @param L2       小腿长度(mm)
- * @param x        足端 x 坐标（用户坐标系，+x 前）
- * @param y        足端 y 坐标（用户坐标系，+y 下）
- * @param hip_deg  输出：髋关节角度(°)
- * @param knee_deg 输出：膝关节角度(°)
- * @return 1=可达，0=不可达（超出工作空间）
- *
- * @details
- *       对 IK_TwoLink 的弧度结果乘 RAD_TO_DEG 得到角度值。
- *       可直接将结果传入 Motion_SetTarget 使用。
- *
- * @note
- *       - hip_deg/knee_deg 为 NULL 时跳过写入，可用于仅检查可达性
- *       - 推荐使用此版本，避免调用方手动转换
- */
-uint8_t IK_TwoLink_Deg(float L1, float L2, float x, float y,
-                        float *hip_deg, float *knee_deg)
-{
-    float hip_rad, knee_rad;
-    uint8_t ret = IK_TwoLink(L1, L2, x, y, &hip_rad, &knee_rad);
+    /* 弧度转角度 */
+    *t1_1 = (psi - phi1) * 180.0 / M_PI;
+    *t2_1 = theta2_1 * 180.0 / M_PI;
+    *t1_2 = (psi - phi2) * 180.0 / M_PI;
+    *t2_2 = theta2_2 * 180.0 / M_PI;
 
-    if (hip_deg)  *hip_deg  = hip_rad  * RAD_TO_DEG;
-    if (knee_deg) *knee_deg = knee_rad * RAD_TO_DEG;
+    /* ── 边界情况 ──
+       当 d ≈ L1+L2（完全伸直）或 d ≈ |L1-L2|（完全折叠）时，
+       两组解重合，实际只有 1 个解 */
+    if (fabs(d - (L1 + L2)) < eps || fabs(d - fabs(L1 - L2)) < eps)
+    {
+        *t1_2 = *t1_1;
+        *t2_2 = *t2_1;
+        return 1;
+    }
 
-    return ret;
+    return 2;
 }

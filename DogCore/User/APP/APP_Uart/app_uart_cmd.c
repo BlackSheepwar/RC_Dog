@@ -29,54 +29,48 @@
  *============================================================================*/
 static void APP_UART_AA(uint8_t *payload, uint8_t len)
 {
+    BSP_GPIO_Toggle(2);
+}
+ 
+static void APP_UART_F0(uint8_t *payload, uint8_t len)
+{
     static uint8_t i = 0;
     if (i == 0) {
         MotionSched_Start(&GAIT_KICK0);  
         i = i+1;
     }
     else{
-        MotionSched_Start(&GAIT_KICK1);
+        MotionSched_Start(&GAIT_KICK2);
         i = i-1;
     }
-}
- 
-static void APP_UART_F0(uint8_t *payload, uint8_t len)
-{
-    APP_Servo_SetTarget(1, -38);
-    APP_Servo_SetTarget(2, 27);
 } 
 
 static void APP_UART_F1(uint8_t *payload, uint8_t len)
 {
-    //APP_Servo_SetTarget(3, 45);
-    APP_Servo_SetTarget(1, -77);
-    APP_Servo_SetTarget(2, -63);
+    MotionSched_Start(&GAIT_KICK2);
 }  
 
 static void APP_UART_F2(uint8_t *payload, uint8_t len)
 {
-    //APP_Servo_SetTarget(3, -10);
-    APP_Servo_SetTarget(1, 0);
-    APP_Servo_SetTarget(2, 90);
+    MotionSched_Start(&GAIT_KICK1);
 }
 
-/**
- * @brief 挡位调速命令（0xE0）
- * @param payload[0] 挡位 0~10，0=停止，1=20°/s … 10=200°/s
- * @param len 数据长度
- * @note 速算：speed_dps = payload[0] * 20，超范围截断到 10
- */
-static void APP_UART_E0(uint8_t *payload, uint8_t len)
+static void APP_UART_F3(uint8_t *payload, uint8_t len)
 {
-    if (payload == NULL || len == 0) return;
 
-    uint8_t gear = payload[0];
-    if (gear > 10) gear = 10;
-
-    float speed = (float)gear * 20.0f;
-    APP_Servo_SetSpeed(1, speed);
-    APP_Servo_SetSpeed(2, speed);
 }
+
+static void APP_UART_F4(uint8_t *payload, uint8_t len)
+{
+
+}
+
+static void APP_UART_F5(uint8_t *payload, uint8_t len)
+{
+
+}
+
+
 
 /*==============================================================================
  * 命令配置表
@@ -93,8 +87,9 @@ static const uart_cmd_entry_t CMD_TABLE[] = {
     { .cmd = 0xF0, .handler = APP_UART_F0 },
     { .cmd = 0xF1, .handler = APP_UART_F1 },
     { .cmd = 0xF2, .handler = APP_UART_F2 },
-    // 挡位调速命令
-    { .cmd = 0xE0, .handler = APP_UART_E0 },
+    { .cmd = 0xF3, .handler = APP_UART_F3 },
+    { .cmd = 0xF4, .handler = APP_UART_F4 },
+    { .cmd = 0xF5, .handler = APP_UART_F5 },
 };
 
 /*==============================================================================
