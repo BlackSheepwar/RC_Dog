@@ -22,6 +22,7 @@
 #include "app_motion_ik.h"   /* IK 协调层（自动按 mode 分发） */
 #include "app_motion.h"
 #include "bsp_sys.h"
+#include "app_gait_seq.h"
 
 /*==============================================================================
  * 调度器内部状态
@@ -66,6 +67,7 @@ static void MotionSched_ApplyPhase(uint16_t phase_index);
  */
 void MotionSched_Init(void)
 {
+    MotionSched_Start(&GAIT_Init);
     s_sched.gait = NULL;
     s_sched.phase_index = 0;
     s_sched.phase_start_tick = 0;

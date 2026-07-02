@@ -24,18 +24,25 @@
 #define __APP_GAIT_SEQ_H__
 
 #include "app_motion_scheduler.h"
+#include "app_motion_ik.h"
+
+#define bab1  130
+#define bab2  200
 
 /*==============================================================================
- * 踱步（循环）
+ * 踱步1（循环）
  *============================================================================*/
-static const motion_gait_t GAIT_KICK0 = {
+static const motion_gait_t GAIT_KICK1 = {
     .phases = (const motion_phase_t[]){
-        {
+
+
+
+                {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = 80} },
-                { .leg_id = 2, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 3, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 4, .pos = {.x = 0, .y = 150} },
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
 
             },
             .leg_count = 4,
@@ -43,20 +50,20 @@ static const motion_gait_t GAIT_KICK0 = {
         },
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 2, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 3, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 4, .pos = {.x = 0, .y = 80} }
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} }
             },
             .leg_count = 4,
-            .speed = 100.0f,         
+            .speed = 100.0f,
         },
                 {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 2, .pos = {.x = 0, .y = 80} },
-                { .leg_id = 3, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 4, .pos = {.x = 0, .y = 150} },
+                { .leg_id = 1, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
 
             },
             .leg_count = 4,
@@ -64,13 +71,13 @@ static const motion_gait_t GAIT_KICK0 = {
         },
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 2, .pos = {.x = 0, .y = 80} },
-                { .leg_id = 3, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 4, .pos = {.x = 0, .y = 150} }
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab1} }
             },
             .leg_count = 4,
-            .speed = 100.0f,
+            .speed = 100.0f,         
         },
     },
     .phase_count = 4,
@@ -79,42 +86,143 @@ static const motion_gait_t GAIT_KICK0 = {
 };
 
 /*==============================================================================
- * 踱步（循环）
+ * 踱步2（循环）
  *============================================================================*/
-static const motion_gait_t GAIT_KICK1 = {
+static const motion_gait_t GAIT_KICK2 = {
     .phases = (const motion_phase_t[]){
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = 80} },
-                { .leg_id = 2, .pos = {.x = 20, .y = 150} },
-                { .leg_id = 3, .pos = {.x = -20, .y = 150} },
-                { .leg_id = 4, .pos = {.x = -20, .y = 150} },
+                { .leg_id = 1, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab1} },
+
+            },
+            .leg_count = 4,
+            .speed = 61.8f,
+        },
+                {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
 
             },
             .leg_count = 4,
             .speed = 100.0f,
         },
+
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = 150} },
-                { .leg_id = 2, .pos = {.x = 20, .y = 150} },
-                { .leg_id = 3, .pos = {.x = -20, .y = 150} },
-                { .leg_id = 4, .pos = {.x = -20, .y = 150} }
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} }
             },
             .leg_count = 4,
-            .speed = 100.0f,         
+            .speed = 61.8f,       
+        },
+                {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} }
+            },
+            .leg_count = 4,
+            .speed = 100.0f,      
+        },
+
+    },
+    .phase_count = 4,
+    .loop = 1,
+    .mode = 1,
+};
+
+/*==============================================================================
+ * F4 单腿抬起相位（单次执行）
+ *============================================================================*/
+/** @brief F4 相位0：腿2抬起 */
+static const motion_gait_t GAIT_F4_PHASE0 = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab1} },
+            },
+            .leg_count = 4,
+            .speed = 100.0f,
         },
     },
-    .phase_count = 2,
+    .phase_count = 1,
     .loop = 0,
     .mode = 1,
 };
 
+/** @brief F4 相位1：腿3抬起 */
+static const motion_gait_t GAIT_F4_PHASE1 = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
+            },
+            .leg_count = 4,
+            .speed = 100.0f,
+        },
+    },
+    .phase_count = 1,
+    .loop = 0,
+    .mode = 1,
+};
+
+/** @brief F4 相位2：腿1抬起 */
+static const motion_gait_t GAIT_F4_PHASE2 = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab1} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
+            },
+            .leg_count = 4,
+            .speed = 100.0f,
+        },
+    },
+    .phase_count = 1,
+    .loop = 0,
+    .mode = 1,
+};
+
+/** @brief F4 相位3：腿4抬起 */
+static const motion_gait_t GAIT_F4_PHASE3 = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
+            },
+            .leg_count = 4,
+            .speed = 100.0f,
+        },
+    },
+    .phase_count = 1,
+    .loop = 0,
+    .mode = 1,
+};
 
 /*==============================================================================
  * 爬服（单次）
  *============================================================================*/
-static const motion_gait_t GAIT_KICK2 = {
+static const motion_gait_t GAIT_Init = {
     .phases = (const motion_phase_t[]){
         {
             .legs = (const leg_phase_data_t[]){
@@ -122,6 +230,27 @@ static const motion_gait_t GAIT_KICK2 = {
                 { .leg_id = 2, .pos = {.x = 0, .y = 200} },
                 { .leg_id = 3, .pos = {.x = 0, .y = 200} },
                 { .leg_id = 4, .pos = {.x = 0, .y = 200} },
+            },
+            .leg_count = 4,
+            .speed = 50.0f,
+        },
+    },
+    .phase_count = 1,
+    .loop = 0,
+    .mode = 1,
+};
+
+/*==============================================================================
+ * 竖直
+ *============================================================================*/
+static const motion_gait_t GAIT_Init_1 = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = MOTIONIK_L1+MOTIONIK_L2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = MOTIONIK_L1+MOTIONIK_L2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = MOTIONIK_L1+MOTIONIK_L2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = MOTIONIK_L1+MOTIONIK_L2} },
             },
             .leg_count = 4,
             .speed = 50.0f,
