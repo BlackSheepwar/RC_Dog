@@ -14,6 +14,7 @@
  *============================================================================*/
 // 固定包含
 #include <stdint.h>
+#include "cmsis_os2.h"
 #include "main.h"
 #include "common.h"
 // 功能包含
@@ -34,6 +35,7 @@ static const can_fifo_routing_entry_t CAN_FIFO0_ROUTING_TABLE[] = {
  *============================================================================*/
 void Task_CAN_RXF0(void *argument)
 {
+    osDelay(10);
     /* ---------- 1. 初始化APP层（复位发送缓冲） ---------- */
     APP_CAN_Init();
 

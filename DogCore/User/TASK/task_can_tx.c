@@ -32,6 +32,7 @@
  */
 void Task_CAN_TX(void *argument)
 {
+    osDelay(10);
     for (;;)
     {
         /* ---------- 等待 TX 完成信号量 ---------- */

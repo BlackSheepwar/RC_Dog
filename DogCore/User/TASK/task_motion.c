@@ -23,6 +23,7 @@
 
 void Task_Motion(void *argument)
 {
+    osDelay(1);
     /* ── 初始化两层架构 ── */
     Motion_Init();           /* 第一层：角度控制 */
     MotionSched_Init();      /* 第二层：周期调度 */

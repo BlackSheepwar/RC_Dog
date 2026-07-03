@@ -26,6 +26,7 @@
  *============================================================================*/
 void Task_UART_TX(void *argument)
 {
+    osDelay(10);
     static uint8_t buf[APP_TX_BUF_SIZE] __attribute__((section(".dma_buffer")));
     uint8_t id, len;
 

@@ -23,6 +23,7 @@
  *============================================================================*/
 void TASK_KEY_CMD(void *argument)
 {
+  osDelay(10);
   App_Key_EventPacket_t msg;
   for(;;)
   {

@@ -20,6 +20,7 @@
  *============================================================================*/
 // 固定包含
 #include <stdint.h>
+#include "cmsis_os2.h"
 #include "main.h"
 #include "common.h"
 // 功能包含

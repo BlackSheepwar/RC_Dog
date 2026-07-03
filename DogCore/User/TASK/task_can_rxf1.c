@@ -34,6 +34,7 @@ static const can_fifo_routing_entry_t CAN_FIFO1_ROUTING_TABLE[] = {
  *============================================================================*/
 void Task_CAN_RXF1(void *argument)
 {
+    osDelay(10);
     for (;;)
     {
         BSP_CAN_Packet_t rx_pkt;

@@ -84,10 +84,29 @@ static void APP_UART_F4(uint8_t *payload, uint8_t len)
 
 static void APP_UART_F5(uint8_t *payload, uint8_t len)
 {
-
+    static uint8_t i = 0;
+    if (i == 0) {
+        MotionSched_Start(&GAIT_Walk_Front);  
+        i = i+1;
+    }
+    else{
+        MotionSched_Start(&GAIT_Init);
+        i = i-1;
+    }
 }
 
-
+static void APP_UART_F6(uint8_t *payload, uint8_t len)
+{
+    static uint8_t i = 0;
+    if (i == 0) {
+        MotionSched_Start(&GAIT_Walk_Queen);  
+        i = i+1;
+    }
+    else{
+        MotionSched_Start(&GAIT_Init);
+        i = i-1;
+    }
+}
 
 /*==============================================================================
  * 命令配置表
@@ -107,6 +126,7 @@ static const uart_cmd_entry_t CMD_TABLE[] = {
     { .cmd = 0xF3, .handler = APP_UART_F3 },
     { .cmd = 0xF4, .handler = APP_UART_F4 },
     { .cmd = 0xF5, .handler = APP_UART_F5 },
+    { .cmd = 0xF6, .handler = APP_UART_F6 },
 };
 
 /*==============================================================================

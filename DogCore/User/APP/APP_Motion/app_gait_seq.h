@@ -99,7 +99,7 @@ static const motion_gait_t GAIT_KICK2 = {
 
             },
             .leg_count = 4,
-            .speed = 61.8f,
+            .speed = 80.0f,
         },
                 {
             .legs = (const leg_phase_data_t[]){
@@ -110,7 +110,7 @@ static const motion_gait_t GAIT_KICK2 = {
 
             },
             .leg_count = 4,
-            .speed = 100.0f,
+            .speed = 80.0f,
         },
 
         {
@@ -121,7 +121,7 @@ static const motion_gait_t GAIT_KICK2 = {
                 { .leg_id = 4, .pos = {.x = 0, .y = bab2} }
             },
             .leg_count = 4,
-            .speed = 61.8f,       
+            .speed = 80.0f,
         },
                 {
             .legs = (const leg_phase_data_t[]){
@@ -131,7 +131,7 @@ static const motion_gait_t GAIT_KICK2 = {
                 { .leg_id = 4, .pos = {.x = 0, .y = bab2} }
             },
             .leg_count = 4,
-            .speed = 100.0f,      
+            .speed = 80.0f,
         },
 
     },
@@ -220,7 +220,7 @@ static const motion_gait_t GAIT_F4_PHASE3 = {
 };
 
 /*==============================================================================
- * 爬服（单次）
+ * 站立（单次）
  *============================================================================*/
 static const motion_gait_t GAIT_Init = {
     .phases = (const motion_phase_t[]){
@@ -261,8 +261,249 @@ static const motion_gait_t GAIT_Init_1 = {
     .mode = 1,
 };
 
+/*==============================================================================
+ * X移动
+ *============================================================================*/
+static const motion_gait_t GAIT_Init_2 = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 50, .y = 200} },
+                { .leg_id = 2, .pos = {.x = 50, .y = 200} },
+                { .leg_id = 3, .pos = {.x = 50, .y = 200} },
+                { .leg_id = 4, .pos = {.x = 50, .y = 200} },
+            },
+            .leg_count = 4,
+            .speed = 50.0f,
+        },
+    },
+    .phase_count = 1,
+    .loop = 0,
+    .mode = 1,
+};
 
+/*==============================================================================
+ * 向前行走
+ *============================================================================*/
+/** @name 行走步态坐标常量
+ *  @brief 步态相位中腿部的位置参数
+ *  @note  X 轴：正值为前进方向，负值为后退方向
+ *         Y 轴：数值越小抬得越高（坐标原点在肩关节）
+ *         - E  : 支撑相高度，脚着地
+ *         - F    : 摆动相高度，脚抬起
+ *         - G : 过渡高度，介于支撑与摆动之间
+ *  @{
+ */
+#define A_F   (60)        /**< 全步幅偏移 */
+#define B_F   (30)        /**< 半步幅偏移 */
+#define C_F   (0)         /**< 居中位置 */
 
+#define E_F   (260.0f)   /**< 支撑相高度 */
+#define F_F   (200.0f)   /**< 摆动相高度 */
+#define G_F   (208.8f)   /**< 过渡高度 */
 
+/** @brief 行走步态速度百分比 */
+#define SPEED_WALK_F      (100.0f)    /**< 行走主速度 */
+/** @} */
+
+static const motion_gait_t GAIT_Walk_Front = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = A_F, .y = E_F} },
+                { .leg_id = 2, .pos = {.x = -A_F, .y = E_F} },
+                { .leg_id = 3, .pos = {.x = A_F, .y = E_F} },
+                { .leg_id = 4, .pos = {.x = -A_F, .y = E_F} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_F,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = B_F, .y = E_F} },
+                { .leg_id = 2, .pos = {.x = -B_F, .y = G_F} },
+                { .leg_id = 3, .pos = {.x = B_F, .y = G_F} },
+                { .leg_id = 4, .pos = {.x = -B_F, .y = E_F} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_F,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = C_F, .y = E_F} },
+                { .leg_id = 2, .pos = {.x = C_F, .y = F_F} },
+                { .leg_id = 3, .pos = {.x = C_F, .y = F_F} },
+                { .leg_id = 4, .pos = {.x = C_F, .y = E_F} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_F,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = -B_F, .y = E_F} },
+                { .leg_id = 2, .pos = {.x = B_F, .y = G_F} },
+                { .leg_id = 3, .pos = {.x = -B_F, .y = G_F} },
+                { .leg_id = 4, .pos = {.x = B_F, .y = E_F} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_F,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = -A_F, .y = E_F} },
+                { .leg_id = 2, .pos = {.x = A_F, .y = E_F} },
+                { .leg_id = 3, .pos = {.x = -A_F, .y = E_F} },
+                { .leg_id = 4, .pos = {.x = A_F, .y = E_F} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_F,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = -B_F, .y = G_F} },
+                { .leg_id = 2, .pos = {.x = B_F, .y = E_F} },
+                { .leg_id = 3, .pos = {.x = -B_F, .y = E_F} },
+                { .leg_id = 4, .pos = {.x = B_F, .y = G_F} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_F,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = C_F, .y = F_F} },
+                { .leg_id = 2, .pos = {.x = C_F, .y = E_F} },
+                { .leg_id = 3, .pos = {.x = C_F, .y = E_F} },
+                { .leg_id = 4, .pos = {.x = C_F, .y = F_F} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_F,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = B_F, .y = G_F} },
+                { .leg_id = 2, .pos = {.x = -B_F, .y = E_F} },
+                { .leg_id = 3, .pos = {.x = B_F, .y = E_F} },
+                { .leg_id = 4, .pos = {.x = -B_F, .y = G_F} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_F,
+        },
+    },
+    .phase_count = 8,
+    .loop = 1,
+    .mode = 1,
+};
+
+/*==============================================================================
+ * 向后行走
+ *============================================================================*/
+/** @name 行走步态坐标常量
+ *  @brief 步态相位中腿部的位置参数
+ *  @note  X 轴：正值为前进方向，负值为后退方向
+ *         Y 轴：数值越小抬得越高（坐标原点在肩关节）
+ *         - E  : 支撑相高度，脚着地
+ *         - F    : 摆动相高度，脚抬起
+ *         - G : 过渡高度，介于支撑与摆动之间
+ *  @{
+ */
+#define A_Q   (-50)        /**< 全步幅偏移 */
+#define B_Q   (-250)        /**< 半步幅偏移 */
+#define C_Q   (0)         /**< 居中位置 */
+
+#define E_Q   (230.0f)   /**< 支撑相高度 */
+#define F_Q   (170.0f)   /**< 摆动相高度 */
+#define G_Q   (178.8f)   /**< 过渡高度 */
+
+/** @brief 行走步态速度百分比 */
+#define SPEED_WALK_Q      (50.0f)    /**< 行走主速度 */
+/** @} */
+
+static const motion_gait_t GAIT_Walk_Queen = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = A_Q, .y = E_Q} },
+                { .leg_id = 2, .pos = {.x = -A_Q, .y = E_Q} },
+                { .leg_id = 3, .pos = {.x = A_Q, .y = E_Q} },
+                { .leg_id = 4, .pos = {.x = -A_Q, .y = E_Q} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_Q,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = B_Q, .y = E_Q} },
+                { .leg_id = 2, .pos = {.x = -B_Q, .y = G_Q} },
+                { .leg_id = 3, .pos = {.x = B_Q, .y = G_Q} },
+                { .leg_id = 4, .pos = {.x = -B_Q, .y = E_Q} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_Q,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = C_Q, .y = E_Q} },
+                { .leg_id = 2, .pos = {.x = C_Q, .y = F_Q} },
+                { .leg_id = 3, .pos = {.x = C_Q, .y = F_Q} },
+                { .leg_id = 4, .pos = {.x = C_Q, .y = E_Q} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_Q,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = -B_Q, .y = E_Q} },
+                { .leg_id = 2, .pos = {.x = B_Q, .y = G_Q} },
+                { .leg_id = 3, .pos = {.x = -B_Q, .y = G_Q} },
+                { .leg_id = 4, .pos = {.x = B_Q, .y = E_Q} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_Q,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = -A_Q, .y = E_Q} },
+                { .leg_id = 2, .pos = {.x = A_Q, .y = E_Q} },
+                { .leg_id = 3, .pos = {.x = -A_Q, .y = E_Q} },
+                { .leg_id = 4, .pos = {.x = A_Q, .y = E_Q} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_Q,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = -B_Q, .y = G_Q} },
+                { .leg_id = 2, .pos = {.x = B_Q, .y = E_Q} },
+                { .leg_id = 3, .pos = {.x = -B_Q, .y = E_Q} },
+                { .leg_id = 4, .pos = {.x = B_Q, .y = G_Q} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_Q,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = C_Q, .y = F_Q} },
+                { .leg_id = 2, .pos = {.x = C_Q, .y = E_Q} },
+                { .leg_id = 3, .pos = {.x = C_Q, .y = E_Q} },
+                { .leg_id = 4, .pos = {.x = C_Q, .y = F_Q} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_Q,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = B_Q, .y = G_Q} },
+                { .leg_id = 2, .pos = {.x = -B_Q, .y = E_Q} },
+                { .leg_id = 3, .pos = {.x = B_Q, .y = E_Q} },
+                { .leg_id = 4, .pos = {.x = -B_Q, .y = G_Q} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_WALK_Q,
+        },
+    },
+    .phase_count = 8,
+    .loop = 1,
+    .mode = 1,
+};
 
 #endif /* __APP_GAIT_SEQ_H__ */
