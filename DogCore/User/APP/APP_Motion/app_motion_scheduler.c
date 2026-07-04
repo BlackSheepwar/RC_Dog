@@ -67,7 +67,6 @@ static void MotionSched_ApplyPhase(uint16_t phase_index);
  */
 void MotionSched_Init(void)
 {
-    MotionSched_Start(&GAIT_Init);
     s_sched.gait = NULL;
     s_sched.phase_index = 0;
     s_sched.phase_start_tick = 0;
