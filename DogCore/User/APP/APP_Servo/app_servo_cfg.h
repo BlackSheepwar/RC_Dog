@@ -71,7 +71,7 @@ static const servo_cfg_t SERVO_CFG[] = {
     // 左后腿
     { .servo_id = 5, .pwm_id = 5,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
-          .offset = 9, .offset_max = 20,              // 偏移量 (°)
+          .offset = 2, .offset_max = 20,              // 偏移量 (°)
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 0, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)

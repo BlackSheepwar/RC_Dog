@@ -36,7 +36,7 @@ static void APP_UART_F0(uint8_t *payload, uint8_t len)
 {
     static uint8_t i = 0;
     if (i == 0) {
-        MotionSched_Start(&GAIT_KICK1);  
+        MotionSched_Start(&GAIT_KICK2);  
         i = i+1;
     }
     else{
@@ -49,7 +49,7 @@ static void APP_UART_F1(uint8_t *payload, uint8_t len)
 {
     static uint8_t i = 0;
     if (i == 0) {
-        MotionSched_Start(&GAIT_KICK2);  
+        MotionSched_Start(&GAIT_Init_1);  
         i = i+1;
     }
     else{
@@ -60,26 +60,17 @@ static void APP_UART_F1(uint8_t *payload, uint8_t len)
 
 static void APP_UART_F2(uint8_t *payload, uint8_t len)
 {
-    MotionSched_Start(&GAIT_Init);
+
 }
 
 static void APP_UART_F3(uint8_t *payload, uint8_t len)
 {   
-    MotionSched_Start(&GAIT_Init_1);
+
 }
 
 static void APP_UART_F4(uint8_t *payload, uint8_t len)
 {
-    static uint8_t phase = 0;
-    static const motion_gait_t *const PHASES[] = {
-        &GAIT_F4_PHASE0,
-        &GAIT_F4_PHASE1,
-        &GAIT_F4_PHASE2,
-        &GAIT_F4_PHASE3,
-    };
 
-    MotionSched_Start(PHASES[phase]);
-    phase = (phase + 1) % 4;  /* 循环切换 */
 }
 
 static void APP_UART_F5(uint8_t *payload, uint8_t len)

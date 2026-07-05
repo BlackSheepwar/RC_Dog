@@ -141,85 +141,6 @@ static const motion_gait_t GAIT_KICK2 = {
 };
 
 /*==============================================================================
- * F4 单腿抬起相位（单次执行）
- *============================================================================*/
-/** @brief F4 相位0：腿2抬起 */
-static const motion_gait_t GAIT_F4_PHASE0 = {
-    .phases = (const motion_phase_t[]){
-        {
-            .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = bab1} },
-                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 4, .pos = {.x = 0, .y = bab1} },
-            },
-            .leg_count = 4,
-            .speed = 100.0f,
-        },
-    },
-    .phase_count = 1,
-    .loop = 0,
-    .mode = 1,
-};
-
-/** @brief F4 相位1：腿3抬起 */
-static const motion_gait_t GAIT_F4_PHASE1 = {
-    .phases = (const motion_phase_t[]){
-        {
-            .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
-            },
-            .leg_count = 4,
-            .speed = 100.0f,
-        },
-    },
-    .phase_count = 1,
-    .loop = 0,
-    .mode = 1,
-};
-
-/** @brief F4 相位2：腿1抬起 */
-static const motion_gait_t GAIT_F4_PHASE2 = {
-    .phases = (const motion_phase_t[]){
-        {
-            .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 2, .pos = {.x = 0, .y = bab1} },
-                { .leg_id = 3, .pos = {.x = 0, .y = bab1} },
-                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
-            },
-            .leg_count = 4,
-            .speed = 100.0f,
-        },
-    },
-    .phase_count = 1,
-    .loop = 0,
-    .mode = 1,
-};
-
-/** @brief F4 相位3：腿4抬起 */
-static const motion_gait_t GAIT_F4_PHASE3 = {
-    .phases = (const motion_phase_t[]){
-        {
-            .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 2, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 3, .pos = {.x = 0, .y = bab2} },
-                { .leg_id = 4, .pos = {.x = 0, .y = bab2} },
-            },
-            .leg_count = 4,
-            .speed = 100.0f,
-        },
-    },
-    .phase_count = 1,
-    .loop = 0,
-    .mode = 1,
-};
-
-/*==============================================================================
  * 站立（单次）
  *============================================================================*/
 static const motion_gait_t GAIT_Init = {
@@ -232,7 +153,7 @@ static const motion_gait_t GAIT_Init = {
                 { .leg_id = 4, .pos = {.x = 0, .y = 200} },
             },
             .leg_count = 4,
-            .speed = 50.0f,
+            .speed = 75.0f,
         },
     },
     .phase_count = 1,
@@ -253,28 +174,7 @@ static const motion_gait_t GAIT_Init_1 = {
                 { .leg_id = 4, .pos = {.x = 0, .y = MOTIONIK_L1+MOTIONIK_L2} },
             },
             .leg_count = 4,
-            .speed = 50.0f,
-        },
-    },
-    .phase_count = 1,
-    .loop = 0,
-    .mode = 1,
-};
-
-/*==============================================================================
- * X移动
- *============================================================================*/
-static const motion_gait_t GAIT_Init_2 = {
-    .phases = (const motion_phase_t[]){
-        {
-            .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 50, .y = 200} },
-                { .leg_id = 2, .pos = {.x = 50, .y = 200} },
-                { .leg_id = 3, .pos = {.x = 50, .y = 200} },
-                { .leg_id = 4, .pos = {.x = 50, .y = 200} },
-            },
-            .leg_count = 4,
-            .speed = 50.0f,
+            .speed = 75.0f,
         },
     },
     .phase_count = 1,
@@ -294,13 +194,13 @@ static const motion_gait_t GAIT_Init_2 = {
  *         - G : 过渡高度，介于支撑与摆动之间
  *  @{
  */
-#define A_F   (60)        /**< 全步幅偏移 */
-#define B_F   (30)        /**< 半步幅偏移 */
+#define A_F   (50)        /**< 全步幅偏移 */
+#define B_F   (25)        /**< 半步幅偏移 */
 #define C_F   (0)         /**< 居中位置 */
 
 #define E_F   (260.0f)   /**< 支撑相高度 */
 #define F_F   (200.0f)   /**< 摆动相高度 */
-#define G_F   (208.8f)   /**< 过渡高度 */
+#define G_F   (223.8f)   /**< 过渡高度 */
 
 /** @brief 行走步态速度百分比 */
 #define SPEED_WALK_F      (100.0f)    /**< 行走主速度 */
@@ -406,8 +306,8 @@ static const motion_gait_t GAIT_Walk_Front = {
  *         - G : 过渡高度，介于支撑与摆动之间
  *  @{
  */
-#define A_Q   (-50)        /**< 全步幅偏移 */
-#define B_Q   (-250)        /**< 半步幅偏移 */
+#define A_Q   (60)        /**< 全步幅偏移 */
+#define B_Q   (30)        /**< 半步幅偏移 */
 #define C_Q   (0)         /**< 居中位置 */
 
 #define E_Q   (230.0f)   /**< 支撑相高度 */
@@ -415,7 +315,7 @@ static const motion_gait_t GAIT_Walk_Front = {
 #define G_Q   (178.8f)   /**< 过渡高度 */
 
 /** @brief 行走步态速度百分比 */
-#define SPEED_WALK_Q      (50.0f)    /**< 行走主速度 */
+#define SPEED_WALK_Q      (100.0f)    /**< 行走主速度 */
 /** @} */
 
 static const motion_gait_t GAIT_Walk_Queen = {

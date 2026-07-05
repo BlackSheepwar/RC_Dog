@@ -45,7 +45,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # User sources
-    # APP
+    # APP层
     User/APP/APP_Uart/app_uart.c
     User/APP/APP_Uart/app_uart_cmd.c
     User/APP/APP_Key/app_key.c
@@ -71,18 +71,18 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Middlewares/IK/ik_two_link.h
 
 
-    # TASK
-    User/TASK/task_uart_rx.c
-    User/TASK/task_uart_rx_cmd.c
-    User/TASK/task_uart_tx.c
-    User/TASK/task_key_debounce.c
-    User/TASK/task_key_cmd.c
+    # TASK层
+    User/TASK/TASK_UART/task_uart_rx.c
+    User/TASK/TASK_UART/task_uart_rx_cmd.c
+    User/TASK/TASK_UART/task_uart_tx.c
+    User/TASK/TASK_KEY/task_key_debounce.c
+    User/TASK/TASK_KEY/task_key_cmd.c
+    User/TASK/TASK_CAN/task_can_rxf0.c
+    User/TASK/TASK_CAN/task_can_rxf1.c
+    User/TASK/TASK_CAN/task_can_tx.c
+    User/TASK/task_oled.c
     User/TASK/task_motion.c
     User/TASK/task_servo.c
-    User/TASK/task_can_rxf0.c
-    User/TASK/task_can_rxf1.c
-    User/TASK/task_can_tx.c
-    User/TASK/task_oled.c
 
     # Third Party
     User/Third_Party/OLED/oled.c
