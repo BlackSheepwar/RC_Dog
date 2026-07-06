@@ -16,10 +16,13 @@
 #include "main.h"
 #include "common.h"
 #include "app_uart_cmd.h"
+#include "tim.h"
+#include "cmsis_os.h"
 // 功能包含
 #include "app_uart.h"
 #include "app_servo.h"
 #include "bsp_gpio.h"
+#include "bsp_pwm.h"
 #include "app_gait_seq.h"
 #include "app_motion_scheduler.h"
 #include <stdint.h>
@@ -64,7 +67,7 @@ static void APP_UART_F2(uint8_t *payload, uint8_t len)
 }
 
 static void APP_UART_F3(uint8_t *payload, uint8_t len)
-{   
+{
 
 }
 

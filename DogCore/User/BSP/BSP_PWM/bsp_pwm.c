@@ -27,6 +27,7 @@
 #define TIM_APB2_Hz     240000000        // APB2定时器时钟（TIM1, TIM8, TIM15, TIM16, TIM17）120MHz
 #define TIM_APB1_Hz     240000000        // APB1定时器时钟（TIM2, TIM3, TIM4, TIM5, TIM6, TIM7, TIM12, TIM13, TIM14）120MHz
 #define BSP_SERVO_PWM_TIM_FREQ_HZ  1000000U   // 定时器计数频率，1MHz → 1计数值=1μs
+#define BSP_MOTOR_PWM_TIM_FREQ_HZ  10000000U  // 电机计数频率，10MHz → ARR=499 @20kHz，500级分辨率
 #define TIM_PSC_MAX          0xFFFFU    // PSC在所有STM32定时器上均为16位
 #define TIM_ARR_MAX(htim)    (IS_TIM_32B_COUNTER_INSTANCE((htim)->Instance) ? 0xFFFFFFFFU : 0xFFFFU)
 
@@ -47,18 +48,31 @@ typedef struct {
 } BSP_PwmMap_t;
 
 static const BSP_PwmMap_t PWM_HW_MAP[TIM_MAX_SIZE] = {
-    // 左前腿
+    // 左前腿舵机
     { .pwm_id = 1,  .htim = &htim15, .channel = TIM_CHANNEL_2 },
     { .pwm_id = 2,  .htim = &htim15, .channel = TIM_CHANNEL_1 },
-    // 右前腿
+    // 右前腿舵机
     { .pwm_id = 3,  .htim = &htim14, .channel = TIM_CHANNEL_1 },
     { .pwm_id = 4,  .htim = &htim13, .channel = TIM_CHANNEL_1 },
-    // 左后后腿
+    // 左后后腿舵机
     { .pwm_id = 5,  .htim = &htim12, .channel = TIM_CHANNEL_2 },
     { .pwm_id = 6,  .htim = &htim12, .channel = TIM_CHANNEL_1 },
-    // 右后腿
+    // 右后腿舵机
     { .pwm_id = 7,  .htim = &htim16, .channel = TIM_CHANNEL_1 },
     { .pwm_id = 8,  .htim = &htim17, .channel = TIM_CHANNEL_1 },
+
+    // 左前腿电机
+    { .pwm_id = 9,  .htim = &htim5, .channel = TIM_CHANNEL_1 },
+    { .pwm_id = 10, .htim = &htim5, .channel = TIM_CHANNEL_2 },
+    // 右前腿电机
+    { .pwm_id = 11, .htim = &htim5, .channel = TIM_CHANNEL_3 },
+    { .pwm_id = 12, .htim = &htim5, .channel = TIM_CHANNEL_4 },
+    // 左后腿电机
+    { .pwm_id = 13, .htim = &htim8, .channel = TIM_CHANNEL_1 },
+    { .pwm_id = 14, .htim = &htim8, .channel = TIM_CHANNEL_2 },
+    // 右后腿电机
+    { .pwm_id = 15, .htim = &htim8, .channel = TIM_CHANNEL_3 },
+    { .pwm_id = 16, .htim = &htim8, .channel = TIM_CHANNEL_4 },
 };
 
 /*==============================================================================
@@ -75,12 +89,16 @@ typedef struct {
 } BSP_TimerFreqMap_t;
 
 static const BSP_TimerFreqMap_t PWM_TIM_CFG[] = {
+    // 舵机
     { .htim = &htim12, .clock_hz = TIM_APB1_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
     { .htim = &htim13, .clock_hz = TIM_APB1_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
     { .htim = &htim14, .clock_hz = TIM_APB1_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
     { .htim = &htim15, .clock_hz = TIM_APB2_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
     { .htim = &htim16, .clock_hz = TIM_APB2_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
     { .htim = &htim17, .clock_hz = TIM_APB2_Hz, .tim_freq_hz = BSP_SERVO_PWM_TIM_FREQ_HZ, .freq = 330 },
+    // 电机（20kHz，空占比 500 级分辨率）
+    { .htim = &htim5, .clock_hz = TIM_APB1_Hz, .tim_freq_hz = BSP_MOTOR_PWM_TIM_FREQ_HZ, .freq = 20000 },
+    { .htim = &htim8, .clock_hz = TIM_APB2_Hz, .tim_freq_hz = BSP_MOTOR_PWM_TIM_FREQ_HZ, .freq = 20000 },
 };
 
 /**
@@ -183,6 +201,11 @@ void BSP_PWM_Start(uint8_t pwm_id)
     if (map == NULL) return;
 
     HAL_TIM_PWM_Start(map->htim, map->channel);
+
+    /* 高级定时器（TIM1/8/15/16/17）必须置位 BDTR.MOE 才有输出。
+     * 即使 HAL_TIM_PWM_Start 内部已做此操作，这里双重保证最稳妥。
+     * 通用定时器无 BDTR 寄存器，写操作无副作用。             */
+    __HAL_TIM_MOE_ENABLE(map->htim);
 }
 
 /**
@@ -248,7 +271,7 @@ void BSP_PWM_SetDuty(uint8_t pwm_id, float duty_percent)
     if (duty_percent > 100.0f) duty_percent = 100.0f;
 
     uint32_t arr     = map->htim->Instance->ARR;
-    uint32_t compare = (uint32_t)((float)(arr + 1) * duty_percent / 100.0f + 0.5f);
+    uint32_t compare = (uint32_t)(((float)arr + 1.0f) * duty_percent / 100.0f + 0.5f);
 
     BSP_PWM_SetCompare(map->htim, map->channel, compare);
 }

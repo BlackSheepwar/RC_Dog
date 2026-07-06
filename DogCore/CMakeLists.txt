@@ -45,81 +45,97 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # User sources
-    # APP层
-    User/APP/APP_Uart/app_uart.c
-    User/APP/APP_Uart/app_uart_cmd.c
-    User/APP/APP_Key/app_key.c
-    User/APP/APP_Key/app_key_cmd.c
-    User/APP/APP_Servo/app_servo.c
-    User/APP/APP_Motion/app_motion.c
-    User/APP/APP_Motion/app_motion_scheduler.c
-    User/APP/APP_Motion/app_motion_ik.c
-    User/APP/APP_CAN/app_can.c
+
+    ## APP层
+    # CAN
     User/APP/APP_CAN/app_can_cmd_1.c
     User/APP/APP_CAN/app_can_cmd_2.c
-    
-    # BSP
-    User/BSP/BSP_GPIO/bsp_gpio.c
-    User/BSP/BSP_Sys/bsp_sys.c
-    User/BSP/BSP_Uart/bsp_uart.c
-    User/BSP/BSP_PWM/bsp_pwm.c
-    User/BSP/BSP_CAN/bsp_can.c
+    User/APP/APP_CAN/app_can.c
+    # KEY
+    User/APP/APP_Key/app_key_cmd.c
+    User/APP/APP_Key/app_key.c
+    # MOTION
+    User/APP/APP_Motion/app_motion_ik.c
+    User/APP/APP_Motion/app_motion_scheduler.c
+    User/APP/APP_Motion/app_motion.c
+    # MOTOR
+    User/APP/APP_Motor/app_motor.c
+    # SERVO
+    User/APP/APP_Servo/app_servo.c
+    # UART
+    User/APP/APP_Uart/app_uart_cmd.c
+    User/APP/APP_Uart/app_uart.c
 
-    # Middlewares
-    User/Middlewares/Codec/codec.c
-    User/Middlewares/IK/ik_two_link.c
-    User/Middlewares/IK/ik_two_link.h
+    ## BSP层
+    User/BSP/BSP_CAN/bsp_can.c          # CAN 
+    User/BSP/BSP_Encoder/bsp_encoder.c  # ENCODER
+    User/BSP/BSP_GPIO/bsp_gpio.c        # GPIO
+    User/BSP/BSP_PWM/bsp_pwm.c          # PWM
+    User/BSP/BSP_Sys/bsp_sys.c          # SYS
+    User/BSP/BSP_Uart/bsp_uart.c        # UART
 
+    ## Middlewares层
+    User/Middlewares/Codec/codec.c      # CODEC
+    User/Middlewares/IK/ik_two_link.c   # IK
+    User/Middlewares/PID/pid.c          # PID
 
-    # TASK层
-    User/TASK/TASK_UART/task_uart_rx.c
-    User/TASK/TASK_UART/task_uart_rx_cmd.c
-    User/TASK/TASK_UART/task_uart_tx.c
-    User/TASK/TASK_KEY/task_key_debounce.c
-    User/TASK/TASK_KEY/task_key_cmd.c
+    ## TASK层
+    # CAN
     User/TASK/TASK_CAN/task_can_rxf0.c
     User/TASK/TASK_CAN/task_can_rxf1.c
     User/TASK/TASK_CAN/task_can_tx.c
-    User/TASK/task_oled.c
-    User/TASK/task_motion.c
-    User/TASK/task_servo.c
+    # Execute
+    User/TASK/TASK_Execute/task_motion.c    
+    User/TASK/TASK_Execute/task_motor.c
+    User/TASK/TASK_Execute/task_servo.c
+    # KEY
+    User/TASK/TASK_KEY/task_key_cmd.c  
+    User/TASK/TASK_KEY/task_key_debounce.c
+    # OLED
+    User/TASK/TASK_OLED/task_oled.c
+    # UART
+    User/TASK/TASK_UART/task_uart_rx_cmd.c    
+    User/TASK/TASK_UART/task_uart_rx.c
+    User/TASK/TASK_UART/task_uart_tx.c
 
-    # Third Party
-    User/Third_Party/OLED/oled.c
-    User/Third_Party/OLED/oled_extend.c
+    ## Third Party层
+    # OLED
     User/Third_Party/OLED/font.c
+    User/Third_Party/OLED/oled_extend.c
     User/Third_Party/OLED/oled_ui.c
+    User/Third_Party/OLED/oled.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # User include directories
-    # APP
-    User/APP/APP_Uart
-    User/APP/APP_Key
-    User/APP/APP_Servo
-    User/APP/APP_Motion
-    User/APP/APP_CAN
 
-    # Common
+    ## APP
+    User/APP/APP_CAN                # CAN
+    User/APP/APP_Key                # KEY
+    User/APP/APP_Motion             # MOTION
+    User/APP/APP_Motor              # MOTOR
+    User/APP/APP_Servo              # SERVO
+    User/APP/APP_Uart               # UART
+
+    ## Common
     User/Common
 
-    # BSP
-    User/BSP/BSP_GPIO
-    User/BSP/BSP_Sys
-    User/BSP/BSP_Uart
-    User/BSP/BSP_PWM
-    User/BSP/BSP_CAN
+    ## BSP
+    User/BSP/BSP_CAN                # CAN 
+    User/BSP/BSP_Encoder            # ENCODER
+    User/BSP/BSP_GPIO               # GPIO
+    User/BSP/BSP_PWM                # PWM    
+    User/BSP/BSP_Sys                # SYS
+    User/BSP/BSP_Uart               # UART
 
-    # Middlewares
-    User/Middlewares/Codec
-    User/Middlewares/IK
+    ## Middlewares
+    User/Middlewares/Codec           # CODEC
+    User/Middlewares/IK              # IK
+    User/Middlewares/PID             # PID
 
-    # TASK
-    User/TASK
-
-    # Third Party
-    User/Third_Party/OLED
+    ## Third Party
+    User/Third_Party/OLED            # OLED
 )
 
 # Add project symbols (macros)

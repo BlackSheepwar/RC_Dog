@@ -86,7 +86,7 @@ const osThreadAttr_t KEY_CMD_T_attributes = {
   .cb_size = sizeof(KEY_CMD_TControlBlock),
   .stack_mem = &KEY_CMD_TBuffer[0],
   .stack_size = sizeof(KEY_CMD_TBuffer),
-  .priority = (osPriority_t) osPriorityHigh5,
+  .priority = (osPriority_t) osPriorityHigh4,
 };
 /* Definitions for UART_RX_T */
 osThreadId_t UART_RX_THandle;
@@ -196,6 +196,18 @@ const osThreadAttr_t Motion_T_attributes = {
   .stack_size = sizeof(Motion_TBuffer),
   .priority = (osPriority_t) osPriorityHigh5,
 };
+/* Definitions for Motor_T */
+osThreadId_t Motor_THandle;
+uint32_t Motor_TBuffer[ 256 ];
+osStaticThreadDef_t Motor_TControlBlock;
+const osThreadAttr_t Motor_T_attributes = {
+  .name = "Motor_T",
+  .cb_mem = &Motor_TControlBlock,
+  .cb_size = sizeof(Motor_TControlBlock),
+  .stack_mem = &Motor_TBuffer[0],
+  .stack_size = sizeof(Motor_TBuffer),
+  .priority = (osPriority_t) osPriorityHigh5,
+};
 /* Definitions for KEY_CMD_Q */
 osMessageQueueId_t KEY_CMD_QHandle;
 uint8_t KEY_CMD_QBuffer[ 16 * sizeof( App_Key_EventPacket_t ) ];
@@ -293,6 +305,7 @@ void Task_CAN_RXF1(void *argument);
 void Task_Servo(void *argument);
 void Task_OLED(void *argument);
 void Task_Motion(void *argument);
+void Task_Motor(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -384,6 +397,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Motion_T */
   Motion_THandle = osThreadNew(Task_Motion, NULL, &Motion_T_attributes);
+
+  /* creation of Motor_T */
+  Motor_THandle = osThreadNew(Task_Motor, NULL, &Motor_T_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -610,6 +626,24 @@ __weak void Task_Motion(void *argument)
     osDelay(1);
   }
   /* USER CODE END Task_Motion */
+}
+
+/* USER CODE BEGIN Header_Task_Motor */
+/**
+* @brief Function implementing the Motor_T thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Task_Motor */
+__weak void Task_Motor(void *argument)
+{
+  /* USER CODE BEGIN Task_Motor */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Task_Motor */
 }
 
 /* Private application code --------------------------------------------------*/
