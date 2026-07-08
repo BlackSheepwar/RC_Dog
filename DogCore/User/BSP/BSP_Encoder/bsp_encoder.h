@@ -7,12 +7,6 @@
  * @note 内置编码器硬件映射表（encoder_id → htim），
  *       上层通过 encoder_id 调用，无需知道具体定时器句柄。
  *       映射表在 bsp_encoder.c 中静态定义，根据项目需要自由增删。
- *
- *       4个电机编码器分别使用 TIM1~TIM4，映射关系：
- *         encoder 0 → TIM1（左前腿）
- *         encoder 1 → TIM2（右前腿）
- *         encoder 2 → TIM3（左后腿）
- *         encoder 3 → TIM4（右后腿）
  */
 
 #ifndef __BSP_ENCODER_H__
@@ -21,6 +15,7 @@
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
+// 固定包含
 #include <stdint.h>
 
 /*==============================================================================
@@ -49,5 +44,27 @@ void BSP_Encoder_Init(void);
  * @note 每次读取后硬件计数器自动清零，下次读取得到的是新周期增量
  */
 uint8_t BSP_Encoder_GetCount(uint8_t id, int16_t *count);
+
+/*==============================================================================
+ * 编码器累积读数函数（不清零，用于分辨率检测/PID调参）
+ *============================================================================*/
+/**
+ * @brief 读取编码器当前计数值（不自动清零，用于累积测量）
+ * @param id    编码器索引（1 ~ BSP_ENCODER_NUM，1-based）
+ * @param count 输出计数值的指针
+ * @retval 1: 成功
+ * @retval 0: 失败（id 无效或 count 为 NULL）
+ * @note 与 BSP_Encoder_GetCount 不同，此函数不清零计数器，
+ *       适用于手动旋转电机一圈检测编码器线数等累积测量场景。
+ *       配合 BSP_Encoder_ResetCount 使用：先复位→旋转→读数。
+ */
+uint8_t BSP_Encoder_ReadCount(uint8_t id, int16_t *count);
+
+/**
+ * @brief 复位编码器计数器（清零）
+ * @param id 编码器索引（1 ~ BSP_ENCODER_NUM，1-based）
+ * @note 用于累积测量前手动归零。不影响编码器模式运行状态。
+ */
+void BSP_Encoder_ResetCount(uint8_t id);
 
 #endif /* __BSP_ENCODER_H__ */

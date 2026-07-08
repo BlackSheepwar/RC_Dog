@@ -28,6 +28,7 @@
 #include "app_key.h"
 #include "bsp_can.h"
 #include "app_uart.h"
+#include "app_motor_debug.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -424,8 +425,9 @@ __weak void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    //HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_3);
-    osDelay(1);
+    /* 标定完成后取消注释，恢复 PID 调参数据发送 */
+    //APP_Motor_SendPIDData(2);
+    osDelay(50);
   }
   /* USER CODE END StartDefaultTask */
 }

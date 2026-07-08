@@ -60,6 +60,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Motion/app_motion.c
     # MOTOR
     User/APP/APP_Motor/app_motor.c
+    User/APP/APP_Motor/app_motor_debug.c
     # SERVO
     User/APP/APP_Servo/app_servo.c
     # UART
@@ -73,6 +74,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/BSP/BSP_PWM/bsp_pwm.c          # PWM
     User/BSP/BSP_Sys/bsp_sys.c          # SYS
     User/BSP/BSP_Uart/bsp_uart.c        # UART
+
+    ## Common层
+    User/Common/common_utils.c
 
     ## Middlewares层
     User/Middlewares/Codec/codec.c      # CODEC

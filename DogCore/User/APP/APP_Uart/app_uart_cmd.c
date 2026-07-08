@@ -22,10 +22,10 @@
 #include "app_uart.h"
 #include "app_servo.h"
 #include "bsp_gpio.h"
-#include "bsp_pwm.h"
 #include "app_gait_seq.h"
 #include "app_motion_scheduler.h"
-#include <stdint.h>
+#include "app_motor.h"
+#include "app_motor_debug.h"
 
 /*==============================================================================
  * 命令处理函数
@@ -63,12 +63,20 @@ static void APP_UART_F1(uint8_t *payload, uint8_t len)
 
 static void APP_UART_F2(uint8_t *payload, uint8_t len)
 {
-
+    BSP_GPIO_Toggle(2);
+    static uint8_t i = 0;
+    if (i == 0) {
+    APP_Motor_SetSpeed(2, 250);
+        i = i+1;
+    }
+    else{
+    APP_Motor_SetSpeed(2, 0);
+        i = i-1;
+    }
 }
 
 static void APP_UART_F3(uint8_t *payload, uint8_t len)
 {
-
 }
 
 static void APP_UART_F4(uint8_t *payload, uint8_t len)

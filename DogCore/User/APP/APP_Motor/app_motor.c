@@ -14,7 +14,11 @@
  *         停止 → 两个PWM均为0
  *
  *       速度闭环流程（每 MOTOR_PID_TICK_MS 执行一次）：
- *         编码器读数 → 换算速度% → PID增量计算 → 限幅 → PWM输出
+ *         编码器读数 → 换算速度% → 增量式PID → 输出累加限幅 → PWM输出
+ *
+ *       增量式 PID 参考 Mini 4WD RC 实现：
+ *         Δu = Kp·Δe + Ki·e  (Kd=0)
+ *         Ki 项不带 dt，Ki 与 Kp 量级相近即可驱动速度环
  */
 
 /*==============================================================================
@@ -29,6 +33,7 @@
 #include "pid.h"
 #include "bsp_encoder.h"
 #include "bsp_pwm.h"
+#include "cmsis_os.h"
 
 /*==============================================================================
  * 电机硬件映射表
@@ -47,35 +52,30 @@ typedef struct {
     uint8_t  pwm_fwd;           /* 正转 PWM ID（BSP_PWM 寻址用）         */
     uint8_t  pwm_rev;           /* 反转 PWM ID（BSP_PWM 寻址用）         */
     uint8_t  encoder_id;        /* 编码器索引（BSP_Encoder 寻址用）      */
-    float    encoder_cpr;       /* 每转定时器计数值（PPR×4, STM32编码器4倍频） */
-    float    gear_ratio;        /* 减速箱减速比                          */
+    float    encoder_cpr;       /**< 输出轴每转脉冲数 */
 } Motor_HwMap_t;
 
 static const Motor_HwMap_t MOTOR_HW_MAP[MOTOR_NUM] = {
 
-    { .motor_id = MOTOR_LF,
+    { .motor_id = 1,
         .pwm_fwd = 9,  .pwm_rev = 10,
-        .encoder_id = 0,
-        .encoder_cpr = 2000.0f,
-        .gear_ratio = 30.0f },
-
-    { .motor_id = MOTOR_RF,
-        .pwm_fwd = 11, .pwm_rev = 12,
         .encoder_id = 1,
-        .encoder_cpr = 2000.0f,
-        .gear_ratio = 30.0f },
+        .encoder_cpr = 60000.0f },
 
-    { .motor_id = MOTOR_LB,
-        .pwm_fwd = 13, .pwm_rev = 14,
+    { .motor_id = 2,
+        .pwm_fwd = 11, .pwm_rev = 12,
         .encoder_id = 2,
-        .encoder_cpr = 2000.0f,
-        .gear_ratio = 30.0f },
+        .encoder_cpr = 60000.0f },
 
-    { .motor_id = MOTOR_RB,
-        .pwm_fwd = 15, .pwm_rev = 16,
+    { .motor_id = 3,
+        .pwm_fwd = 13, .pwm_rev = 14,
         .encoder_id = 3,
-        .encoder_cpr = 2000.0f,
-        .gear_ratio = 30.0f },
+        .encoder_cpr = 60000.0f },
+
+    { .motor_id = 4,
+        .pwm_fwd = 15, .pwm_rev = 16,
+        .encoder_id = 4,
+        .encoder_cpr = 60000.0f },
 };
 
 /*==============================================================================
@@ -144,16 +144,16 @@ static void Motor_SetPWM(const Motor_HwMap_t *map, float duty)
 
 /**
  * @brief 将编码器计数值换算为速度百分比
- * @param map   电机硬件映射（含编码器线数、减速比）
+ * @param map   电机硬件映射（含输出轴每转脉冲数）
  * @param count 编码器计数值（每 PID 周期增量）
  * @return 换算后的速度（-100.0 ~ 100.0）
  *
- * @note 公式：speed = count × 100 / (gear_ratio × encoder_cpr × dt)
- *       负值表示反转，正值表示正转。
+ * @note 公式：speed = count × 100 / (encoder_cpr × dt)
+ *       encoder_cpr 已包含减速比（输出轴每转脉冲数），负值表示反转。
  */
 static float Motor_CountToSpeed(const Motor_HwMap_t *map, int16_t count)
 {
-    float denominator = map->gear_ratio * map->encoder_cpr * MOTOR_PID_TICK_S;
+    float denominator = map->encoder_cpr * MOTOR_PID_TICK_S;
     if (denominator < 0.001f) return 0.0f;
 
     return (float)count * 100.0f / denominator;
@@ -169,6 +169,7 @@ static float Motor_CountToSpeed(const Motor_HwMap_t *map, int16_t count)
  */
 void APP_Motor_Init(void)
 {
+    BSP_Encoder_Init();
     BSP_PWM_Init();
     /* 清空电机池 */
     memset(motor_pool, 0, sizeof(motor_pool));
@@ -178,8 +179,10 @@ void APP_Motor_Init(void)
         const Motor_HwMap_t *map = &MOTOR_HW_MAP[i];
         Motor_Instance_t *inst = &motor_pool[i];
 
-        /* 初始化 PID 句柄（缺省参数，后续可通过 APP_Motor_SetPID 调整） */
-        PID_Init(&inst->pid, 0.5f, 0.4f, 0.0f, MOTOR_PID_TICK_S);
+        /* 初始化 PID 句柄（缺省参数，后续可通过 APP_Motor_SetPID 调整）
+         * 输出限幅 ±100 对应 PWM 占空比范围，防止积分饱和导致振荡 */
+        PID_Init(&inst->pid, 1.7f, 1.0f, 0.8f,
+                 100.0f, -100.0f);
         inst->target_speed = 0.0f;
         inst->enable = 1;
 
@@ -202,13 +205,15 @@ void APP_Motor_Init(void)
  */
 void APP_Motor_SetSpeed(uint8_t motor_id, float speed)
 {
-    if (motor_id >= MOTOR_NUM) return;
+    const Motor_HwMap_t *map = Motor_FindMap(motor_id);
+    if (map == NULL) return;
 
     /* 限幅 */
     if (speed >  MOTOR_SPEED_MAX) speed =  MOTOR_SPEED_MAX;
     if (speed < -MOTOR_SPEED_MAX) speed = -MOTOR_SPEED_MAX;
 
-    Motor_Instance_t *inst = &motor_pool[motor_id];
+    uint8_t idx = (uint8_t)(map - MOTOR_HW_MAP);
+    Motor_Instance_t *inst = &motor_pool[idx];
     inst->target_speed = speed;
 
     /* 同步到 PID 目标值 */
@@ -224,10 +229,34 @@ void APP_Motor_SetSpeed(uint8_t motor_id, float speed)
  */
 uint8_t APP_Motor_GetSpeed(uint8_t motor_id, float *speed)
 {
-    if (motor_id >= MOTOR_NUM || speed == NULL)
+    const Motor_HwMap_t *map = Motor_FindMap(motor_id);
+    if (map == NULL || speed == NULL)
         return 0;
 
-    *speed = motor_pool[motor_id].pid.actual;
+    uint8_t idx = (uint8_t)(map - MOTOR_HW_MAP);
+    *speed = motor_pool[idx].pid.actual;
+    return 1;
+}
+
+/**
+ * @brief 获取指定电机的 PID 状态（供调试模块等外部调用）
+ * @param motor_id 电机编号（1 ~ MOTOR_NUM）
+ * @param target   输出目标值指针
+ * @param actual   输出实际值指针
+ * @param out      输出 PID 输出值指针
+ * @retval 1: 成功
+ * @retval 0: 失败
+ */
+uint8_t APP_Motor_GetPIDState(uint8_t motor_id, float *target, float *actual, float *out)
+{
+    const Motor_HwMap_t *map = Motor_FindMap(motor_id);
+    if (map == NULL || target == NULL || actual == NULL || out == NULL)
+        return 0;
+
+    uint8_t idx = (uint8_t)(map - MOTOR_HW_MAP);
+    *target = motor_pool[idx].pid.target;
+    *actual = motor_pool[idx].pid.actual;
+    *out    = motor_pool[idx].pid.out;
     return 1;
 }
 
@@ -242,9 +271,11 @@ uint8_t APP_Motor_GetSpeed(uint8_t motor_id, float *speed)
  */
 uint8_t APP_Motor_SetPID(uint8_t motor_id, float Kp, float Ki, float Kd)
 {
-    if (motor_id >= MOTOR_NUM) return 0;
+    const Motor_HwMap_t *map = Motor_FindMap(motor_id);
+    if (map == NULL) return 0;
 
-    PID_SetParam(&motor_pool[motor_id].pid, Kp, Ki, Kd);
+    uint8_t idx = (uint8_t)(map - MOTOR_HW_MAP);
+    PID_SetParam(&motor_pool[idx].pid, Kp, Ki, Kd);
     return 1;
 }
 
@@ -271,14 +302,20 @@ void APP_Motor_StopAll(void)
  * PID 调度函数（由 TASK 层周期调用）
  *============================================================================*/
 /**
- * @brief 电机 PID 闭环调度
+ * @brief 电机 PID 闭环调度（增量式）
  * @note 每 MOTOR_PID_TICK_MS 调用一次，完成一次完整的闭环控制周期：
  *
- *       1. 编码器读数 → 2. 速度换算 → 3. PID增量计算 →
- *       4. 输出累加 + 限幅 → 5. PWM输出
+ *       1. 编码器读数 → 2. 速度换算 → 3. 增量式PID计算 →
+ *       4. 输出限幅 → 5. PWM输出
  *
- *       停止检测：当目标速度为 0 且实际速度为 0 且输出 < 5 时，
- *       强制输出为 0 并重置误差历史，防止静摩擦导致积分累积。
+ *       增量式 PID（参考 Mini 4WD RC 实现）：
+ *       - Δu = Kp·Δe + Ki·e + Kd·(Δe − Δe_prev)
+ *       - Ki 项不带 dt，避免 dt=0.01 导致 I 项衰减 100 倍
+ *       - 输出 = 上次输出 + Δu，自动累加并限幅
+ *       - Kp 项作为阻尼，Ki 项作为驱动力，两者量级相近即可
+ *
+ *       停止检测：当目标速度为 0 且实际速度 ≈ 0 且输出 ≈ 0 时，
+ *       强制输出为 0 并重置 PID 状态。
  */
 void APP_Motor_RunPID(void)
 {
@@ -297,28 +334,24 @@ void APP_Motor_RunPID(void)
         /* 2. 换算为实际速度 */
         float actual = Motor_CountToSpeed(map, count);
 
-        /* 3. 执行增量式 PID */
+        /* 3. 执行增量式 PID（内部自动累加并限幅） */
         PID_IncrementControl(&inst->pid, actual);
-
-        /* 4. 输出限幅到 ±100 */
         float out = inst->pid.out;
-        if (out >  MOTOR_SPEED_MAX) out =  MOTOR_SPEED_MAX;
-        if (out < -MOTOR_SPEED_MAX) out = -MOTOR_SPEED_MAX;
 
-        /* 5. 停止检测：目标=0 且 实际≈0 且 输出较小 → 强制归零 */
+        /* 4. 停止检测：目标=0 且 实际≈0 → 强制归零
+         *    去掉输出阈值条件，避免电机已停转但 PID 积分残留导致输出卡死 */
         if (inst->target_speed == 0.0f &&
-            fabsf(actual) < 0.5f &&
-            fabsf(out) < 5.0f)
+            fabsf(actual) < 0.5f)
         {
             out = 0.0f;
+            inst->pid.out = 0.0f;
             PID_Reset(&inst->pid);
         }
 
-        /* 6. 更新 PID 输出值（限幅后的值） */
-        inst->pid.out = out;
+        /* 5. 同步实际速度（供调试读取） */
         inst->pid.actual = actual;
 
-        /* 7. 写入 PWM 硬件 */
+        /* 6. 写入 PWM 硬件 */
         Motor_SetPWM(map, out);
     }
 }

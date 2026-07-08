@@ -31,17 +31,7 @@
 #define MOTOR_NUM              4            /* 电机总数                    */
 #define MOTOR_PID_TICK_S       0.01f         /* PID调度周期（秒）          */
 #define MOTOR_PID_TICK_MS      10            /* PID调度周期（毫秒）        */
-#define MOTOR_SPEED_MAX        100.0f        /* 最大速度（-100~100）       */
-
-/*==============================================================================
- * 电机编号枚举
- *============================================================================*/
-typedef enum {
-    MOTOR_LF = 0,           /* 左前腿 Left  Front                     */
-    MOTOR_RF = 1,           /* 右前腿 Right Front                     */
-    MOTOR_LB = 2,           /* 左后腿 Left  Back                      */
-    MOTOR_RB = 3,           /* 右后腿 Right Back                      */
-} Motor_ID_t;
+#define MOTOR_SPEED_MAX        500.0f        /* 最大速度（标定后 target=100 = 满速） */
 
 /*==============================================================================
  * 初始化函数
@@ -94,6 +84,20 @@ uint8_t APP_Motor_SetPID(uint8_t motor_id, float Kp, float Ki, float Kd);
 void APP_Motor_StopAll(void);
 
 /*==============================================================================
+ * 状态查询（供调试模块等外部调用）
+ *============================================================================*/
+/**
+ * @brief 获取指定电机的 PID 状态
+ * @param motor_id 电机编号（1 ~ MOTOR_NUM）
+ * @param target   输出目标值指针
+ * @param actual   输出实际值指针
+ * @param out      输出 PID 输出值指针
+ * @retval 1: 成功
+ * @retval 0: 失败（motor_id 无效或指针为 NULL）
+ */
+uint8_t APP_Motor_GetPIDState(uint8_t motor_id, float *target, float *actual, float *out);
+
+/*==============================================================================
  * PID 调度函数（由 TASK 层周期调用）
  *============================================================================*/
 /**
@@ -101,7 +105,7 @@ void APP_Motor_StopAll(void);
  * @note 遍历所有电机：
  *       1. 读取编码器计数值
  *       2. 换算为实际速度
- *       3. 调用增量式 PID 计算
+ *       3. 调用增量式 PID 计算（输出自动累加到 pid.out）
  *       4. 输出限幅到 ±100
  *       5. 通过 BSP_PWM_SetDuty 写入硬件
  *
