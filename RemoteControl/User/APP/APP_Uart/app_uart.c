@@ -34,9 +34,9 @@
  *============================================================================*/
 
 /** @brief APP 层管理的串口 ID 列表（运行时不受理热注册） */
-static const uint8_t APP_UART_PORT_IDS[] = { 1 };
+static const uint8_t APP_UART_PORT_IDS[] = {1, 2};
 
-static APP_UART_Port_t app_port_pool[ARRAY_SIZE(APP_UART_PORT_IDS)];    // 需要 DMA 访问
+static APP_UART_Port_t app_port_pool[ARRAY_SIZE(APP_UART_PORT_IDS)] __attribute__((section(".dma_buffer")));
 static uint8_t app_port_count = 0;
 
 /*==============================================================================

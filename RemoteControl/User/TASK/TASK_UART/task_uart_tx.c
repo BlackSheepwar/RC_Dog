@@ -1,13 +1,16 @@
 /**
  * @file task_uart_tx.c
- * @brief UART 发送处理任务（TX 池+描述符 FIFO 方式）
+ * @brief UART 发送处理任务（双缓冲 DMA）
  * @author 李嘉图
- * @date 2026-06-27
+ * @date 2026-06-20
  *
- * @note APP_UART_GetTxFrame 阻塞取帧 → 等待 DMA 空闲 → 启动 DMA 发送。
+ * @note 等待队列 → 区分数据帧与标记帧，经 APP 双缓冲发送。
  *
- *       帧数据写入 TX 池，描述符入 FIFO，信号量通知此任务。
- *       无 ISR 预装，无双缓冲，无 RTOS 消息队列大帧拷贝。
+ *       数据帧（len > 0）：通过双缓冲发送或预装。
+ *       标记帧（len == 0）：ISR 发回的 TX 完成通知，
+ *       任务趁机从队列取帧装填空闲缓冲。
+ *
+ *       双缓冲（ping-pong）：一发一装，消除帧间间隙。
  */
 
 /*==============================================================================
@@ -23,7 +26,8 @@
  *============================================================================*/
 void Task_UART_TX(void *argument)
 {
-    uint8_t buf[APP_TX_BUF_SIZE];   // 需要 DMA 访问
+    osDelay(10);
+    static uint8_t buf[APP_TX_BUF_SIZE] __attribute__((section(".dma_buffer")));
     uint8_t id, len;
 
     for (;;)

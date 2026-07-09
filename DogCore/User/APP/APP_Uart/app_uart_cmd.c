@@ -52,11 +52,11 @@ static void APP_UART_F1(uint8_t *payload, uint8_t len)
 {
     static uint8_t i = 0;
     if (i == 0) {
-        MotionSched_Start(&GAIT_Init_1);  
+        MotionSched_Start(&GAIT_Init);  
         i = i+1;
     }
     else{
-        MotionSched_Start(&GAIT_Init);
+        MotionSched_Start(&GAIT_Init_2);
         i = i-1;
     }
 }  
@@ -66,22 +66,59 @@ static void APP_UART_F2(uint8_t *payload, uint8_t len)
     BSP_GPIO_Toggle(2);
     static uint8_t i = 0;
     if (i == 0) {
-    APP_Motor_SetSpeed(2, 250);
+    APP_Motor_SetSpeed(1, 100);
+    APP_Motor_SetSpeed(2, 100);
+    APP_Motor_SetSpeed(3, 100);
+    APP_Motor_SetSpeed(4, 100);
         i = i+1;
     }
     else{
+    APP_Motor_SetSpeed(1, 0);
     APP_Motor_SetSpeed(2, 0);
+    APP_Motor_SetSpeed(3, 0);
+    APP_Motor_SetSpeed(4, 0);
         i = i-1;
     }
 }
 
 static void APP_UART_F3(uint8_t *payload, uint8_t len)
 {
+        BSP_GPIO_Toggle(2);
+    static uint8_t i = 0;
+    if (i == 0) {
+    APP_Motor_SetSpeed(1, -100);
+    APP_Motor_SetSpeed(2, -100);
+    APP_Motor_SetSpeed(3, -100);
+    APP_Motor_SetSpeed(4, -100);
+        i = i+1;
+    }
+    else{
+    APP_Motor_SetSpeed(1, 0);
+    APP_Motor_SetSpeed(2, 0);
+    APP_Motor_SetSpeed(3, 0);
+    APP_Motor_SetSpeed(4, 0);
+        i = i-1;
+    }
 }
 
 static void APP_UART_F4(uint8_t *payload, uint8_t len)
 {
-
+        BSP_GPIO_Toggle(2);
+    static uint8_t i = 0;
+    if (i == 0) {
+    APP_Motor_SetSpeed(1, 50);
+    APP_Motor_SetSpeed(2, -50);
+    APP_Motor_SetSpeed(3, 50);
+    APP_Motor_SetSpeed(4, -50);
+        i = i+1;
+    }
+    else{
+    APP_Motor_SetSpeed(1, 0);
+    APP_Motor_SetSpeed(2, 0);
+    APP_Motor_SetSpeed(3, 0);
+    APP_Motor_SetSpeed(4, 0);
+        i = i-1;
+    }
 }
 
 static void APP_UART_F5(uint8_t *payload, uint8_t len)

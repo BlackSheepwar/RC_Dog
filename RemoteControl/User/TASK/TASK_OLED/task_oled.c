@@ -1,8 +1,11 @@
 /**
  * @file task_oled.c
- * @brief 实现OLED任务
+ * @brief OLED任务 — 帧率测试
  * @author 李嘉图
- * @date 2026-05-08
+ * @date 2026-06-23
+ *
+ * @note 测量 OLED_ShowFrame 实际刷新速率，显示 FPS。
+ *       含移动光标视觉反馈，全程无延迟跑满速。
  */
 
 /*==============================================================================
@@ -14,14 +17,15 @@
 #include "main.h"
 // 功能包含
 #include "oled.h"
-#include "oled_ui.h"
 #include "oled_extend.h"
+#include "oled_ui.h"
 
 /*==============================================================================
  * 任务函数
  *============================================================================*/
 void Task_OLED(void *argument)
 {
+    osDelay(10);
     OLED_Init();
     OLED_UI_FpsInit();
 

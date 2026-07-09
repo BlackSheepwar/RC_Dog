@@ -37,7 +37,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 108,
+				"line" : 104,
 				"parent" : 2
 			},
 			{
@@ -55,7 +55,7 @@
 			{
 				"command" : 3,
 				"file" : 1,
-				"line" : 102,
+				"line" : 98,
 				"parent" : 2
 			},
 			{
@@ -199,10 +199,10 @@
 				4,
 				5,
 				6,
-				7,
 				8,
 				9,
 				10,
+				11,
 				12,
 				13,
 				14,
@@ -216,11 +216,7 @@
 				22,
 				23,
 				24,
-				25,
-				26,
-				27,
-				28,
-				29
+				25
 			]
 		},
 		{
@@ -319,7 +315,7 @@
 			"language" : "ASM",
 			"sourceIndexes" : 
 			[
-				11
+				7
 			]
 		}
 	],
@@ -394,10 +390,10 @@
 				4,
 				5,
 				6,
-				7,
 				8,
 				9,
 				10,
+				11,
 				12,
 				13,
 				14,
@@ -411,24 +407,24 @@
 				22,
 				23,
 				24,
-				25,
-				26,
-				27,
-				28,
-				29
+				25
 			]
 		},
 		{
 			"name" : "",
 			"sourceIndexes" : 
 			[
-				11
+				7
 			]
 		},
 		{
 			"name" : "Object Libraries",
 			"sourceIndexes" : 
 			[
+				26,
+				27,
+				28,
+				29,
 				30,
 				31,
 				32,
@@ -450,11 +446,7 @@
 				48,
 				49,
 				50,
-				51,
-				52,
-				53,
-				54,
-				55
+				51
 			]
 		}
 	],
@@ -469,31 +461,7 @@
 		{
 			"backtrace" : 6,
 			"compileGroupIndex" : 0,
-			"path" : "Core/Src/gpio.c",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 6,
-			"compileGroupIndex" : 0,
 			"path" : "Core/Src/freertos.c",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 6,
-			"compileGroupIndex" : 0,
-			"path" : "Core/Src/dma.c",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 6,
-			"compileGroupIndex" : 0,
-			"path" : "Core/Src/i2c.c",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 6,
-			"compileGroupIndex" : 0,
-			"path" : "Core/Src/usart.c",
 			"sourceGroupIndex" : 0
 		},
 		{

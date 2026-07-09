@@ -85,6 +85,16 @@ uint16_t BSP_UART_GetDMAPos(uint8_t id);
 void BSP_UART_SendDMA(uint8_t id, const uint8_t *buf, uint16_t len);
 
 /**
+ * @brief 阻塞式发送数据（轮询模式，不使用 DMA）
+ * @param id  UART 实例 ID
+ * @param buf 待发送数据指针
+ * @param len 发送长度
+ * @note 函数阻塞直到全部数据发送完成。
+ *       适用于调试输出等低频场景，不会与 DMA 发送产生冲突。
+ */
+void BSP_UART_Send(uint8_t id, const uint8_t *buf, uint16_t len);
+
+/**
  * @brief 查询 DMA 发送是否忙
  * @param id UART 实例 ID
  * @retval 1: 发送中

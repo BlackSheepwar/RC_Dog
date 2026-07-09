@@ -53,7 +53,8 @@ typedef struct {
 
 /** @brief UART 硬件映射表 */
 static const BSP_UART_Map_t BSP_UART_MAP[BSP_UART_MAX_NUM] = {
-    { .id = 1, .huart = &huart1 },
+    { .id = 1, .huart = &huart4 },
+    { .id = 2, .huart = &huart5 },
 };
 
 /**
@@ -231,10 +232,7 @@ void BSP_UART_SendDMA(uint8_t id, const uint8_t *buf, uint16_t len)
     uint8_t idx = map - BSP_UART_MAP;
     tx_busy[idx] = 1;
 
-    if (HAL_UART_Transmit_DMA(map->huart, buf, len) != HAL_OK)
-    {
-        tx_busy[idx] = 0;   /* 发送启动失败，释放忙标志 */
-    }
+    HAL_UART_Transmit_DMA(map->huart, buf, len);
 }
 
 /**
@@ -248,6 +246,25 @@ uint8_t BSP_UART_IsTxBusy(uint8_t id)
     const BSP_UART_Map_t *map = BSP_UART_FindMap(id);
     if (!map) return 0;
     return tx_busy[map - BSP_UART_MAP];
+}
+
+/**
+ * @brief 阻塞式发送数据（轮询模式，不使用 DMA）
+ * @param id  UART 实例 ID
+ * @param buf 待发送数据指针
+ * @param len 发送长度
+ *
+ * @note 使用 HAL_UART_Transmit 轮询发送，阻塞直到完成。
+ *       与 DMA 发送独立，不会产生 DMA 通道冲突。
+ *       适用于调试输出等低频场景（长度过大时会长时间阻塞）。
+ */
+void BSP_UART_Send(uint8_t id, const uint8_t *buf, uint16_t len)
+{
+    const BSP_UART_Map_t *map = BSP_UART_FindMap(id);
+    if (!map || !buf || len == 0)
+        return;
+
+    HAL_UART_Transmit(map->huart, (uint8_t*)buf, len, HAL_MAX_DELAY);
 }
 
 /*==============================================================================

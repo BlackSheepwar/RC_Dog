@@ -24,6 +24,7 @@
  *============================================================================*/
 void Task_KEY_Debounce(void *argument)
 {
+    osDelay(10);
     App_Key_Init();
 
     for (uint8_t i = 0; i < ARRAY_SIZE(KEY_REG_TABLE); i++)
