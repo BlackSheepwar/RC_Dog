@@ -37,25 +37,25 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 104,
+				"line" : 109,
 				"parent" : 2
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 111,
+				"line" : 120,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 78,
+				"line" : 83,
 				"parent" : 0
 			},
 			{
 				"command" : 3,
 				"file" : 1,
-				"line" : 98,
+				"line" : 103,
 				"parent" : 2
 			},
 			{
@@ -114,11 +114,11 @@
 			[
 				{
 					"backtrace" : 5,
-					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/APP/APP_Uart"
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/APP/APP_Key"
 				},
 				{
 					"backtrace" : 5,
-					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/APP/APP_Key"
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/APP/APP_Uart"
 				},
 				{
 					"backtrace" : 5,
@@ -130,7 +130,7 @@
 				},
 				{
 					"backtrace" : 5,
-					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/BSP/BSP_Sys"
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/BSP/BSP_SYS"
 				},
 				{
 					"backtrace" : 5,
@@ -138,11 +138,23 @@
 				},
 				{
 					"backtrace" : 5,
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/BSP/BSP_Encoder"
+				},
+				{
+					"backtrace" : 5,
 					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/Middlewares/Codec"
 				},
 				{
 					"backtrace" : 5,
-					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/TASK"
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/TASK/TASK_KEY"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/TASK/TASK_OLED"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/TASK/TASK_UART"
 				},
 				{
 					"backtrace" : 5,
@@ -199,11 +211,11 @@
 				4,
 				5,
 				6,
+				7,
 				8,
 				9,
 				10,
 				11,
-				12,
 				13,
 				14,
 				15,
@@ -216,7 +228,14 @@
 				22,
 				23,
 				24,
-				25
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32
 			]
 		},
 		{
@@ -245,11 +264,11 @@
 			[
 				{
 					"backtrace" : 5,
-					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/APP/APP_Uart"
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/APP/APP_Key"
 				},
 				{
 					"backtrace" : 5,
-					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/APP/APP_Key"
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/APP/APP_Uart"
 				},
 				{
 					"backtrace" : 5,
@@ -261,7 +280,7 @@
 				},
 				{
 					"backtrace" : 5,
-					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/BSP/BSP_Sys"
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/BSP/BSP_SYS"
 				},
 				{
 					"backtrace" : 5,
@@ -269,11 +288,23 @@
 				},
 				{
 					"backtrace" : 5,
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/BSP/BSP_Encoder"
+				},
+				{
+					"backtrace" : 5,
 					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/Middlewares/Codec"
 				},
 				{
 					"backtrace" : 5,
-					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/TASK"
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/TASK/TASK_KEY"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/TASK/TASK_OLED"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "D:/a1/Project/RC_Dog/RemoteControl/User/TASK/TASK_UART"
 				},
 				{
 					"backtrace" : 5,
@@ -315,7 +346,7 @@
 			"language" : "ASM",
 			"sourceIndexes" : 
 			[
-				7
+				12
 			]
 		}
 	],
@@ -390,11 +421,11 @@
 				4,
 				5,
 				6,
+				7,
 				8,
 				9,
 				10,
 				11,
-				12,
 				13,
 				14,
 				15,
@@ -407,27 +438,27 @@
 				22,
 				23,
 				24,
-				25
-			]
-		},
-		{
-			"name" : "",
-			"sourceIndexes" : 
-			[
-				7
-			]
-		},
-		{
-			"name" : "Object Libraries",
-			"sourceIndexes" : 
-			[
+				25,
 				26,
 				27,
 				28,
 				29,
 				30,
 				31,
-				32,
+				32
+			]
+		},
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				12
+			]
+		},
+		{
+			"name" : "Object Libraries",
+			"sourceIndexes" : 
+			[
 				33,
 				34,
 				35,
@@ -446,7 +477,14 @@
 				48,
 				49,
 				50,
-				51
+				51,
+				52,
+				53,
+				54,
+				55,
+				56,
+				57,
+				58
 			]
 		}
 	],
@@ -461,7 +499,37 @@
 		{
 			"backtrace" : 6,
 			"compileGroupIndex" : 0,
+			"path" : "Core/Src/gpio.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 6,
+			"compileGroupIndex" : 0,
 			"path" : "Core/Src/freertos.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 6,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/dma.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 6,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/i2c.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 6,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/tim.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 6,
+			"compileGroupIndex" : 0,
+			"path" : "Core/Src/usart.c",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -503,18 +571,6 @@
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "User/APP/APP_Uart/app_uart.c",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 7,
-			"compileGroupIndex" : 0,
-			"path" : "User/APP/APP_Uart/app_uart_cmd.c",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 7,
-			"compileGroupIndex" : 0,
 			"path" : "User/APP/APP_Key/app_key.c",
 			"sourceGroupIndex" : 0
 		},
@@ -527,13 +583,31 @@
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
+			"path" : "User/APP/APP_Uart/app_uart.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "User/APP/APP_Uart/app_uart_cmd.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "User/Common/common_utils.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
 			"path" : "User/BSP/BSP_GPIO/bsp_gpio.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "User/BSP/BSP_Sys/bsp_sys.c",
+			"path" : "User/BSP/BSP_SYS/bsp_sys.c",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -545,43 +619,55 @@
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
+			"path" : "User/BSP/BSP_Encoder/bsp_encoder.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
 			"path" : "User/Middlewares/Codec/codec.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "User/TASK/task_uart_rx.c",
+			"path" : "User/TASK/TASK_KEY/task_key_cmd.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "User/TASK/task_uart_rx_cmd.c",
+			"path" : "User/TASK/TASK_KEY/task_key_debounce.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "User/TASK/task_uart_tx.c",
+			"path" : "User/TASK/TASK_OLED/task_oled.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "User/TASK/task_key_debounce.c",
+			"path" : "User/TASK/TASK_UART/task_uart_rx.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "User/TASK/task_key_cmd.c",
+			"path" : "User/TASK/TASK_UART/task_uart_rx_cmd.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
-			"path" : "User/TASK/task_oled.c",
+			"path" : "User/TASK/TASK_UART/task_uart_tx.c",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 7,
+			"compileGroupIndex" : 0,
+			"path" : "User/Third_Party/OLED/font.c",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -594,12 +680,6 @@
 			"backtrace" : 7,
 			"compileGroupIndex" : 0,
 			"path" : "User/Third_Party/OLED/oled_extend.c",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 7,
-			"compileGroupIndex" : 0,
-			"path" : "User/Third_Party/OLED/font.c",
 			"sourceGroupIndex" : 0
 		},
 		{

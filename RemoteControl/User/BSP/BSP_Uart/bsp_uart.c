@@ -53,8 +53,7 @@ typedef struct {
 
 /** @brief UART 硬件映射表 */
 static const BSP_UART_Map_t BSP_UART_MAP[BSP_UART_MAX_NUM] = {
-    { .id = 1, .huart = &huart4 },
-    { .id = 2, .huart = &huart5 },
+    { .id = 1, .huart = &huart1 },
 };
 
 /**

@@ -45,8 +45,32 @@ typedef struct {
 } BSP_GPIO_Map_t;
 
 static const BSP_GPIO_Map_t GPIO_HW_MAP[GPIO_MAX_NUM] = {
-    { .gpio_id = 1, .GPIOx = GPIOC, .Pin = GPIO_PIN_13, .dir = GPIO_DIR_IN  },
-    { .gpio_id = 2, .GPIOx = GPIOE, .Pin = GPIO_PIN_3,  .dir = GPIO_DIR_OUT },
+    // 测试
+    { .gpio_id = 0, .GPIOx = GPIOC, .Pin = GPIO_PIN_13, .dir = GPIO_DIR_OUT  },
+    // 微动按键
+    { .gpio_id = 1, .GPIOx = KEY1_GPIO_Port, .Pin = KEY1_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 2, .GPIOx = KEY2_GPIO_Port, .Pin = KEY2_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 3, .GPIOx = KEY3_GPIO_Port, .Pin = KEY3_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 4, .GPIOx = KEY4_GPIO_Port, .Pin = KEY4_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 5, .GPIOx = KEY5_GPIO_Port, .Pin = KEY5_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 6, .GPIOx = KEY6_GPIO_Port, .Pin = KEY6_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 7, .GPIOx = KEY7_GPIO_Port, .Pin = KEY7_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 8, .GPIOx = KEY8_GPIO_Port, .Pin = KEY8_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 9, .GPIOx = KEY9_GPIO_Port, .Pin = KEY9_Pin, .dir = GPIO_DIR_IN  },
+    // 编码器按钮
+    { .gpio_id = 10, .GPIOx = EK1_GPIO_Port, .Pin = EK1_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 11, .GPIOx = EK2_GPIO_Port, .Pin = EK2_Pin, .dir = GPIO_DIR_IN  },
+    { .gpio_id = 12, .GPIOx = EK3_GPIO_Port, .Pin = EK3_Pin, .dir = GPIO_DIR_IN  },
+    // LED灯
+    { .gpio_id = 13, .GPIOx = LED1_GPIO_Port, .Pin = LED1_Pin,  .dir = GPIO_DIR_OUT },
+    { .gpio_id = 14, .GPIOx = LED2_GPIO_Port, .Pin = LED2_Pin,  .dir = GPIO_DIR_OUT },
+    { .gpio_id = 15, .GPIOx = LED3_GPIO_Port, .Pin = LED3_Pin,  .dir = GPIO_DIR_OUT },
+    { .gpio_id = 16, .GPIOx = LED4_GPIO_Port, .Pin = LED4_Pin,  .dir = GPIO_DIR_OUT },
+    { .gpio_id = 17, .GPIOx = LED5_GPIO_Port, .Pin = LED5_Pin,  .dir = GPIO_DIR_OUT },
+    { .gpio_id = 18, .GPIOx = LED6_GPIO_Port, .Pin = LED6_Pin,  .dir = GPIO_DIR_OUT },
+    // 无线引脚
+    { .gpio_id = 19, .GPIOx = M0_GPIO_Port, .Pin = M0_Pin,  .dir = GPIO_DIR_OUT },
+    { .gpio_id = 20, .GPIOx = M1_GPIO_Port, .Pin = M1_Pin,  .dir = GPIO_DIR_OUT },
 };
 
 /**

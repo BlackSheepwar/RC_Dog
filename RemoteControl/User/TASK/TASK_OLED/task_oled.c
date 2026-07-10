@@ -25,7 +25,7 @@
  *============================================================================*/
 void Task_OLED(void *argument)
 {
-    osDelay(10);
+    osDelay(20);
     OLED_Init();
     OLED_UI_FpsInit();
 

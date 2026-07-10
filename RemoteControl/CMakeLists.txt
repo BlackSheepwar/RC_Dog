@@ -46,57 +46,66 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     # APP
-    User/APP/APP_Uart/app_uart.c
-    User/APP/APP_Uart/app_uart_cmd.c
     User/APP/APP_Key/app_key.c
     User/APP/APP_Key/app_key_cmd.c
-    
+    User/APP/APP_Uart/app_uart.c
+    User/APP/APP_Uart/app_uart_cmd.c
+
+    # Common
+    User/Common/common_utils.c
+
     # BSP
     User/BSP/BSP_GPIO/bsp_gpio.c
-    User/BSP/BSP_Sys/bsp_sys.c
+    User/BSP/BSP_SYS/bsp_sys.c
     User/BSP/BSP_Uart/bsp_uart.c
+    User/BSP/BSP_Encoder/bsp_encoder.c
 
     # Middlewares
     User/Middlewares/Codec/codec.c
 
     # TASK
-    User/TASK/task_uart_rx.c
-    User/TASK/task_uart_rx_cmd.c
-    User/TASK/task_uart_tx.c
-    User/TASK/task_key_debounce.c
-    User/TASK/task_key_cmd.c
-    User/TASK/task_oled.c
+    User/TASK/TASK_KEY/task_key_cmd.c
+    User/TASK/TASK_KEY/task_key_debounce.c
+    User/TASK/TASK_OLED/task_oled.c
+    User/TASK/TASK_UART/task_uart_rx.c
+    User/TASK/TASK_UART/task_uart_rx_cmd.c
+    User/TASK/TASK_UART/task_uart_tx.c
 
     # Third_Party
+    User/Third_Party/OLED/font.c
     User/Third_Party/OLED/oled.c
     User/Third_Party/OLED/oled_extend.c
-    User/Third_Party/OLED/font.c
     User/Third_Party/OLED/oled_ui.c
+
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     # APP
-    User/APP/APP_Uart
     User/APP/APP_Key
+    User/APP/APP_Uart
 
     # Common
     User/Common
 
     # BSP
     User/BSP/BSP_GPIO
-    User/BSP/BSP_Sys
+    User/BSP/BSP_SYS
     User/BSP/BSP_Uart
+    User/BSP/BSP_Encoder
 
     # Middlewares
     User/Middlewares/Codec
 
     # TASK
-    User/TASK
+    User/TASK/TASK_KEY
+    User/TASK/TASK_OLED
+    User/TASK/TASK_UART
 
     # Third_Party
     User/Third_Party/OLED
+
 )
 
 # Add project symbols (macros)
