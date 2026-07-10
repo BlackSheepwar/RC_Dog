@@ -1,8 +1,0 @@
-device STM32F405RG
-si SWD
-speed 4000
-connect
-loadfile build/Debug/FrontDog.elf
-r
-g
-exit

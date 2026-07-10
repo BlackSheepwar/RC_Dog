@@ -20,6 +20,7 @@
 // 功能包含
 #include "app_key.h"
 #include "app_uart.h"
+#include "app_led.h"
 #include "bsp_gpio.h"
 
 /*==============================================================================
@@ -35,295 +36,77 @@ typedef struct {
  * 按键事件处理函数
  *============================================================================*/
 
-/* --- Key1 ----------------------------------------- */
-static void Key1_OnDown(void)    
-{ 
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(16);    
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key1  ---------------------------------------- */
+static void Key1_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X01, NULL, 0); }
 static void Key1_OnClick(void)   { }
 static void Key1_OnLong(void)    { }
-static void Key1_OnLongUp(void)  
-{ 
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(16, GPIO_LEVEL_LOW);    
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key1_OnLongUp(void)  { }
 
-/* --- Key2 ----------------------------------------- */
-static void Key2_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key2  ---------------------------------------- */
+static void Key2_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X02, NULL, 0);}
 static void Key2_OnClick(void)   { }
 static void Key2_OnLong(void)    { }
-static void Key2_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key2_OnLongUp(void)  { }
 
-/* --- Key3 ----------------------------------------- */
-static void Key3_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key3  ---------------------------------------- */
+static void Key3_OnDown(void)    { }
 static void Key3_OnClick(void)   { }
 static void Key3_OnLong(void)    { }
-static void Key3_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key3_OnLongUp(void)  { }
 
-/* --- Key4 ----------------------------------------- */
-static void Key4_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key4  ---------------------------------------- */
+static void Key4_OnDown(void)    { }
 static void Key4_OnClick(void)   { }
 static void Key4_OnLong(void)    { }
-static void Key4_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key4_OnLongUp(void)  { }
 
-/* --- Key5 ----------------------------------------- */
-static void Key5_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key5  ---------------------------------------- */
+static void Key5_OnDown(void)    { }
 static void Key5_OnClick(void)   { }
 static void Key5_OnLong(void)    { }
-static void Key5_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key5_OnLongUp(void)  { }
 
-/* --- Key6 ----------------------------------------- */
-static void Key6_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key6  ---------------------------------------- */
+static void Key6_OnDown(void)    { }
 static void Key6_OnClick(void)   { }
 static void Key6_OnLong(void)    { }
-static void Key6_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key6_OnLongUp(void)  { }
 
-/* --- Key7 ----------------------------------------- */
-static void Key7_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key7  ---------------------------------------- */
+static void Key7_OnDown(void)    { }
 static void Key7_OnClick(void)   { }
 static void Key7_OnLong(void)    { }
-static void Key7_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key7_OnLongUp(void)  { }
 
-/* --- Key8 ----------------------------------------- */
-static void Key8_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key8  ---------------------------------------- */
+static void Key8_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X12, NULL, 0); }
 static void Key8_OnClick(void)   { }
 static void Key8_OnLong(void)    { }
-static void Key8_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key8_OnLongUp(void)  { }
 
-/* --- Key9 ----------------------------------------- */
-static void Key9_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+/* --- Key9  ---------------------------------------- */
+static void Key9_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X11, NULL, 0); }
 static void Key9_OnClick(void)   { }
 static void Key9_OnLong(void)    { }
-static void Key9_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key9_OnLongUp(void)  { }
 
 /* --- Key10 ---------------------------------------- */
-static void Key10_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+static void Key10_OnDown(void)   { APP_UART_BuildTxPacket(1, 0X21, NULL, 0); }
 static void Key10_OnClick(void)  { }
 static void Key10_OnLong(void)   { }
-static void Key10_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key10_OnLongUp(void) { }
 
 /* --- Key11 ---------------------------------------- */
-static void Key11_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+static void Key11_OnDown(void)   { APP_UART_BuildTxPacket(1, 0X22, NULL, 0); }
 static void Key11_OnClick(void)  { }
 static void Key11_OnLong(void)   { }
-static void Key11_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key11_OnLongUp(void) { }
 
 /* --- Key12 ---------------------------------------- */
-static void Key12_OnDown(void)
-{
-    BSP_GPIO_Toggle(0);
-    BSP_GPIO_Toggle(12);
-    BSP_GPIO_Toggle(13);
-    BSP_GPIO_Toggle(14);
-    BSP_GPIO_Toggle(15);
-    BSP_GPIO_Toggle(17);
-    BSP_GPIO_Toggle(18);
-}
+static void Key12_OnDown(void)   { APP_UART_BuildTxPacket(1, 0XFF, NULL, 0); }
 static void Key12_OnClick(void)  { }
 static void Key12_OnLong(void)   { }
-static void Key12_OnLongUp(void)
-{
-    BSP_GPIO_SetLevel(0,  GPIO_LEVEL_HIGH);
-    BSP_GPIO_SetLevel(12, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(13, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(14, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(15, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(17, GPIO_LEVEL_LOW);
-    BSP_GPIO_SetLevel(18, GPIO_LEVEL_LOW);
-}
+static void Key12_OnLongUp(void) { }
 
 /*==============================================================================
  * 按键命令分发

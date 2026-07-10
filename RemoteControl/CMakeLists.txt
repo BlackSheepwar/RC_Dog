@@ -50,6 +50,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/APP/APP_Key/app_key_cmd.c
     User/APP/APP_Uart/app_uart.c
     User/APP/APP_Uart/app_uart_cmd.c
+    User/APP/APP_LED/app_led.c
 
     # Common
     User/Common/common_utils.c
@@ -85,6 +86,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # APP
     User/APP/APP_Key
     User/APP/APP_Uart
+    User/APP/APP_LED
 
     # Common
     User/Common

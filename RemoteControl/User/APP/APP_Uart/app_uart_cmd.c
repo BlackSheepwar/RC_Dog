@@ -29,41 +29,6 @@ static void APP_UART_AA(uint8_t *payload, uint8_t len)
 {
     BSP_GPIO_Toggle(0);
 }
- 
-static void APP_UART_F0(uint8_t *payload, uint8_t len)
-{
-    BSP_GPIO_Toggle(0);
-} 
-
-static void APP_UART_F1(uint8_t *payload, uint8_t len)
-{
-    BSP_GPIO_Toggle(0);
-}  
-
-static void APP_UART_F2(uint8_t *payload, uint8_t len)
-{
-    BSP_GPIO_Toggle(0);
-}
-
-static void APP_UART_F3(uint8_t *payload, uint8_t len)
-{
-    BSP_GPIO_Toggle(0);
-}
-
-static void APP_UART_F4(uint8_t *payload, uint8_t len)
-{
-    BSP_GPIO_Toggle(0);
-}
-
-static void APP_UART_F5(uint8_t *payload, uint8_t len)
-{
-    BSP_GPIO_Toggle(0);
-}
-
-static void APP_UART_F6(uint8_t *payload, uint8_t len)
-{
-    BSP_GPIO_Toggle(0);
-}
 
 /*==============================================================================
  * 命令配置表
@@ -76,14 +41,6 @@ typedef struct {
 static const uart_cmd_entry_t CMD_TABLE[] = {
     // 测试命令
     { .cmd = 0xAA, .handler = APP_UART_AA },
-    // 伺服命令
-    { .cmd = 0xF0, .handler = APP_UART_F0 },
-    { .cmd = 0xF1, .handler = APP_UART_F1 },
-    { .cmd = 0xF2, .handler = APP_UART_F2 },
-    { .cmd = 0xF3, .handler = APP_UART_F3 },
-    { .cmd = 0xF4, .handler = APP_UART_F4 },
-    { .cmd = 0xF5, .handler = APP_UART_F5 },
-    { .cmd = 0xF6, .handler = APP_UART_F6 },
 };
 
 /*==============================================================================

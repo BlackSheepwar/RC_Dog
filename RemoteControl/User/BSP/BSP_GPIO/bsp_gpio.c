@@ -68,7 +68,7 @@ static const BSP_GPIO_Map_t GPIO_HW_MAP[GPIO_MAX_NUM] = {
     { .gpio_id = 16, .GPIOx = LED4_GPIO_Port, .Pin = LED4_Pin,  .dir = GPIO_DIR_OUT },
     { .gpio_id = 17, .GPIOx = LED5_GPIO_Port, .Pin = LED5_Pin,  .dir = GPIO_DIR_OUT },
     { .gpio_id = 18, .GPIOx = LED6_GPIO_Port, .Pin = LED6_Pin,  .dir = GPIO_DIR_OUT },
-    // 无线引脚
+    // 无线通信模式选择引脚
     { .gpio_id = 19, .GPIOx = M0_GPIO_Port, .Pin = M0_Pin,  .dir = GPIO_DIR_OUT },
     { .gpio_id = 20, .GPIOx = M1_GPIO_Port, .Pin = M1_Pin,  .dir = GPIO_DIR_OUT },
 };
