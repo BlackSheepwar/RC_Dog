@@ -40,31 +40,31 @@ typedef struct {
 static void Key1_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X01, NULL, 0); }
 static void Key1_OnClick(void)   { }
 static void Key1_OnLong(void)    { }
-static void Key1_OnLongUp(void)  { }
+static void Key1_OnLongUp(void)  { APP_UART_BuildTxPacket(1, 0X01, NULL, 0); }
 
 /* --- Key2  ---------------------------------------- */
-static void Key2_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X02, NULL, 0);}
+static void Key2_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X02, NULL, 0); }
 static void Key2_OnClick(void)   { }
 static void Key2_OnLong(void)    { }
-static void Key2_OnLongUp(void)  { }
+static void Key2_OnLongUp(void)  { APP_UART_BuildTxPacket(1, 0X02, NULL, 0); }
 
 /* --- Key3  ---------------------------------------- */
-static void Key3_OnDown(void)    { }
+static void Key3_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X03, NULL, 0); }
 static void Key3_OnClick(void)   { }
 static void Key3_OnLong(void)    { }
-static void Key3_OnLongUp(void)  { }
+static void Key3_OnLongUp(void)  { APP_UART_BuildTxPacket(1, 0X03, NULL, 0); }
 
 /* --- Key4  ---------------------------------------- */
-static void Key4_OnDown(void)    { }
+static void Key4_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X04, NULL, 0); }
 static void Key4_OnClick(void)   { }
 static void Key4_OnLong(void)    { }
-static void Key4_OnLongUp(void)  { }
+static void Key4_OnLongUp(void)  { APP_UART_BuildTxPacket(1, 0X04, NULL, 0); }
 
 /* --- Key5  ---------------------------------------- */
-static void Key5_OnDown(void)    { }
+static void Key5_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X31, NULL, 0); }
 static void Key5_OnClick(void)   { }
 static void Key5_OnLong(void)    { }
-static void Key5_OnLongUp(void)  { }
+static void Key5_OnLongUp(void)  { APP_UART_BuildTxPacket(1, 0X31, NULL, 0); }
 
 /* --- Key6  ---------------------------------------- */
 static void Key6_OnDown(void)    { }
@@ -82,13 +82,13 @@ static void Key7_OnLongUp(void)  { }
 static void Key8_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X12, NULL, 0); }
 static void Key8_OnClick(void)   { }
 static void Key8_OnLong(void)    { }
-static void Key8_OnLongUp(void)  { }
+static void Key8_OnLongUp(void)  { APP_UART_BuildTxPacket(1, 0X12, NULL, 0); }
 
 /* --- Key9  ---------------------------------------- */
 static void Key9_OnDown(void)    { APP_UART_BuildTxPacket(1, 0X11, NULL, 0); }
 static void Key9_OnClick(void)   { }
 static void Key9_OnLong(void)    { }
-static void Key9_OnLongUp(void)  { }
+static void Key9_OnLongUp(void)  { APP_UART_BuildTxPacket(1, 0X11, NULL, 0); }
 
 /* --- Key10 ---------------------------------------- */
 static void Key10_OnDown(void)   { APP_UART_BuildTxPacket(1, 0X21, NULL, 0); }
@@ -103,7 +103,7 @@ static void Key11_OnLong(void)   { }
 static void Key11_OnLongUp(void) { }
 
 /* --- Key12 ---------------------------------------- */
-static void Key12_OnDown(void)   { APP_UART_BuildTxPacket(1, 0XFF, NULL, 0); }
+static void Key12_OnDown(void)   { APP_UART_BuildTxPacket(1, 0X23, NULL, 0); }
 static void Key12_OnClick(void)  { }
 static void Key12_OnLong(void)   { }
 static void Key12_OnLongUp(void) { }

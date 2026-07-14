@@ -7360,7 +7360,7 @@ LOAD C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+s
                 0x08000000                g_pfnVectors
                 0x0800010c                        . = ALIGN (0x4)
 
-.text           0x08000110     0x9c0c
+.text           0x08000110     0x9c5c
                 0x08000110                        . = ALIGN (0x4)
  *(.text)
  .text          0x08000110       0x40 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
@@ -7982,424 +7982,424 @@ LOAD C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+s
  .text.Key1_OnLong
                 0x08007d00        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key1_OnLongUp
-                0x08007d0c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007d0c       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key2_OnDown
-                0x08007d18       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007d20       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key2_OnClick
-                0x08007d2c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007d34        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key2_OnLong
-                0x08007d38        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007d40        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key2_OnLongUp
-                0x08007d44        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007d4c       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key3_OnDown
-                0x08007d50        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007d60       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key3_OnClick
-                0x08007d5c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key3_OnLong
-                0x08007d68        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key3_OnLongUp
                 0x08007d74        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key4_OnDown
+ .text.Key3_OnLong
                 0x08007d80        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key3_OnLongUp
+                0x08007d8c       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key4_OnDown
+                0x08007da0       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key4_OnClick
-                0x08007d8c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007db4        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key4_OnLong
-                0x08007d98        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007dc0        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key4_OnLongUp
-                0x08007da4        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007dcc       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key5_OnDown
-                0x08007db0        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007de0       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key5_OnClick
-                0x08007dbc        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007df4        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key5_OnLong
-                0x08007dc8        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e00        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key5_OnLongUp
-                0x08007dd4        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e0c       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key6_OnDown
-                0x08007de0        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e20        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key6_OnClick
-                0x08007dec        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e2c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key6_OnLong
-                0x08007df8        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e38        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key6_OnLongUp
-                0x08007e04        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e44        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key7_OnDown
-                0x08007e10        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e50        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key7_OnClick
-                0x08007e1c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e5c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key7_OnLong
-                0x08007e28        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e68        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key7_OnLongUp
-                0x08007e34        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e74        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key8_OnDown
-                0x08007e40       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e80       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key8_OnClick
-                0x08007e54        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007e94        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key8_OnLong
-                0x08007e60        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007ea0        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key8_OnLongUp
-                0x08007e6c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007eac       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key9_OnDown
-                0x08007e78       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007ec0       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key9_OnClick
-                0x08007e8c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007ed4        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key9_OnLong
-                0x08007e98        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007ee0        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key9_OnLongUp
-                0x08007ea4        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007eec       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key10_OnDown
-                0x08007eb0       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007f00       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.Key10_OnClick
-                0x08007ec4        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key10_OnLong
-                0x08007ed0        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key10_OnLongUp
-                0x08007edc        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key11_OnDown
-                0x08007ee8       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key11_OnClick
-                0x08007efc        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key11_OnLong
-                0x08007f08        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key11_OnLongUp
                 0x08007f14        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key12_OnDown
-                0x08007f20       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key12_OnClick
-                0x08007f34        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key12_OnLong
-                0x08007f40        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .text.Key12_OnLongUp
+ .text.Key10_OnLong
+                0x08007f20        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key10_OnLongUp
+                0x08007f2c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key11_OnDown
+                0x08007f38       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key11_OnClick
                 0x08007f4c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key11_OnLong
+                0x08007f58        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key11_OnLongUp
+                0x08007f64        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key12_OnDown
+                0x08007f70       0x14 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key12_OnClick
+                0x08007f84        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key12_OnLong
+                0x08007f90        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .text.Key12_OnLongUp
+                0x08007f9c        0xc CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .text.App_Key_CMD_Packet
-                0x08007f58       0x58 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
-                0x08007f58                App_Key_CMD_Packet
+                0x08007fa8       0x58 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08007fa8                App_Key_CMD_Packet
  .text.app_rx_pool_free
-                0x08007fb0       0x40 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x08008000       0x40 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_rx_pool_write
-                0x08007ff0       0x9c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x08008040       0x9c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_rx_pool_read
-                0x0800808c       0x64 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x080080dc       0x64 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_rx_pool_advance
-                0x080080f0       0x2c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x08008140       0x2c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.rx_desc_push
-                0x0800811c       0x78 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x0800816c       0x78 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.rx_desc_pop
-                0x08008194       0x78 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x080081e4       0x78 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_tx_pool_free
-                0x0800820c       0x40 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x0800825c       0x40 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_tx_pool_write
-                0x0800824c       0x9c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x0800829c       0x9c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_tx_pool_read
-                0x080082e8       0x64 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x08008338       0x64 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_tx_pool_advance
-                0x0800834c       0x2c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x0800839c       0x2c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.tx_desc_push
-                0x08008378       0x68 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x080083c8       0x68 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.tx_desc_pop
-                0x080083e0       0x6c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x08008430       0x6c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_find_port
-                0x0800844c       0x5c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x0800849c       0x5c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_is_timeout
-                0x080084a8       0x24 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x080084f8       0x24 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.app_read_dma_data
-                0x080084cc       0xe0 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x0800851c       0xe0 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .text.APP_UART_Init
-                0x080085ac       0xcc CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
-                0x080085ac                APP_UART_Init
+                0x080085fc       0xcc CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x080085fc                APP_UART_Init
  .text.APP_UART_ProcessRxData
-                0x08008678      0x214 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
-                0x08008678                APP_UART_ProcessRxData
+                0x080086c8      0x214 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x080086c8                APP_UART_ProcessRxData
  .text.APP_UART_SendRxPacket
-                0x0800888c       0x7a CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
-                0x0800888c                APP_UART_SendRxPacket
- *fill*         0x08008906        0x2 
+                0x080088dc       0x7a CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x080088dc                APP_UART_SendRxPacket
+ *fill*         0x08008956        0x2 
  .text.APP_UART_GetTxFrame
-                0x08008908       0x74 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
-                0x08008908                APP_UART_GetTxFrame
+                0x08008958       0x74 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x08008958                APP_UART_GetTxFrame
  .text.APP_UART_BuildTxPacket
-                0x0800897c      0x18c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
-                0x0800897c                APP_UART_BuildTxPacket
+                0x080089cc      0x18c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+                0x080089cc                APP_UART_BuildTxPacket
  .text.APP_UART_AA
-                0x08008b08       0x1a CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart_cmd.c.obj
- *fill*         0x08008b22        0x2 
+                0x08008b58       0x1a CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart_cmd.c.obj
+ *fill*         0x08008b72        0x2 
  .text.APP_UART_Cmd
-                0x08008b24       0x4c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart_cmd.c.obj
-                0x08008b24                APP_UART_Cmd
+                0x08008b74       0x4c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart_cmd.c.obj
+                0x08008b74                APP_UART_Cmd
  .text.BSP_GPIO_FindMap
-                0x08008b70       0x54 CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
+                0x08008bc0       0x54 CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
  .text.BSP_GPIO_Init
-                0x08008bc4        0xc CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
-                0x08008bc4                BSP_GPIO_Init
+                0x08008c14        0xc CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
+                0x08008c14                BSP_GPIO_Init
  .text.BSP_GPIO_ReadLevel
-                0x08008bd0       0x40 CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
-                0x08008bd0                BSP_GPIO_ReadLevel
+                0x08008c20       0x40 CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
+                0x08008c20                BSP_GPIO_ReadLevel
  .text.BSP_GPIO_Toggle
-                0x08008c10       0x40 CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
-                0x08008c10                BSP_GPIO_Toggle
+                0x08008c60       0x40 CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
+                0x08008c60                BSP_GPIO_Toggle
  .text.BSP_UART_FindMap
-                0x08008c50       0x44 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008ca0       0x44 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
  .text.BSP_UART_FindByHuart
-                0x08008c94       0x44 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008ce4       0x44 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
  .text.BSP_UART_Init
-                0x08008cd8       0x24 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008cd8                BSP_UART_Init
+                0x08008d28       0x24 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008d28                BSP_UART_Init
  .text.BSP_UART_GetIdByHuart
-                0x08008cfc       0x26 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008cfc                BSP_UART_GetIdByHuart
- *fill*         0x08008d22        0x2 
+                0x08008d4c       0x26 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008d4c                BSP_UART_GetIdByHuart
+ *fill*         0x08008d72        0x2 
  .text.BSP_UART_ConfigDMARx
-                0x08008d24       0xa4 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008d24                BSP_UART_ConfigDMARx
+                0x08008d74       0xa4 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008d74                BSP_UART_ConfigDMARx
  .text.BSP_UART_GetDMAPos
-                0x08008dc8       0x64 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008dc8                BSP_UART_GetDMAPos
+                0x08008e18       0x64 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008e18                BSP_UART_GetDMAPos
  .text.BSP_UART_SendDMA
-                0x08008e2c       0x60 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008e2c                BSP_UART_SendDMA
+                0x08008e7c       0x60 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008e7c                BSP_UART_SendDMA
  .text.BSP_UART_IsTxBusy
-                0x08008e8c       0x40 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008e8c                BSP_UART_IsTxBusy
+                0x08008edc       0x40 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008edc                BSP_UART_IsTxBusy
  .text.BSP_UART_OnRxEvent
-                0x08008ecc       0x38 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008f1c       0x38 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
  .text.HAL_UARTEx_RxEventCallback
-                0x08008f04       0x1a CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008f04                HAL_UARTEx_RxEventCallback
+                0x08008f54       0x1a CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008f54                HAL_UARTEx_RxEventCallback
  .text.HAL_UART_RxHalfCpltCallback
-                0x08008f1e       0x16 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008f1e                HAL_UART_RxHalfCpltCallback
+                0x08008f6e       0x16 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008f6e                HAL_UART_RxHalfCpltCallback
  .text.HAL_UART_RxCpltCallback
-                0x08008f34       0x16 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008f34                HAL_UART_RxCpltCallback
- *fill*         0x08008f4a        0x2 
+                0x08008f84       0x16 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008f84                HAL_UART_RxCpltCallback
+ *fill*         0x08008f9a        0x2 
  .text.HAL_UART_TxCpltCallback
-                0x08008f4c       0x58 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
-                0x08008f4c                HAL_UART_TxCpltCallback
+                0x08008f9c       0x58 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x08008f9c                HAL_UART_TxCpltCallback
  .text.Codec_ParseRxPacket
-                0x08008fa4      0x14c CMakeFiles/RemoteControl.dir/User/Middlewares/Codec/codec.c.obj
-                0x08008fa4                Codec_ParseRxPacket
+                0x08008ff4      0x14c CMakeFiles/RemoteControl.dir/User/Middlewares/Codec/codec.c.obj
+                0x08008ff4                Codec_ParseRxPacket
  .text.Codec_BuildTxPacket
-                0x080090f0      0x106 CMakeFiles/RemoteControl.dir/User/Middlewares/Codec/codec.c.obj
-                0x080090f0                Codec_BuildTxPacket
- *fill*         0x080091f6        0x2 
+                0x08009140      0x106 CMakeFiles/RemoteControl.dir/User/Middlewares/Codec/codec.c.obj
+                0x08009140                Codec_BuildTxPacket
+ *fill*         0x08009246        0x2 
  .text.TASK_KEY_CMD
-                0x080091f8       0x3c CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_cmd.c.obj
-                0x080091f8                TASK_KEY_CMD
+                0x08009248       0x3c CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_cmd.c.obj
+                0x08009248                TASK_KEY_CMD
  .text.Task_KEY_Debounce
-                0x08009234       0x90 CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_debounce.c.obj
-                0x08009234                Task_KEY_Debounce
+                0x08009284       0x90 CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_debounce.c.obj
+                0x08009284                Task_KEY_Debounce
  .text.Task_OLED
-                0x080092c4       0x24 CMakeFiles/RemoteControl.dir/User/TASK/TASK_OLED/task_oled.c.obj
-                0x080092c4                Task_OLED
+                0x08009314       0x24 CMakeFiles/RemoteControl.dir/User/TASK/TASK_OLED/task_oled.c.obj
+                0x08009314                Task_OLED
  .text.Task_UART_RX
-                0x080092e8       0x44 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_rx.c.obj
-                0x080092e8                Task_UART_RX
+                0x08009338       0x44 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_rx.c.obj
+                0x08009338                Task_UART_RX
  .text.Task_UART_RX_CMD
-                0x0800932c       0x48 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_rx_cmd.c.obj
-                0x0800932c                Task_UART_RX_CMD
+                0x0800937c       0x48 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_rx_cmd.c.obj
+                0x0800937c                Task_UART_RX_CMD
  .text.Task_UART_TX
-                0x08009374       0x48 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_tx.c.obj
-                0x08009374                Task_UART_TX
+                0x080093c4       0x48 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_tx.c.obj
+                0x080093c4                Task_UART_TX
  .text.OLED_Send
-                0x080093bc       0x2c CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x080093bc                OLED_Send
+                0x0800940c       0x2c CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x0800940c                OLED_Send
  .text.OLED_SendCmd
-                0x080093e8       0x24 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x080093e8                OLED_SendCmd
+                0x08009438       0x24 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x08009438                OLED_SendCmd
  .text.OLED_Init
-                0x0800940c       0xb8 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x0800940c                OLED_Init
+                0x0800945c       0xb8 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x0800945c                OLED_Init
  .text.OLED_NewFrame
-                0x080094c4       0x18 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x080094c4                OLED_NewFrame
+                0x08009514       0x18 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x08009514                OLED_NewFrame
  .text.OLED_ShowFrame
-                0x080094dc       0x68 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x080094dc                OLED_ShowFrame
+                0x0800952c       0x68 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x0800952c                OLED_ShowFrame
  .text.OLED_SetPixel
-                0x08009544       0xb0 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x08009544                OLED_SetPixel
+                0x08009594       0xb0 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x08009594                OLED_SetPixel
  .text.OLED_SetByte_Fine
-                0x080095f4       0xf8 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x080095f4                OLED_SetByte_Fine
+                0x08009644       0xf8 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x08009644                OLED_SetByte_Fine
  .text.OLED_SetBits_Fine
-                0x080096ec       0xbe CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x080096ec                OLED_SetBits_Fine
+                0x0800973c       0xbe CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x0800973c                OLED_SetBits_Fine
  .text.OLED_SetBits
-                0x080097aa       0x82 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x080097aa                OLED_SetBits
+                0x080097fa       0x82 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x080097fa                OLED_SetBits
  .text.OLED_SetBlock
-                0x0800982c       0xe2 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x0800982c                OLED_SetBlock
+                0x0800987c       0xe2 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x0800987c                OLED_SetBlock
  .text.OLED_PrintASCIIChar
-                0x0800990e       0x5e CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x0800990e                OLED_PrintASCIIChar
+                0x0800995e       0x5e CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x0800995e                OLED_PrintASCIIChar
  .text.OLED_PrintASCIIString
-                0x0800996c       0x4e CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
-                0x0800996c                OLED_PrintASCIIString
- *fill*         0x080099ba        0x2 
+                0x080099bc       0x4e CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+                0x080099bc                OLED_PrintASCIIString
+ *fill*         0x08009a0a        0x2 
  .text.OLED_PrintDecimal
-                0x080099bc      0x15c CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_extend.c.obj
-                0x080099bc                OLED_PrintDecimal
+                0x08009a0c      0x15c CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_extend.c.obj
+                0x08009a0c                OLED_PrintDecimal
  .text.OLED_UI_FpsInit
-                0x08009b18       0x28 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
-                0x08009b18                OLED_UI_FpsInit
+                0x08009b68       0x28 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
+                0x08009b68                OLED_UI_FpsInit
  .text.OLED_UI_FpsTick
-                0x08009b40      0x11c CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
-                0x08009b40                OLED_UI_FpsTick
- .text.memmove  0x08009c5c       0x32 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memmove.o)
-                0x08009c5c                memmove
- .text.memset   0x08009c8e       0x10 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memset.o)
-                0x08009c8e                memset
- *fill*         0x08009c9e        0x2 
+                0x08009b90      0x11c CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
+                0x08009b90                OLED_UI_FpsTick
+ .text.memmove  0x08009cac       0x32 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memmove.o)
+                0x08009cac                memmove
+ .text.memset   0x08009cde       0x10 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memset.o)
+                0x08009cde                memset
+ *fill*         0x08009cee        0x2 
  .text.__libc_init_array
-                0x08009ca0       0x48 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-init.o)
-                0x08009ca0                __libc_init_array
- .text.memcpy   0x08009ce8       0x1c C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memcpy-stub.o)
-                0x08009ce8                memcpy
+                0x08009cf0       0x48 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-init.o)
+                0x08009cf0                __libc_init_array
+ .text.memcpy   0x08009d38       0x1c C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memcpy-stub.o)
+                0x08009d38                memcpy
  *(.glue_7)
- .glue_7        0x08009d04        0x0 linker stubs
+ .glue_7        0x08009d54        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x08009d04        0x0 linker stubs
+ .glue_7t       0x08009d54        0x0 linker stubs
  *(.eh_frame)
- .eh_frame      0x08009d04        0x0 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
+ .eh_frame      0x08009d54        0x0 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
  *(.init)
- .init          0x08009d04        0x4 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crti.o
-                0x08009d04                _init
- .init          0x08009d08        0x8 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtn.o
+ .init          0x08009d54        0x4 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crti.o
+                0x08009d54                _init
+ .init          0x08009d58        0x8 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtn.o
  *(.fini)
- .fini          0x08009d10        0x4 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crti.o
-                0x08009d10                _fini
- .fini          0x08009d14        0x8 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtn.o
-                0x08009d1c                        . = ALIGN (0x4)
-                0x08009d1c                        _etext = .
+ .fini          0x08009d60        0x4 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crti.o
+                0x08009d60                _fini
+ .fini          0x08009d64        0x8 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtn.o
+                0x08009d6c                        . = ALIGN (0x4)
+                0x08009d6c                        _etext = .
 
-.vfp11_veneer   0x08009d1c        0x0
- .vfp11_veneer  0x08009d1c        0x0 linker stubs
+.vfp11_veneer   0x08009d6c        0x0
+ .vfp11_veneer  0x08009d6c        0x0 linker stubs
 
-.v4_bx          0x08009d1c        0x0
- .v4_bx         0x08009d1c        0x0 linker stubs
+.v4_bx          0x08009d6c        0x0
+ .v4_bx         0x08009d6c        0x0 linker stubs
 
-.iplt           0x08009d1c        0x0
- .iplt          0x08009d1c        0x0 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
+.iplt           0x08009d6c        0x0
+ .iplt          0x08009d6c        0x0 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
 
-.rodata         0x08009d1c      0xb20
-                0x08009d1c                        . = ALIGN (0x4)
+.rodata         0x08009d6c      0xb20
+                0x08009d6c                        . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x08009d1c        0x5 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/tasks.c.obj
- *fill*         0x08009d21        0x3 
- .rodata        0x08009d24        0xd cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/timers.c.obj
- *fill*         0x08009d31        0x3 
- .rodata        0x08009d34       0x8f CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
- *fill*         0x08009dc3        0x1 
- .rodata        0x08009dc4       0x20 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
+ .rodata        0x08009d6c        0x5 cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/tasks.c.obj
+ *fill*         0x08009d71        0x3 
+ .rodata        0x08009d74        0xd cmake/stm32cubemx/CMakeFiles/FreeRTOS.dir/__/__/Middlewares/Third_Party/FreeRTOS/Source/timers.c.obj
+ *fill*         0x08009d81        0x3 
+ .rodata        0x08009d84       0x8f CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+ *fill*         0x08009e13        0x1 
+ .rodata        0x08009e14       0x20 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
  *(.rodata*)
  .rodata.AHBPrescTable
-                0x08009de4       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
-                0x08009de4                AHBPrescTable
+                0x08009e34       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
+                0x08009e34                AHBPrescTable
  .rodata.APBPrescTable
-                0x08009df4        0x8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
-                0x08009df4                APBPrescTable
+                0x08009e44        0x8 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
+                0x08009e44                APBPrescTable
  .rodata.aPLLMULFactorTable.1
-                0x08009dfc       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
+                0x08009e4c       0x10 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
  .rodata.aPredivFactorTable.0
-                0x08009e0c        0x2 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
- *fill*         0x08009e0e        0x2 
+                0x08009e5c        0x2 cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
+ *fill*         0x08009e5e        0x2 
  .rodata.defaultTask_attributes
-                0x08009e10       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009e10                defaultTask_attributes
+                0x08009e60       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009e60                defaultTask_attributes
  .rodata.KEY_Debounce_T_attributes
-                0x08009e34       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009e34                KEY_Debounce_T_attributes
+                0x08009e84       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009e84                KEY_Debounce_T_attributes
  .rodata.KEY_CMD_T_attributes
-                0x08009e58       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009e58                KEY_CMD_T_attributes
+                0x08009ea8       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009ea8                KEY_CMD_T_attributes
  .rodata.UART_RX_T_attributes
-                0x08009e7c       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009e7c                UART_RX_T_attributes
+                0x08009ecc       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009ecc                UART_RX_T_attributes
  .rodata.UART_TX_T_attributes
-                0x08009ea0       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009ea0                UART_TX_T_attributes
+                0x08009ef0       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009ef0                UART_TX_T_attributes
  .rodata.UART_RX_CMD_attributes
-                0x08009ec4       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009ec4                UART_RX_CMD_attributes
+                0x08009f14       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009f14                UART_RX_CMD_attributes
  .rodata.OLED_T_attributes
-                0x08009ee8       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009ee8                OLED_T_attributes
+                0x08009f38       0x24 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009f38                OLED_T_attributes
  .rodata.KEY_CMD_Q_attributes
-                0x08009f0c       0x18 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009f0c                KEY_CMD_Q_attributes
+                0x08009f5c       0x18 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009f5c                KEY_CMD_Q_attributes
  .rodata.UART_RX_Q_attributes
-                0x08009f24       0x18 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009f24                UART_RX_Q_attributes
+                0x08009f74       0x18 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009f74                UART_RX_Q_attributes
  .rodata.UART_TX_Q_attributes
-                0x08009f3c       0x18 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009f3c                UART_TX_Q_attributes
+                0x08009f8c       0x18 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009f8c                UART_TX_Q_attributes
  .rodata.UART_RX_BS_attributes
-                0x08009f54       0x10 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009f54                UART_RX_BS_attributes
+                0x08009fa4       0x10 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009fa4                UART_RX_BS_attributes
  .rodata.UART_TX_CS_attributes
-                0x08009f64       0x10 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
-                0x08009f64                UART_TX_CS_attributes
+                0x08009fb4       0x10 CMakeFiles/RemoteControl.dir/Core/Src/freertos.c.obj
+                0x08009fb4                UART_TX_CS_attributes
  .rodata.KEY_DISPATCH_TABLE
-                0x08009f74      0x180 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+                0x08009fc4      0x180 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
  .rodata.CMD_TABLE
-                0x0800a0f4        0x8 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart_cmd.c.obj
+                0x0800a144        0x8 CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart_cmd.c.obj
  .rodata.GPIO_HW_MAP
-                0x0800a0fc       0xfc CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
+                0x0800a14c       0xfc CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
  .rodata.BSP_UART_MAP
-                0x0800a1f8       0x10 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+                0x0800a248       0x10 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
  .rodata.KEY_REG_TABLE
-                0x0800a208       0x3c CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_debounce.c.obj
+                0x0800a258       0x3c CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_debounce.c.obj
  .rodata.ascii_16x8
-                0x0800a244      0x5f0 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/font.c.obj
-                0x0800a244                ascii_16x8
+                0x0800a294      0x5f0 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/font.c.obj
+                0x0800a294                ascii_16x8
  .rodata.afont16x8
-                0x0800a834        0x8 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/font.c.obj
-                0x0800a834                afont16x8
-                0x0800a83c                        . = ALIGN (0x4)
+                0x0800a884        0x8 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/font.c.obj
+                0x0800a884                afont16x8
+                0x0800a88c                        . = ALIGN (0x4)
 
-.ARM.extab      0x0800a83c        0x0
-                0x0800a83c                        . = ALIGN (0x4)
+.ARM.extab      0x0800a88c        0x0
+                0x0800a88c                        . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x0800a83c                        . = ALIGN (0x4)
+                0x0800a88c                        . = ALIGN (0x4)
 
-.ARM            0x0800a83c        0x0
-                0x0800a83c                        . = ALIGN (0x4)
-                0x0800a83c                        __exidx_start = .
+.ARM            0x0800a88c        0x0
+                0x0800a88c                        . = ALIGN (0x4)
+                0x0800a88c                        __exidx_start = .
  *(.ARM.exidx*)
-                0x0800a83c                        __exidx_end = .
-                0x0800a83c                        . = ALIGN (0x4)
+                0x0800a88c                        __exidx_end = .
+                0x0800a88c                        . = ALIGN (0x4)
 
-.preinit_array  0x0800a83c        0x0
-                0x0800a83c                        . = ALIGN (0x4)
-                0x0800a83c                        PROVIDE (__preinit_array_start = .)
+.preinit_array  0x0800a88c        0x0
+                0x0800a88c                        . = ALIGN (0x4)
+                0x0800a88c                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x0800a83c                        PROVIDE (__preinit_array_end = .)
-                0x0800a83c                        . = ALIGN (0x4)
+                0x0800a88c                        PROVIDE (__preinit_array_end = .)
+                0x0800a88c                        . = ALIGN (0x4)
 
-.init_array     0x0800a83c        0x4
-                0x0800a83c                        . = ALIGN (0x4)
-                0x0800a83c                        PROVIDE (__init_array_start = .)
+.init_array     0x0800a88c        0x4
+                0x0800a88c                        . = ALIGN (0x4)
+                0x0800a88c                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x0800a83c        0x4 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
-                0x0800a840                        PROVIDE (__init_array_end = .)
-                0x0800a840                        . = ALIGN (0x4)
+ .init_array    0x0800a88c        0x4 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
+                0x0800a890                        PROVIDE (__init_array_end = .)
+                0x0800a890                        . = ALIGN (0x4)
 
-.fini_array     0x0800a840        0x4
-                0x0800a840                        . = ALIGN (0x4)
+.fini_array     0x0800a890        0x4
+                0x0800a890                        . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x0800a840        0x4 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
+ .fini_array    0x0800a890        0x4 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x0800a844                        . = ALIGN (0x4)
-                0x0800a844                        _sidata = LOADADDR (.data)
+                0x0800a894                        . = ALIGN (0x4)
+                0x0800a894                        _sidata = LOADADDR (.data)
 
-.rel.dyn        0x0800a844        0x0
- .rel.iplt      0x0800a844        0x0 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
+.rel.dyn        0x0800a894        0x0
+ .rel.iplt      0x0800a894        0x0 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
 
-.data           0x20000000       0x10 load address 0x0800a844
+.data           0x20000000       0x10 load address 0x0800a894
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        _sdata = .
  *(.data)
@@ -8420,14 +8420,14 @@ LOAD C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+s
  *(.RamFunc*)
                 0x20000010                        . = ALIGN (0x4)
 
-.igot.plt       0x20000010        0x0 load address 0x0800a854
+.igot.plt       0x20000010        0x0 load address 0x0800a8a4
  .igot.plt      0x20000010        0x0 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
 
-.dma_buffer     0x20000010      0x38c load address 0x0800a854
+.dma_buffer     0x20000010      0x38c load address 0x0800a8a4
  .dma_buffer    0x20000010      0x30c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
  .dma_buffer    0x2000031c       0x80 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_tx.c.obj
 
-.tdata          0x2000039c        0x0 load address 0x0800abe0
+.tdata          0x2000039c        0x0 load address 0x0800ac30
  *(.tdata .tdata.* .gnu.linkonce.td.*)
                 0x2000039c                        . = ALIGN (0x4)
                 0x2000039c                        _edata = .
@@ -8444,7 +8444,7 @@ LOAD C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+s
                 [!provide]                        PROVIDE (__data_source_end = __tdata_source_end)
                 [!provide]                        PROVIDE (__data_source_size = (__data_source_end - __data_source))
 
-.tbss           0x2000039c        0x0 load address 0x0800abe0
+.tbss           0x2000039c        0x0 load address 0x0800ac30
                 0x2000039c                        _sbss = .
                 0x2000039c                        __bss_start__ = _sbss
  *(.tbss .tbss.*)
@@ -8461,7 +8461,7 @@ LOAD C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+s
                 [!provide]                        PROVIDE (__arm32_tls_tcb_offset = MAX (0x8, __tls_align))
                 [!provide]                        PROVIDE (__arm64_tls_tcb_offset = MAX (0x10, __tls_align))
 
-.bss            0x2000039c     0x3940 load address 0x0800abe0
+.bss            0x2000039c     0x3940 load address 0x0800ac30
  *(.bss)
  .bss           0x2000039c       0x1c C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/thumb/v7-m/nofp/crtbegin.o
  *(.bss*)
@@ -8734,7 +8734,7 @@ LOAD C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+s
                 [!provide]                        PROVIDE (__bss_size = (__bss_end - __bss_start))
 
 ._user_heap_stack
-                0x20003cdc      0x604 load address 0x0800abe0
+                0x20003cdc      0x604 load address 0x0800ac30
                 0x20003ce0                        . = ALIGN (0x8)
  *fill*         0x20003cdc        0x4 
                 [!provide]                        PROVIDE (end = .)
@@ -9322,7 +9322,7 @@ LOAD linker stubs
  .debug_macro   0x0001c1fa      0x341 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_extend.c.obj
  .debug_macro   0x0001c53b      0x324 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
 
-.debug_line     0x00000000    0x294ca
+.debug_line     0x00000000    0x294e8
  .debug_line    0x00000000      0x7ba cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj
  .debug_line    0x000007ba     0x34df cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c.obj
  .debug_line    0x00003c99     0x18af cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c.obj
@@ -9352,26 +9352,26 @@ LOAD linker stubs
  .debug_line    0x0001c626      0x7ba CMakeFiles/RemoteControl.dir/Core/Src/stm32f1xx_hal_timebase_tim.c.obj
  .debug_line    0x0001cde0       0x78 CMakeFiles/RemoteControl.dir/startup_stm32f103xb.s.obj
  .debug_line    0x0001ce58      0xb21 CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key.c.obj
- .debug_line    0x0001d979      0xeee CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
- .debug_line    0x0001e867     0x102c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
- .debug_line    0x0001f893      0xaad CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart_cmd.c.obj
- .debug_line    0x00020340      0xa63 CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
- .debug_line    0x00020da3      0xc96 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
- .debug_line    0x00021a39      0xaf7 CMakeFiles/RemoteControl.dir/User/Middlewares/Codec/codec.c.obj
- .debug_line    0x00022530      0x97f CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_cmd.c.obj
- .debug_line    0x00022eaf      0x9ed CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_debounce.c.obj
- .debug_line    0x0002389c      0xa27 CMakeFiles/RemoteControl.dir/User/TASK/TASK_OLED/task_oled.c.obj
- .debug_line    0x000242c3      0xa39 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_rx.c.obj
- .debug_line    0x00024cfc      0xa1b CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_rx_cmd.c.obj
- .debug_line    0x00025717      0xa0a CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_tx.c.obj
- .debug_line    0x00026121      0x3be CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/font.c.obj
- .debug_line    0x000264df     0x127a CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
- .debug_line    0x00027759      0xb22 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_extend.c.obj
- .debug_line    0x0002827b      0xba6 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
- .debug_line    0x00028e21      0x1bb C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memmove.o)
- .debug_line    0x00028fdc      0x17e C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memset.o)
- .debug_line    0x0002915a      0x169 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-init.o)
- .debug_line    0x000292c3      0x207 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memcpy-stub.o)
+ .debug_line    0x0001d979      0xf0c CMakeFiles/RemoteControl.dir/User/APP/APP_Key/app_key_cmd.c.obj
+ .debug_line    0x0001e885     0x102c CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart.c.obj
+ .debug_line    0x0001f8b1      0xaad CMakeFiles/RemoteControl.dir/User/APP/APP_Uart/app_uart_cmd.c.obj
+ .debug_line    0x0002035e      0xa63 CMakeFiles/RemoteControl.dir/User/BSP/BSP_GPIO/bsp_gpio.c.obj
+ .debug_line    0x00020dc1      0xc96 CMakeFiles/RemoteControl.dir/User/BSP/BSP_Uart/bsp_uart.c.obj
+ .debug_line    0x00021a57      0xaf7 CMakeFiles/RemoteControl.dir/User/Middlewares/Codec/codec.c.obj
+ .debug_line    0x0002254e      0x97f CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_cmd.c.obj
+ .debug_line    0x00022ecd      0x9ed CMakeFiles/RemoteControl.dir/User/TASK/TASK_KEY/task_key_debounce.c.obj
+ .debug_line    0x000238ba      0xa27 CMakeFiles/RemoteControl.dir/User/TASK/TASK_OLED/task_oled.c.obj
+ .debug_line    0x000242e1      0xa39 CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_rx.c.obj
+ .debug_line    0x00024d1a      0xa1b CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_rx_cmd.c.obj
+ .debug_line    0x00025735      0xa0a CMakeFiles/RemoteControl.dir/User/TASK/TASK_UART/task_uart_tx.c.obj
+ .debug_line    0x0002613f      0x3be CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/font.c.obj
+ .debug_line    0x000264fd     0x127a CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled.c.obj
+ .debug_line    0x00027777      0xb22 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_extend.c.obj
+ .debug_line    0x00028299      0xba6 CMakeFiles/RemoteControl.dir/User/Third_Party/OLED/oled_ui.c.obj
+ .debug_line    0x00028e3f      0x1bb C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memmove.o)
+ .debug_line    0x00028ffa      0x17e C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memset.o)
+ .debug_line    0x00029178      0x169 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-init.o)
+ .debug_line    0x000292e1      0x207 C:/Users/g_aa2/AppData/Local/stm32cube/bundles/gnu-tools-for-stm32/14.3.1+st.2/bin/../lib/gcc/arm-none-eabi/14.3.1/../../../../arm-none-eabi/lib/thumb/v7-m/nofp\libg_nano.a(libc_a-memcpy-stub.o)
 
 .debug_str      0x00000000    0x996ae
  .debug_str     0x00000000    0x996ae cmake/stm32cubemx/CMakeFiles/STM32_Drivers.dir/__/__/Core/Src/system_stm32f1xx.c.obj

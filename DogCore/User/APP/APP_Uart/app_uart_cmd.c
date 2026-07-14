@@ -30,25 +30,28 @@
 /*==============================================================================
  * 命令处理函数
  *============================================================================*/
+/* ──────── 测试命令 ──────── */
 static void APP_UART_FF(uint8_t *payload, uint8_t len)
 {
     BSP_GPIO_Toggle(2);
 }
 
+/* ──────── 移动命令 ──────── */
+// 前进四
 static void APP_UART_01(uint8_t *payload, uint8_t len)
 {
     static uint8_t i = 0;
     if (i == 0) {
         MotionSched_Start(&GAIT_Walk_2_Front);
-        APP_Motor_SetSpeed(1, 150);
-        APP_Motor_SetSpeed(2, -150);
-        APP_Motor_SetSpeed(3, 150);
-        APP_Motor_SetSpeed(4, -150);
+        APP_Motor_SetSpeed(1, 100);
+        APP_Motor_SetSpeed(2, -100);
+        APP_Motor_SetSpeed(3, 100);
+        APP_Motor_SetSpeed(4, -100);
         
         i = i+1;
     }
     else{
-        MotionSched_Start(&GAIT_Init);
+        MotionSched_Start(&GAIT_Stand);
         APP_Motor_SetSpeed(1, 0);
         APP_Motor_SetSpeed(2, 0);
         APP_Motor_SetSpeed(3, 0);
@@ -57,19 +60,20 @@ static void APP_UART_01(uint8_t *payload, uint8_t len)
     }
 }
 
+// 后退四
 static void APP_UART_02(uint8_t *payload, uint8_t len)
 {
     static uint8_t i = 0;
     if (i == 0) {
         MotionSched_Start(&GAIT_Walk_2_Queen);
-        APP_Motor_SetSpeed(1, -150);
-        APP_Motor_SetSpeed(2, 150);
-        APP_Motor_SetSpeed(3, -150);
-        APP_Motor_SetSpeed(4, 150);
+        APP_Motor_SetSpeed(1, -100);
+        APP_Motor_SetSpeed(2, 100);
+        APP_Motor_SetSpeed(3, -100);
+        APP_Motor_SetSpeed(4, 100);
         i = i+1;
     }
     else{
-        MotionSched_Start(&GAIT_Init);
+        MotionSched_Start(&GAIT_Stand);
         APP_Motor_SetSpeed(1, 0);
         APP_Motor_SetSpeed(2, 0);
         APP_Motor_SetSpeed(3, 0);
@@ -78,20 +82,67 @@ static void APP_UART_02(uint8_t *payload, uint8_t len)
     }
 }
 
+// 前进
+static void APP_UART_03(uint8_t *payload, uint8_t len)
+{
+    static uint8_t i = 0;
+    if (i == 0) {
+        MotionSched_Start(&GAIT_Walk_3_Front);
+        APP_Motor_SetSpeed(1, 100);
+        APP_Motor_SetSpeed(2, -100);
+        APP_Motor_SetSpeed(3, 100);
+        APP_Motor_SetSpeed(4, -100);
+        
+        i = i+1;
+    }
+    else{
+        MotionSched_Start(&GAIT_Stand);
+        APP_Motor_SetSpeed(1, 0);
+        APP_Motor_SetSpeed(2, 0);
+        APP_Motor_SetSpeed(3, 0);
+        APP_Motor_SetSpeed(4, 0);
+        i = i-1;
+    }
+}
+
+// 后退
+static void APP_UART_04(uint8_t *payload, uint8_t len)
+{
+    static uint8_t i = 0;
+    if (i == 0) {
+        MotionSched_Start(&GAIT_Walk_3_Queen);
+         APP_Motor_SetSpeed(1, -100);
+        APP_Motor_SetSpeed(2, 100);
+        APP_Motor_SetSpeed(3, -100);
+        APP_Motor_SetSpeed(4, 100);
+        i = i+1;
+    }
+    else{
+        MotionSched_Start(&GAIT_Stand);
+        APP_Motor_SetSpeed(1, 0);
+        APP_Motor_SetSpeed(2, 0);
+        APP_Motor_SetSpeed(3, 0);
+        APP_Motor_SetSpeed(4, 0);
+        i = i-1;
+    }
+}
+
+/* ──────── 转型命令 ──────── */
+// 左转
 static void APP_UART_11(uint8_t *payload, uint8_t len)
 {
     BSP_GPIO_Toggle(2);
     static uint8_t i = 0;
     if (i == 0) {
-    MotionSched_Start(&GAIT_KICK1);  
-    APP_Motor_SetSpeed(1, 150);
-    APP_Motor_SetSpeed(2, 150);
-    APP_Motor_SetSpeed(3, 150);
-    APP_Motor_SetSpeed(4, 150);
+    MotionSched_Start(&GAIT_Trot);  
+    APP_Motor_SetSpeed(1, 50);
+    APP_Motor_SetSpeed(2, 50);
+    APP_Motor_SetSpeed(3, 50);
+    APP_Motor_SetSpeed(4, 50);
         i = i+1;
     }
     else{
-    MotionSched_Start(&GAIT_Init);
+    MotionSched_Start(&GAIT_Stand);
     APP_Motor_SetSpeed(1, 0);
     APP_Motor_SetSpeed(2, 0);
     APP_Motor_SetSpeed(3, 0);
@@ -99,21 +150,22 @@ static void APP_UART_11(uint8_t *payload, uint8_t len)
         i = i-1;
     }
 }
-
+ 
+// 右转
 static void APP_UART_12(uint8_t *payload, uint8_t len)
 {
     BSP_GPIO_Toggle(2);
     static uint8_t i = 0;
     if (i == 0) {
-    MotionSched_Start(&GAIT_KICK1);  
-    APP_Motor_SetSpeed(1, -150);
-    APP_Motor_SetSpeed(2, -150);
-    APP_Motor_SetSpeed(3, -150);
-    APP_Motor_SetSpeed(4, -150);
+    MotionSched_Start(&GAIT_Trot);  
+    APP_Motor_SetSpeed(1, -50);
+    APP_Motor_SetSpeed(2, -50);
+    APP_Motor_SetSpeed(3, -50);
+    APP_Motor_SetSpeed(4, -50);
         i = i+1;
     }
     else{
-    MotionSched_Start(&GAIT_Init);
+    MotionSched_Start(&GAIT_Stand);
     APP_Motor_SetSpeed(1, 0);
     APP_Motor_SetSpeed(2, 0);
     APP_Motor_SetSpeed(3, 0);
@@ -122,31 +174,47 @@ static void APP_UART_12(uint8_t *payload, uint8_t len)
     }
 }
 
+/* ──────── 姿态切换 ──────── */
+// 站立
 static void APP_UART_21(uint8_t *payload, uint8_t len)
+{
+    MotionSched_Start(&GAIT_Stand);
+}
+
+// 趴伏
+static void APP_UART_22(uint8_t *payload, uint8_t len)
+{
+    MotionSched_Start(&GAIT_Grovel);
+}
+
+// 竖直站立
+static void APP_UART_23(uint8_t *payload, uint8_t len)
+{
+    MotionSched_Start(&GAIT_Vertical);
+}
+
+/* ──────── 姿态 ──────── */
+// 踱步
+static void APP_UART_31(uint8_t *payload, uint8_t len)
 {
     static uint8_t i = 0;
     if (i == 0) {
-        MotionSched_Start(&GAIT_Init);  
+    MotionSched_Start(&GAIT_Trot);
+    APP_Motor_SetSpeed(1, 0);
+    APP_Motor_SetSpeed(2, 0);
+    APP_Motor_SetSpeed(3, 0);
+    APP_Motor_SetSpeed(4, 0);
         i = i+1;
     }
     else{
-        MotionSched_Start(&GAIT_Init_2);
+    MotionSched_Start(&GAIT_Stand);
+    APP_Motor_SetSpeed(1, 0);
+    APP_Motor_SetSpeed(2, 0);
+    APP_Motor_SetSpeed(3, 0);
+    APP_Motor_SetSpeed(4, 0);
         i = i-1;
     }
 }
-
-static void APP_UART_22(uint8_t *payload, uint8_t len)
-{
-    static uint8_t i = 0;
-    if (i == 0) {
-        MotionSched_Start(&GAIT_KICK1);  
-        i = i+1;
-    }
-    else{
-        MotionSched_Start(&GAIT_Init);
-        i = i-1;
-    }
-} 
 
 /*==============================================================================
  * 命令配置表
@@ -162,12 +230,17 @@ static const uart_cmd_entry_t CMD_TABLE[] = {
     // 移动
     { .cmd = 0x01, .handler = APP_UART_01 },
     { .cmd = 0x02, .handler = APP_UART_02 },
+    { .cmd = 0x03, .handler = APP_UART_03 },
+    { .cmd = 0x04, .handler = APP_UART_04 },
     // 转向
     { .cmd = 0x11, .handler = APP_UART_11 },
     { .cmd = 0x12, .handler = APP_UART_12 },
     // 姿态调整
     { .cmd = 0x21, .handler = APP_UART_21 },
     { .cmd = 0x22, .handler = APP_UART_22 },
+    { .cmd = 0x23, .handler = APP_UART_23 },
+    // 姿态
+    { .cmd = 0x31, .handler = APP_UART_31 }, 
 };
 
 /*==============================================================================
