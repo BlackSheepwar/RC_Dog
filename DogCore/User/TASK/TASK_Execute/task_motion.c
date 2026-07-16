@@ -34,7 +34,7 @@ void Task_Motion(void *argument)
     /* ── 初始化两层架构 ── */
     Motion_Init();           /* 第一层：角度控制 */
     MotionSched_Init();      /* 第二层：周期调度 */
-    MotionSched_Start(&GAIT_Vertical);
+    MotionSched_Start(&GAIT_Grovel);
 
     /* ── 周期调度（10ms） ── */
     for (;;)

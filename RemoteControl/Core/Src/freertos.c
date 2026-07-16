@@ -77,7 +77,7 @@ const osThreadAttr_t KEY_Debounce_T_attributes = {
 };
 /* Definitions for KEY_CMD_T */
 osThreadId_t KEY_CMD_THandle;
-uint32_t KEY_CMD_TBuffer[ 128 ];
+uint32_t KEY_CMD_TBuffer[ 256 ];
 osStaticThreadDef_t KEY_CMD_TControlBlock;
 const osThreadAttr_t KEY_CMD_T_attributes = {
   .name = "KEY_CMD_T",

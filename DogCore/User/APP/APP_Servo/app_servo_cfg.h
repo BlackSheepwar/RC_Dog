@@ -55,7 +55,7 @@ static const servo_cfg_t SERVO_CFG[] = {
     // 右前腿
     { .servo_id = 3, .pwm_id = 3,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
-          .offset = 0, .offset_max = 20,              // 偏移量 (°)
+          .offset = 5, .offset_max = 20,              // 偏移量 (°)
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = 73, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)
@@ -63,7 +63,7 @@ static const servo_cfg_t SERVO_CFG[] = {
 
     { .servo_id = 4, .pwm_id = 4,                 // ID
           .hw = { .phys_range = 300,                  // 物理范围 (°)
-          .offset = 4, .offset_max = 20,              // 偏移量 (°)
+          .offset = 2, .offset_max = 20,              // 偏移量 (°)
           .limit_min = -130, .limit_max = 130,        // 限制范围 (°)
           .init_angle = -57, .reverse = 0,              // 初始角度 (°)
           .pulse_min = 500, .pulse_max = 2500 },      // 脉冲范围 (ms)

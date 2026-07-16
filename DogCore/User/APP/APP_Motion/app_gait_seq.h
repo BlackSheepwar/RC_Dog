@@ -102,63 +102,128 @@ static const motion_gait_t GAIT_Grovel = {
 };
 
 /*==============================================================================
- * 踱步（对角步态，循环）
+ * 踱步1
  *============================================================================*/
-/** @name GAIT_Trot 坐标常量
+/** @name GAIT_Trot_1 坐标常量
  *  @brief 踱步步态相位中腿部的高度参数
  *  @note  Y 轴：数值越小抬得越高（坐标原点在肩关节）
  *         - TROT_SWING  : 摆动相高度，对角腿抬起
  *         - TROT_STANCE : 支撑相高度，对角腿着地
  *  @{
  */
-#define TROT_SWING     (130)    /**< 踱步摆动相高度 */
-#define TROT_STANCE    (200)    /**< 踱步支撑相高度 */
+#define TROT_SWING_1     (90)    /**< 踱步摆动相高度 */
+#define TROT_STANCE_1    (160)    /**< 踱步支撑相高度 */
 
 /** @brief 踱步步态速度百分比 */
-#define SPEED_TROT     (100.0f) /**< 踱步主速度 */
+#define SPEED_TROT_1     (100.0f) /**< 踱步主速度 */
 /** @} */
 
-static const motion_gait_t GAIT_Trot = {
+static const motion_gait_t GAIT_Trot_1 = {
     .phases = (const motion_phase_t[]){
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = TROT_SWING} },
-                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 4, .pos = {.x = 0, .y = TROT_SWING} },
+                { .leg_id = 1, .pos = {.x = 0, .y = TROT_SWING_1} },
+                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 4, .pos = {.x = 0, .y = TROT_SWING_1} },
             },
             .leg_count = 4,
-            .speed = SPEED_TROT,
+            .speed = SPEED_TROT_1,
         },
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE} },
+                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE_1} },
             },
             .leg_count = 4,
-            .speed = SPEED_TROT,
+            .speed = SPEED_TROT_1,
         },
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 2, .pos = {.x = 0, .y = TROT_SWING} },
-                { .leg_id = 3, .pos = {.x = 0, .y = TROT_SWING} },
-                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE} },
+                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 2, .pos = {.x = 0, .y = TROT_SWING_1} },
+                { .leg_id = 3, .pos = {.x = 0, .y = TROT_SWING_1} },
+                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE_1} },
             },
             .leg_count = 4,
-            .speed = SPEED_TROT,
+            .speed = SPEED_TROT_1,
         },
         {
             .legs = (const leg_phase_data_t[]){
-                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE} },
-                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE} },
+                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE_1} },
+                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE_1} },
             },
             .leg_count = 4,
-            .speed = SPEED_TROT,
+            .speed = SPEED_TROT_1,
+        },
+    },
+    .phase_count = 4,
+    .loop = 1,
+    .mode = 1,
+};
+
+/*==============================================================================
+ * 踱步2
+ *============================================================================*/
+/** @name GAIT_Trot_2 坐标常量
+ *  @brief 踱步步态相位中腿部的高度参数
+ *  @note  Y 轴：数值越小抬得越高（坐标原点在肩关节）
+ *         - TROT_SWING  : 摆动相高度，对角腿抬起
+ *         - TROT_STANCE : 支撑相高度，对角腿着地
+ *  @{
+ */
+#define TROT_SWING_2     (90)    /**< 踱步摆动相高度 */
+#define TROT_STANCE_2    (160)    /**< 踱步支撑相高度 */
+
+/** @brief 踱步步态速度百分比 */
+#define SPEED_TROT_2     (100.0f) /**< 踱步主速度 */
+/** @} */
+
+static const motion_gait_t GAIT_Trot_2 = {
+    .phases = (const motion_phase_t[]){
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = TROT_SWING_2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = TROT_SWING_2} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_TROT_2,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE_2} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_TROT_2,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = TROT_SWING_2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = TROT_SWING_2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE_2} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_TROT_2,
+        },
+        {
+            .legs = (const leg_phase_data_t[]){
+                { .leg_id = 1, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 2, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 3, .pos = {.x = 0, .y = TROT_STANCE_2} },
+                { .leg_id = 4, .pos = {.x = 0, .y = TROT_STANCE_2} },
+            },
+            .leg_count = 4,
+            .speed = SPEED_TROT_2,
         },
     },
     .phase_count = 4,
@@ -178,11 +243,11 @@ static const motion_gait_t GAIT_Trot = {
  *         - G  : 过渡高度，介于支撑与摆动之间
  *  @{
  */
-#define A_W1F   (50)        /**< 全步幅偏移 */
-#define B_W1F   (25)        /**< 半步幅偏移 */
+#define A_W1F   (40)        /**< 全步幅偏移 */
+#define B_W1F   (20)        /**< 半步幅偏移 */
 #define C_W1F   (0)         /**< 居中位置 */
 
-#define E_W1F   (170.0f)   /**< 支撑相高度 */
+#define E_W1F   (160.0f)   /**< 支撑相高度 */
 #define F_W1F   (100.0f)   /**< 摆动相高度 */
 #define G_W1F   (118.8f)   /**< 过渡高度 */
 
@@ -290,11 +355,11 @@ static const motion_gait_t GAIT_Walk_1_Front = {
  *         - G  : 过渡高度，介于支撑与摆动之间
  *  @{
  */
-#define A_W1Q   (-50)        /**< 全步幅偏移 */
-#define B_W1Q   (-25)        /**< 半步幅偏移 */
+#define A_W1Q   (-40)        /**< 全步幅偏移 */
+#define B_W1Q   (-20)        /**< 半步幅偏移 */
 #define C_W1Q   (0)         /**< 居中位置 */
 
-#define E_W1Q   (170.0f)   /**< 支撑相高度 */
+#define E_W1Q   (160.0f)   /**< 支撑相高度 */
 #define F_W1Q   (100.0f)   /**< 摆动相高度 */
 #define G_W1Q   (118.8f)   /**< 过渡高度 */
 
@@ -406,9 +471,9 @@ static const motion_gait_t GAIT_Walk_1_Queen = {
 #define B_W2F   (30)        /**< 半步幅偏移 */
 #define C_W2F   (0)         /**< 居中位置 */
 
-#define E_W2F   (230.0f)   /**< 支撑相高度 */
-#define F_W2F   (170.0f)   /**< 摆动相高度 */
-#define G_W2F   (178.8f)   /**< 过渡高度 */
+#define E_W2F   (200.0f)   /**< 支撑相高度（从 230 降低以减少腿部伸展量，增大电机力矩余量） */
+#define F_W2F   (130.0f)   /**< 摆动相高度（从 170 降低以增大抬腿量至 70） */
+#define G_W2F   (142.0f)   /**< 过渡高度（从 178.8 降低以增大过渡抬腿量至 58） */
 
 /** @brief 行走步态速度百分比 */
 #define SPEED_W2F      (100.0f)    /**< 行走主速度 */
@@ -618,24 +683,24 @@ static const motion_gait_t GAIT_Walk_2_Queen = {
  * 行走步态3 — Front（优化参数）
  *============================================================================*/
 /** @name GAIT_Walk_3_Front 坐标常量
- *  @brief 步态相位中腿部的位置参数（优化版：大步幅、低抬腿）
+ *  @brief 步态相位中腿部的位置参数（低抬腿、低速、省力矩版）
  *  @note  X 轴：正值为前进方向，负值为后退方向
  *         Y 轴：数值越小抬得越高（坐标原点在肩关节）
  *         - E  : 支撑相高度，脚着地
- *         - F  : 摆动相高度，脚抬起（抬腿约 35mm）
+ *         - F  : 摆动相高度，脚抬起（抬腿 50 单位，比 W2F 减少 30% 扭矩）
  *         - G  : 过渡高度，介于支撑与摆动之间
  *  @{
  */
-#define A_W3F   (75)        /**< 全步幅偏移（比 W2F 增加 25%） */
-#define B_W3F   (38)        /**< 半步幅偏移 */
+#define A_W3F   (50)        /**< 全步幅偏移 */
+#define B_W3F   (25)        /**< 半步幅偏移 */
 #define C_W3F   (0)         /**< 居中位置 */
 
-#define E_W3F   (200.0f)   /**< 支撑相高度（71% 最大腿长） */
-#define F_W3F   (135.0f)   /**< 摆动相高度（抬腿 35mm，够越障且省力矩） */
-#define G_W3F   (144.0f)   /**< 过渡高度（紧贴摆动高度，减少落地冲击） */
+#define E_W3F   (210.0f)   /**< 支撑相高度 */
+#define F_W3F   (150.0f)   /**< 摆动相高度 */
+#define G_W3F   (158.0f)   /**< 过渡高度 */
 
 /** @brief 行走步态速度百分比 */
-#define SPEED_W3F      (100.0f)    /**< 行走主速度 */
+#define SPEED_W3F      (100.0f)
 /** @} */
 
 static const motion_gait_t GAIT_Walk_3_Front = {
@@ -730,24 +795,24 @@ static const motion_gait_t GAIT_Walk_3_Front = {
  * 行走步态3 — Queen（优化参数，后退）
  *============================================================================*/
 /** @name GAIT_Walk_3_Queen 坐标常量
- *  @brief 步态相位中腿部的位置参数（优化版后退：大步幅、低抬腿）
+ *  @brief 步态相位中腿部的位置参数（低抬腿、低速、省力矩版，后退）
  *  @note  X 轴：负值为后退方向（与 Front 符号相反）
  *         Y 轴：数值越小抬得越高（坐标原点在肩关节）
  *         - E  : 支撑相高度，脚着地
- *         - F  : 摆动相高度，脚抬起（抬腿约 35mm）
+ *         - F  : 摆动相高度，脚抬起（抬腿 50 单位，降低后腿扭矩需求）
  *         - G  : 过渡高度，介于支撑与摆动之间
  *  @{
  */
-#define A_W3Q   (-75)        /**< 全步幅偏移（后退方向） */
-#define B_W3Q   (-38)        /**< 半步幅偏移（后退方向） */
+#define A_W3Q   (-50)        /**< 全步幅偏移（后退方向） */
+#define B_W3Q   (-25)        /**< 半步幅偏移（后退方向） */
 #define C_W3Q   (0)         /**< 居中位置 */
 
-#define E_W3Q   (200.0f)   /**< 支撑相高度（71% 最大腿长） */
-#define F_W3Q   (135.0f)   /**< 摆动相高度（抬腿 35mm） */
-#define G_W3Q   (144.0f)   /**< 过渡高度 */
+#define E_W3Q   (210.0f)   /**< 支撑相高度（71% 最大腿长） */
+#define F_W3Q   (135.0f)   /**< 摆动相高度（抬腿 50 单位，降低后腿扭矩需求） */
+#define G_W3Q   (165.0f)   /**< 过渡高度（抬腿 30 单位，平缓过渡） */
 
 /** @brief 行走步态速度百分比 */
-#define SPEED_W3Q      (100.0f)    /**< 行走主速度 */
+#define SPEED_W3Q      (100.0f)    /**< 行走主速度（降速减少峰值电流） */
 /** @} */
 
 static const motion_gait_t GAIT_Walk_3_Queen = {
