@@ -130,7 +130,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     User/BSP/BSP_Encoder            # ENCODER
     User/BSP/BSP_GPIO               # GPIO
     User/BSP/BSP_PWM                # PWM    
-    User/BSP/BSP_Sys                # SYS
+    User/BSP/BSP_SYS                # SYS
     User/BSP/BSP_Uart               # UART
 
     ## Middlewares

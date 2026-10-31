@@ -7,7 +7,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "stm32cubemx::@768a070a0fe75716b479",
-					"jsonFile" : "target-stm32cubemx-Debug-166eb033c4f2c3a70970.json",
+					"jsonFile" : "target-stm32cubemx-Debug-468e0e35ba8fc242e336.json",
 					"name" : "stm32cubemx",
 					"projectIndex" : 0
 				}
@@ -20,7 +20,7 @@
 					[
 						1
 					],
-					"jsonFile" : "directory-.-Debug-f040eec181a89de70dbe.json",
+					"jsonFile" : "directory-.-Debug-b5805d5c08fd3d92def4.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -38,7 +38,7 @@
 						0
 					],
 					"build" : "cmake/stm32cubemx",
-					"jsonFile" : "directory-cmake.stm32cubemx-Debug-720efe0a241989607e76.json",
+					"jsonFile" : "directory-cmake.stm32cubemx-Debug-5b3c2a2eeda9743e1cd9.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -80,21 +80,21 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "FreeRTOS::@768a070a0fe75716b479",
-					"jsonFile" : "target-FreeRTOS-Debug-25828fec8db6fba449e3.json",
+					"jsonFile" : "target-FreeRTOS-Debug-7d0bc2ca0fdb18135f16.json",
 					"name" : "FreeRTOS",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "RemoteControl::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-RemoteControl-Debug-f563058000f50a26c36a.json",
+					"jsonFile" : "target-RemoteControl-Debug-280b5559573c5b1f6a8c.json",
 					"name" : "RemoteControl",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "STM32_Drivers::@768a070a0fe75716b479",
-					"jsonFile" : "target-STM32_Drivers-Debug-30051d146131e880f07f.json",
+					"jsonFile" : "target-STM32_Drivers-Debug-bc05aaa9463134befed9.json",
 					"name" : "STM32_Drivers",
 					"projectIndex" : 0
 				}
@@ -110,6 +110,6 @@
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 10
+		"minor" : 11
 	}
 }

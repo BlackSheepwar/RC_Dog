@@ -28,9 +28,6 @@
  *============================================================================*/
 #define GPIO_MAX_NUM    20    /* 最大支持 GPIO 数量） */
 
-#define GPIO_LEVEL_LOW  0    /* 低电平 */
-#define GPIO_LEVEL_HIGH 1    /* 高电平 */
-
 #define GPIO_DIR_IN     0    /* 输入方向 */
 #define GPIO_DIR_OUT    1    /* 输出方向 */
 

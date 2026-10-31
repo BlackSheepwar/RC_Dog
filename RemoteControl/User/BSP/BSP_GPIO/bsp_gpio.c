@@ -44,7 +44,7 @@ typedef struct {
     uint8_t      dir;        /* GPIO_DIR_IN / GPIO_DIR_OUT */
 } BSP_GPIO_Map_t;
 
-static const BSP_GPIO_Map_t GPIO_HW_MAP[GPIO_MAX_NUM] = {
+static const BSP_GPIO_Map_t GPIO_HW_MAP[GPIO_MAX_NUM] = { 
     // 测试
     { .gpio_id = 0, .GPIOx = GPIOC, .Pin = GPIO_PIN_13, .dir = GPIO_DIR_OUT  },
     // 微动按键

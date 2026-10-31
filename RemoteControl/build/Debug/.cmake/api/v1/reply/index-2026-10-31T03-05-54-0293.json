@@ -8,34 +8,34 @@
 		},
 		"paths" : 
 		{
-			"cmake" : "C:/Users/g_aa2/AppData/Local/stm32cube/bundles/cmake/4.3.1+st.1/bin/cmake.exe",
-			"cpack" : "C:/Users/g_aa2/AppData/Local/stm32cube/bundles/cmake/4.3.1+st.1/bin/cpack.exe",
-			"ctest" : "C:/Users/g_aa2/AppData/Local/stm32cube/bundles/cmake/4.3.1+st.1/bin/ctest.exe",
-			"root" : "C:/Users/g_aa2/AppData/Local/stm32cube/bundles/cmake/4.3.1+st.1/share/cmake-4.3"
+			"cmake" : "C:/Users/g_aa2/AppData/Local/stm32cube/bundles/cmake/4.4.0+st.1/bin/cmake.exe",
+			"cpack" : "C:/Users/g_aa2/AppData/Local/stm32cube/bundles/cmake/4.4.0+st.1/bin/cpack.exe",
+			"ctest" : "C:/Users/g_aa2/AppData/Local/stm32cube/bundles/cmake/4.4.0+st.1/bin/ctest.exe",
+			"root" : "C:/Users/g_aa2/AppData/Local/stm32cube/bundles/cmake/4.4.0+st.1/share/cmake-4.4"
 		},
 		"version" : 
 		{
 			"isDirty" : false,
 			"major" : 4,
-			"minor" : 3,
-			"patch" : 1,
-			"string" : "4.3.1",
+			"minor" : 4,
+			"patch" : 0,
+			"string" : "4.4.0",
 			"suffix" : ""
 		}
 	},
 	"objects" : 
 	[
 		{
-			"jsonFile" : "codemodel-v2-607b3964619499376c7b.json",
+			"jsonFile" : "codemodel-v2-f254522cf013c3235fcf.json",
 			"kind" : "codemodel",
 			"version" : 
 			{
 				"major" : 2,
-				"minor" : 10
+				"minor" : 11
 			}
 		},
 		{
-			"jsonFile" : "cache-v2-577e40cc7d265afd6cf4.json",
+			"jsonFile" : "cache-v2-f5ab770b4322fd535735.json",
 			"kind" : "cache",
 			"version" : 
 			{
@@ -44,7 +44,7 @@
 			}
 		},
 		{
-			"jsonFile" : "cmakeFiles-v1-ec9256f2efba578644d2.json",
+			"jsonFile" : "cmakeFiles-v1-66785843660d014a9831.json",
 			"kind" : "cmakeFiles",
 			"version" : 
 			{
@@ -90,7 +90,7 @@
 				"responses" : 
 				[
 					{
-						"jsonFile" : "cache-v2-577e40cc7d265afd6cf4.json",
+						"jsonFile" : "cache-v2-f5ab770b4322fd535735.json",
 						"kind" : "cache",
 						"version" : 
 						{
@@ -99,12 +99,12 @@
 						}
 					},
 					{
-						"jsonFile" : "codemodel-v2-607b3964619499376c7b.json",
+						"jsonFile" : "codemodel-v2-f254522cf013c3235fcf.json",
 						"kind" : "codemodel",
 						"version" : 
 						{
 							"major" : 2,
-							"minor" : 10
+							"minor" : 11
 						}
 					},
 					{
@@ -117,7 +117,7 @@
 						}
 					},
 					{
-						"jsonFile" : "cmakeFiles-v1-ec9256f2efba578644d2.json",
+						"jsonFile" : "cmakeFiles-v1-66785843660d014a9831.json",
 						"kind" : "cmakeFiles",
 						"version" : 
 						{
