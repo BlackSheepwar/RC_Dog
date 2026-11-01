@@ -1,154 +1,123 @@
 /**
  * @file app_can_cmd_2.c
- * @brief CAN2 接收命令表（保留接口，当前硬件没有 CAN2）
- * @author Ricardo
- * @date 2026-11-01
+ * @brief CAN2 命令分发（配置表驱动，保留接口）
+ * @author 李嘉图
+ * @date 2026-06-05
  *
- * @note 结构与 app_can_cmd_1.c 完全一致：两路 CAN 各自一张表，
- *       分发入口签名相同，路由表里换一下函数指针就能启用。
- *       所有处理函数都是桩，接上第二路 CAN 时再填业务。
+ * @note 与 app_can_cmd_1.c 同结构，使用 CAN RX 配置表。
+ *       所有 handler 目前保留为桩函数，后续有实际逻辑时在表中添加条目即可。
  */
 
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
 // 固定包含
-#include <stddef.h>
-#include "common.h"             /* ARRAY_SIZE */
+#include "main.h"
 #include "app_can_cmd.h"
+#include "common.h"
 
 /*==============================================================================
- * FIFO0 处理函数（高优先级，桩）
+ * FIFO0 处理函数（高优先级，均为桩函数）
  *============================================================================*/
-/**
- * @brief 标准数据帧 0x7FF 处理（桩）
- * @param frame 收到的帧
- * @retval 无
- */
-static void APP_CAN2_F0_StdData_Max(const bsp_can_frame_t *frame)
+/* ---------- 标准帧 + 数据帧 ---------- */
+static void APP_CAN2_F0_StdData_7FF(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    (void)frame;
+    (void)header;
+    (void)data;
 }
 
-/**
- * @brief 标准遥控帧 0x7FF 处理（桩）
- * @param frame 收到的帧
- * @retval 无
- */
-static void APP_CAN2_F0_StdRemote_Max(const bsp_can_frame_t *frame)
+/* ---------- 标准帧 + 遥控帧 ---------- */
+static void APP_CAN2_F0_StdRemote_7FF(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    (void)frame;
+    (void)header;
+    (void)data;
 }
 
-/**
- * @brief 扩展数据帧 0x1FFFFFFF 处理（桩）
- * @param frame 收到的帧
- * @retval 无
- */
-static void APP_CAN2_F0_ExtData_Max(const bsp_can_frame_t *frame)
+/* ---------- 扩展帧 + 数据帧 ---------- */
+static void APP_CAN2_F0_ExtData_1FFFFFFF(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    (void)frame;
+    (void)header;
+    (void)data;
 }
 
-/**
- * @brief 扩展遥控帧 0x1FFFFFFF 处理（桩）
- * @param frame 收到的帧
- * @retval 无
- */
-static void APP_CAN2_F0_ExtRemote_Max(const bsp_can_frame_t *frame)
+/* ---------- 扩展帧 + 遥控帧 ---------- */
+static void APP_CAN2_F0_ExtRemote_1FFFFFFF(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    (void)frame;
+    (void)header;
+    (void)data;
 }
 
 /*==============================================================================
- * FIFO1 处理函数（低优先级，桩）
+ * FIFO1 处理函数（低优先级，均为桩函数）
  *============================================================================*/
-/**
- * @brief 标准数据帧 0x7FF 处理（桩）
- * @param frame 收到的帧
- * @retval 无
- */
-static void APP_CAN2_F1_StdData_Max(const bsp_can_frame_t *frame)
+/* ---------- 标准帧 + 数据帧 ---------- */
+static void APP_CAN2_F1_StdData_7FF(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    (void)frame;
+    (void)header;
+    (void)data;
 }
 
-/**
- * @brief 标准遥控帧 0x7FF 处理（桩）
- * @param frame 收到的帧
- * @retval 无
- */
-static void APP_CAN2_F1_StdRemote_Max(const bsp_can_frame_t *frame)
+/* ---------- 标准帧 + 遥控帧 ---------- */
+static void APP_CAN2_F1_StdRemote_7FF(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    (void)frame;
+    (void)header;
+    (void)data;
 }
 
-/**
- * @brief 扩展数据帧 0x1FFFFFFF 处理（桩）
- * @param frame 收到的帧
- * @retval 无
- */
-static void APP_CAN2_F1_ExtData_Max(const bsp_can_frame_t *frame)
+/* ---------- 扩展帧 + 数据帧 ---------- */
+static void APP_CAN2_F1_ExtData_1FFFFFFF(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    (void)frame;
+    (void)header;
+    (void)data;
 }
 
-/**
- * @brief 扩展遥控帧 0x1FFFFFFF 处理（桩）
- * @param frame 收到的帧
- * @retval 无
- */
-static void APP_CAN2_F1_ExtRemote_Max(const bsp_can_frame_t *frame)
+/* ---------- 扩展帧 + 遥控帧 ---------- */
+static void APP_CAN2_F1_ExtRemote_1FFFFFFF(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    (void)frame;
+    (void)header;
+    (void)data;
 }
 
 /*==============================================================================
- * 命令表
+ * CAN2 FIFO0 RX 配置表（高优先级）
  *============================================================================*/
-/** @brief CAN2 FIFO0 命令表 */
-static const can_rx_entry_t APP_CAN2_F0_RX_TABLE[] = {
-    { .can_id = 0x7FFu, .ide = (uint8_t)BSP_CAN_ID_STD, .rtr = (uint8_t)BSP_CAN_FRAME_DATA,
-      .handler = APP_CAN2_F0_StdData_Max },
-    { .can_id = 0x7FFu, .ide = (uint8_t)BSP_CAN_ID_STD, .rtr = (uint8_t)BSP_CAN_FRAME_REMOTE,
-      .handler = APP_CAN2_F0_StdRemote_Max },
-    { .can_id = 0x1FFFFFFFu, .ide = (uint8_t)BSP_CAN_ID_EXT, .rtr = (uint8_t)BSP_CAN_FRAME_DATA,
-      .handler = APP_CAN2_F0_ExtData_Max },
-    { .can_id = 0x1FFFFFFFu, .ide = (uint8_t)BSP_CAN_ID_EXT, .rtr = (uint8_t)BSP_CAN_FRAME_REMOTE,
-      .handler = APP_CAN2_F0_ExtRemote_Max },
-};
-
-/** @brief CAN2 FIFO1 命令表 */
-static const can_rx_entry_t APP_CAN2_F1_RX_TABLE[] = {
-    { .can_id = 0x7FFu, .ide = (uint8_t)BSP_CAN_ID_STD, .rtr = (uint8_t)BSP_CAN_FRAME_DATA,
-      .handler = APP_CAN2_F1_StdData_Max },
-    { .can_id = 0x7FFu, .ide = (uint8_t)BSP_CAN_ID_STD, .rtr = (uint8_t)BSP_CAN_FRAME_REMOTE,
-      .handler = APP_CAN2_F1_StdRemote_Max },
-    { .can_id = 0x1FFFFFFFu, .ide = (uint8_t)BSP_CAN_ID_EXT, .rtr = (uint8_t)BSP_CAN_FRAME_DATA,
-      .handler = APP_CAN2_F1_ExtData_Max },
-    { .can_id = 0x1FFFFFFFu, .ide = (uint8_t)BSP_CAN_ID_EXT, .rtr = (uint8_t)BSP_CAN_FRAME_REMOTE,
-      .handler = APP_CAN2_F1_ExtRemote_Max },
+static const can_rx_entry_t CAN2_F0_RX_TABLE[] = {
+    /* 标准帧 + 数据 */
+    { .can_id = 0x7FF, .ide = FDCAN_STANDARD_ID, .rtr = FDCAN_DATA_FRAME, .handler = APP_CAN2_F0_StdData_7FF },
+    /* 标准帧 + 遥控 */
+    { .can_id = 0x7FF, .ide = FDCAN_STANDARD_ID, .rtr = FDCAN_REMOTE_FRAME, .handler = APP_CAN2_F0_StdRemote_7FF },
+    /* 扩展帧 + 数据 */
+    { .can_id = 0x1FFFFFFF, .ide = FDCAN_EXTENDED_ID, .rtr = FDCAN_DATA_FRAME, .handler = APP_CAN2_F0_ExtData_1FFFFFFF },
+    /* 扩展帧 + 遥控 */
+    { .can_id = 0x1FFFFFFF, .ide = FDCAN_EXTENDED_ID, .rtr = FDCAN_REMOTE_FRAME, .handler = APP_CAN2_F0_ExtRemote_1FFFFFFF },
 };
 
 /*==============================================================================
- * 分发入口
+ * CAN2 FIFO1 RX 配置表（低优先级）
  *============================================================================*/
-/**
- * @brief CAN2 FIFO0 分发
- * @param frame 收到的帧，不可为 NULL
- * @retval 无
- */
-void APP_CAN2_F0_Cmd(const bsp_can_frame_t *frame)
+static const can_rx_entry_t CAN2_F1_RX_TABLE[] = {
+    /* 标准帧 + 数据 */
+    { .can_id = 0x7FF, .ide = FDCAN_STANDARD_ID, .rtr = FDCAN_DATA_FRAME, .handler = APP_CAN2_F1_StdData_7FF },
+    /* 标准帧 + 遥控 */
+    { .can_id = 0x7FF, .ide = FDCAN_STANDARD_ID, .rtr = FDCAN_REMOTE_FRAME, .handler = APP_CAN2_F1_StdRemote_7FF },
+    /* 扩展帧 + 数据 */
+    { .can_id = 0x1FFFFFFF, .ide = FDCAN_EXTENDED_ID, .rtr = FDCAN_DATA_FRAME, .handler = APP_CAN2_F1_ExtData_1FFFFFFF },
+    /* 扩展帧 + 遥控 */
+    { .can_id = 0x1FFFFFFF, .ide = FDCAN_EXTENDED_ID, .rtr = FDCAN_REMOTE_FRAME, .handler = APP_CAN2_F1_ExtRemote_1FFFFFFF },
+};
+
+/*==============================================================================
+ * CAN2 FIFO0 命令分发
+ *============================================================================*/
+void APP_CAN2_F0_Cmd(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    APP_CAN_Cmd_Match(APP_CAN2_F0_RX_TABLE, (uint8_t)ARRAY_SIZE(APP_CAN2_F0_RX_TABLE), frame);
+    CAN_DispatchByTable(CAN2_F0_RX_TABLE, ARRAY_SIZE(CAN2_F0_RX_TABLE), header, data);
 }
 
-/**
- * @brief CAN2 FIFO1 分发
- * @param frame 收到的帧，不可为 NULL
- * @retval 无
- */
-void APP_CAN2_F1_Cmd(const bsp_can_frame_t *frame)
+/*==============================================================================
+ * CAN2 FIFO1 命令分发
+ *============================================================================*/
+void APP_CAN2_F1_Cmd(FDCAN_RxHeaderTypeDef *header, uint8_t *data)
 {
-    APP_CAN_Cmd_Match(APP_CAN2_F1_RX_TABLE, (uint8_t)ARRAY_SIZE(APP_CAN2_F1_RX_TABLE), frame);
+    CAN_DispatchByTable(CAN2_F1_RX_TABLE, ARRAY_SIZE(CAN2_F1_RX_TABLE), header, data);
 }

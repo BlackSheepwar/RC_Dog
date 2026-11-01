@@ -27,15 +27,12 @@
 /* USER CODE BEGIN Includes */
 #include "app_key.h"
 #include "app_uart.h"
-#include "svc_uart.h"
-#include "bsp_iic.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 typedef StaticTask_t osStaticThreadDef_t;
 typedef StaticQueue_t osStaticMessageQDef_t;
 typedef StaticSemaphore_t osStaticSemaphoreDef_t;
-typedef StaticSemaphore_t osStaticMutexDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -187,14 +184,6 @@ const osSemaphoreAttr_t UART_TX_CS_attributes = {
   .cb_mem = &UART_TX_CSControlBlock,
   .cb_size = sizeof(UART_TX_CSControlBlock),
 };
-/* Definitions for IIC_LOCK */
-osMutexId_t IIC_LOCKHandle;
-osStaticMutexDef_t IIC_LOCKControlBlock;
-const osMutexAttr_t IIC_LOCK_attributes = {
-  .name = "IIC_LOCK",
-  .cb_mem = &IIC_LOCKControlBlock,
-  .cb_size = sizeof(IIC_LOCKControlBlock),
-};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -220,17 +209,9 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
-  /* Create the mutex(es) */
-  /* creation of IIC_LOCK */
-  IIC_LOCKHandle = osMutexNew(&IIC_LOCK_attributes);
-
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
-  /* IIC 总线登记：IIC_LOCK 已在上面的 "Create the mutex(es)" 里创建，
-     MX_I2C2_Init() 也已在 main 里跑过，这里只做句柄校验。
-     必须在建线程之前完成，否则 OLED 任务第一次刷屏会拿到未初始化的总线。 */
-  (void)BSP_IIC_Init();
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
@@ -260,10 +241,6 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
-  /* 串口链路：队列/信号量都建好之后、线程启动之前初始化。
-     这里会建立 GFIFO 字节队列并启动 DMA 循环接收，
-     早于本段则 OS 对象还不存在，晚于线程启动则可能丢开头几个字节。 */
-  (void)Svc_Uart_Init();
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */

@@ -1,19 +1,17 @@
 /**
  * @file bsp_can.h
- * @brief CAN（FDCAN）硬件驱动层：总线句柄 + 帧值类型
- * @author Ricardo
- * @date 2026-11-01
+ * @brief CAN硬件接口
+ * @author 李嘉图
+ * @date 2026-06-01
  *
- * @note 本层只做"把一帧丢上总线、从 FIFO 取一帧"，不认识任何 ID 的含义。
- *       哪些 ID 交给哪个处理函数，是 APP_CAN 的命令表决定的。
+ * @note 硬件映射表（id → hcan）在此文件中静态定义，
+ *       支持双 CAN（hcan1/hcan2），滤波器 28 个平均分配。
+ *       BSP层仅负责硬件配置与数据收发，不处理业务逻辑。
  *
- *       头文件里没有 fdcan.h：HAL 的 FDCAN_RxHeaderTypeDef 一旦出现在
- *       BSP 头里，Device / APP 的头文件链就会被迫认识 HAL。
- *       这里用 bsp_can_frame_t 这个值类型代替——它是队列元素，上层要算
- *       sizeof，所以按值类型完整定义在头文件里（值类型的合法例外）。
- *
- *       中断把收到的帧投进 CAN_RXF0_Q / CAN_RXF1_Q，由 TASK 取走分发；
- *       队列由 CubeMX 在 freertos.c 里创建，本层只使用、不创建。
+ *       滤波器配置通过 id1~id4 直接映射 bxCAN 的 4 个寄存器字段，
+ *       配合 mode/scale 组合出 4 种模式:
+ *       规则组+标准(16bit MASK)、规则组+扩展(32bit MASK)
+ *       通道组+标准(16bit LIST)、通道组+扩展(32bit LIST)
  */
 
 #ifndef __BSP_CAN_H__
@@ -24,139 +22,165 @@
  *============================================================================*/
 // 固定包含
 #include <stdint.h>
+// 功能包含
+#include "fdcan.h"
 
 /*==============================================================================
  * 宏定义与常量
  *============================================================================*/
-/** @brief 一帧经典 CAN 的数据字节上限 */
-#define BSP_CAN_DATA_LEN        8u
-/** @brief 标准帧 ID 上限（11 bit） */
-#define BSP_CAN_STD_ID_MAX      0x7FFu
-/** @brief 扩展帧 ID 上限（29 bit） */
-#define BSP_CAN_EXT_ID_MAX      0x1FFFFFFFu
+#define BSP_CAN_MAX_NUM         2           // CAN实例最大数量 (CAN1 + CAN2)
+#define BSP_CAN_DATA_LEN        8           // CAN数据帧最大长度
+
+// 滤波器模式
+#define BSP_CAN_FILTER_MODE_MASK   0                        // 规则组
+#define BSP_CAN_FILTER_MODE_LIST   1                        // 通道组
+#define BSP_CAN_FILTER_MODE_RANGE  2                        // 范围匹配 (FDCAN)
+
+// 滤波器位宽
+#define BSP_CAN_FILTER_SCALE_16    0                        // 标准帧 (11bit)
+#define BSP_CAN_FILTER_SCALE_32    1                        // 扩展帧 (29bit)
+
+// FIFO选择
+#define BSP_CAN_FIFO0              0                        // FIFO0
+#define BSP_CAN_FIFO1              1                        // FIFO1
+
+// ID类型
+#define BSP_CAN_STDID              FDCAN_STANDARD_ID        // 标准帧ID
+#define BSP_CAN_EXTID              FDCAN_EXTENDED_ID        // 扩展帧ID
+
+// 帧类型
+#define BSP_CAN_DATA_FRAME         FDCAN_DATA_FRAME         // 数据帧类型
+#define BSP_CAN_REMOTE_FRAME       FDCAN_REMOTE_FRAME       // 遥控帧类型
 
 /*==============================================================================
- * 类型定义
+ * 标准帧 16-bit 槽位格式宏
+ *   bxCAN 16-bit 寄存器: [15:5]=STDID, [3]=RTR
+ *   IDE位标准帧恒为0，无需配置
  *============================================================================*/
-/**
- * @brief ID 类型
- */
-typedef enum {
-    BSP_CAN_ID_STD = 0,     /* 标准帧，11 bit */
-    BSP_CAN_ID_EXT = 1,     /* 扩展帧，29 bit */
-} bsp_can_id_t;
+#define BSP_CAN_STD16_ID(id)            ((uint16_t)(((id) & 0x7FF) << 5))
+#define BSP_CAN_STD16_RTR(rtr)          ((uint16_t)((rtr) ? (1 << 3) : 0))
+#define BSP_CAN_STD16_IDE(ide)          ((uint16_t)((ide) ? (1 << 2) : 0))
+#define BSP_CAN_STD16(id, rtr, ide)     ((uint16_t)(BSP_CAN_STD16_ID(id) | BSP_CAN_STD16_RTR(rtr) | BSP_CAN_STD16_IDE(ide)))
+
+/*==============================================================================
+ * 扩展帧 32-bit 高低16位格式宏
+ *   高位[15:5]=EXTID[28:18], [4]=SRR, [3]=IDE, [2]=RTR, [1:0]=EXTID[17:16]
+ *   低位[15:0]=EXTID[15:0]
+ *============================================================================*/
+#define BSP_CAN_EXT32_HIGH(id, rtr)  ((uint16_t)( \
+    ((((uint32_t)(id) >> 18) & 0x7FF) << 5) | \
+    (1 << 4) | (1 << 3) | \
+    (((rtr) ? 1 : 0) << 2) | \
+    (((uint32_t)(id) >> 16) & 0x03) ))
+#define BSP_CAN_EXT32_LOW(id)           ((uint16_t)((uint32_t)(id) & 0xFFFF))
+
+/*==============================================================================
+ * 结构体定义
+ *============================================================================*/
 
 /**
- * @brief 帧类型
- */
-typedef enum {
-    BSP_CAN_FRAME_DATA   = 0,   /* 数据帧 */
-    BSP_CAN_FRAME_REMOTE = 1,   /* 遥控帧，data 无效 */
-} bsp_can_frame_type_t;
-
-/**
- * @brief 接收 FIFO 编号
- */
-typedef enum {
-    BSP_CAN_FIFO0 = 0,      /* 高优先级：控制帧 */
-    BSP_CAN_FIFO1 = 1,      /* 低优先级：遥测帧 */
-} bsp_can_fifo_t;
-
-/**
- * @brief 滤波器匹配方式
- */
-typedef enum {
-    BSP_CAN_FILTER_MASK  = 0,   /* ID + 掩码 */
-    BSP_CAN_FILTER_RANGE = 1,   /* [id1, id2] 区间 */
-    BSP_CAN_FILTER_DUAL  = 2,   /* id1 / id2 两个独立 ID */
-} bsp_can_filter_mode_t;
-
-/**
- * @brief 一帧 CAN 报文（值类型：队列元素，按值传递）
+ * @brief CAN滤波器配置参数
+ *
+ * @note id1~id4 直接映射 bxCAN 滤波器的 4 个寄存器字段:
+ *         id1 → FilterIdHigh    (CAN_FxR1高16位)
+ *         id2 → FilterIdLow     (CAN_FxR1低16位)
+ *         id3 → FilterMaskIdHigh (CAN_FxR2高16位)
+ *         id4 → FilterMaskIdLow  (CAN_FxR2低16位)
+ *
+ *       配合 mode×scale 组合出4种模式:
+ *
+ *       规则组+标准 (MASK+16bit):
+ *         id1=ID1, id2=MASK1, id3=ID2, id4=MASK2  (2条规则)
+ *       规则组+扩展 (MASK+32bit):
+ *         id1=ID高位, id2=ID低位, id3=Mask高位, id4=Mask低位
+ *       通道组+标准 (LIST+16bit):
+ *         id1=ID1, id2=ID2, id3=ID3, id4=ID4      (4个独立ID)
+ *       通道组+扩展 (LIST+32bit):
+ *         id1=ID1高位, id2=ID1低位, id3=ID2高位, id4=ID2低位
  */
 typedef struct {
-    uint32_t id;                    /* 帧 ID（标准 11 bit / 扩展 29 bit） */
-    uint8_t  ide;                   /* ID 类型，取 bsp_can_id_t */
-    uint8_t  rtr;                   /* 帧类型，取 bsp_can_frame_type_t */
-    uint8_t  dlc;                   /* 数据长度 0 ~ 8 */
-    uint8_t  data[BSP_CAN_DATA_LEN];/* 数据，遥控帧时全 0 */
-} bsp_can_frame_t;
+    uint8_t  filter_bank;   // 滤波器序号 (0-13=CAN1, 14-27=CAN2)
+    uint8_t  fifo;          // 目标FIFO (BSP_CAN_FIFO0 / BSP_CAN_FIFO1)
+    uint8_t  mode;          // BSP_CAN_FILTER_MODE_MASK / _LIST
+    uint8_t  scale;         // BSP_CAN_FILTER_SCALE_16 / _32
+    uint32_t id1;           // FilterID1（标准11bit/扩展29bit）
+    uint32_t id2;           // FilterID2
+    uint32_t id3;           // 预留（标准帧LIST模式用）
+    uint32_t id4;           // 预留
+} BSP_CAN_FilterConfig_t;
 
 /**
- * @brief 兼容别名：CubeMX 生成的 freertos.c 用旧名字建队列
- * @note 生成代码在 USER CODE 之外，改不动；用别名让它继续编译，
- *       两边的 sizeof 一定一致（同一个类型）。新代码一律用 bsp_can_frame_t。
+ * @brief can指令包结构体
  */
-typedef bsp_can_frame_t BSP_CAN_Packet_t;
-
-/**
- * @brief 滤波器配置（值类型：上层按值构造一条规则）
- */
-typedef struct {
-    uint8_t  index;     /* 滤波器序号，FDCAN 标准列表 0 ~ 127 */
-    uint8_t  fifo;      /* 命中后送哪个 FIFO，取 bsp_can_fifo_t */
-    uint8_t  mode;      /* 匹配方式，取 bsp_can_filter_mode_t */
-    uint8_t  ide;       /* 匹配的 ID 类型，取 bsp_can_id_t */
-    uint32_t id1;       /* 主 ID / 区间下限 */
-    uint32_t id2;       /* 次 ID / 区间上限，MASK 与 DUAL 模式用 */
-} bsp_can_filter_t;
-
-/**
- * @brief CAN 总线句柄（不透明类型，布局在 bsp_can.c）
- */
-typedef struct bsp_can bsp_can_t;
+typedef struct{
+    uint8_t  id;
+    uint8_t data[8];
+    FDCAN_RxHeaderTypeDef header;
+} BSP_CAN_Packet_t;
 
 /*==============================================================================
- * 外部声明
+ * 初始化函数
  *============================================================================*/
-/** @brief FDCAN1 总线句柄 */
-extern const bsp_can_t bsp_can1;
+/**
+ * @brief 初始化BSP CAN层
+ * @note 复位运行时启动状态。映射表为编译期常量，无需注册。
+ */
+void BSP_CAN_Init(void);
+
+/**
+ * @brief 根据CAN句柄获取实例ID
+ * @param hcan CAN硬件句柄
+ * @retval 0~BSP_CAN_MAX_NUM-1: 对应实例ID
+ * @retval 0xFF: 未找到
+ */
+uint8_t BSP_CAN_GetIdByHcan(FDCAN_HandleTypeDef *hfdcan);
 
 /*==============================================================================
- * 初始化与启停
+ * 控制函数
  *============================================================================*/
 /**
- * @brief 复位启动标志（不碰硬件）
- * @retval 0: 成功
- * @note 上电流程里调一次；之后 Start 才会真正去启 HAL。
+ * @brief 启动CAN通信
+ * @param id CAN实例ID
+ * @retval 1: 启动成功
+ * @retval 0: 启动失败
+ *
+ * @note 启动后自动使能 FIFO0/FIFO1 消息挂起中断及溢出中断。
+ *       重复调用安全，已启动则直接返回成功。
  */
-int BSP_CAN_Init(void);
-
-/**
- * @brief 启动总线并使能 FIFO0 / FIFO1 接收中断
- * @param can 总线句柄，不可为 NULL
- * @retval 0: 已启动（重复调用直接返回成功）
- * @retval -1: 句柄为 NULL 或 HAL 启动失败
- * @note 只使能接收中断：发送是否完成由 TASK 周期排空软件缓冲判断，
- *       BSP 不掺和任何 OS 对象。
- */
-int BSP_CAN_Start(const bsp_can_t *can);
+uint8_t BSP_CAN_Start(uint8_t id);
 
 /*==============================================================================
- * 滤波器
+ * 滤波器配置
  *============================================================================*/
 /**
- * @brief 配置一条滤波器规则
- * @param can 总线句柄，不可为 NULL
- * @param cfg 规则，不可为 NULL
- * @retval 0: 配置成功
- * @retval -1: 参数非法（句柄/规则为空、序号越界、ID 超出该类型上限）
- * @retval -2: HAL 配置失败
+ * @brief 配置CAN滤波器
+ * @param id  CAN实例ID
+ * @param cfg 滤波器配置参数（id1~id4直通寄存器，见 BSP_CAN_FilterConfig_t 说明）
+ * @retval 1: 配置成功
+ * @retval 0: 配置失败（实例未找到/cfg为空/滤波器序号>27/HAL配置失败）
+ *
+ * @note id1~id4 直接透传到 HAL，用户通过宏自行组装:
+ *         标准帧 16bit → BSP_CAN_STD16(id, rtr)
+ *         扩展帧 32bit → BSP_CAN_EXT32_HIGH(id, rtr) / BSP_CAN_EXT32_LOW(id)
  */
-int BSP_CAN_Set_Filter(const bsp_can_t *can, const bsp_can_filter_t *cfg);
+uint8_t BSP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg);
 
 /*==============================================================================
- * 收发
+ * 发送函数
  *============================================================================*/
 /**
- * @brief 把一帧放进硬件发送 FIFO（非阻塞）
- * @param can   总线句柄，不可为 NULL
- * @param frame 待发帧，不可为 NULL
- * @retval 0: 已进入硬件 FIFO
- * @retval -1: 参数非法（ID 超限、dlc > 8、数据帧却没给数据）
- * @retval -2: 硬件 FIFO 满或总线未启动
- * @note 只发一帧、不等完成。要保证不丢帧，请走 Svc_Can_Tx 的软件缓冲。
+ * @brief 发送CAN帧（支持 标准/扩展 × 数据/遥控 四种组合）
+ * @param id       CAN实例ID
+ * @param can_id   ID值（标准帧11bit / 扩展帧29bit）
+ * @param is_extid ID类型: BSP_CAN_STDID / BSP_CAN_EXTID
+ * @param is_remote 帧类型: BSP_CAN_DATA_FRAME / BSP_CAN_REMOTE_FRAME
+ * @param data     数据指针（遥控帧传 NULL）
+ * @param len      数据长度 (0~8, 遥控帧时表示期望返回的DLC)
+ * @retval 1: 发送成功
+ * @retval 0: 发送失败（实例未找到/参数错误/邮箱满）
+ *
+ * @note 非阻塞发送，通过HAL_CAN_AddTxMessage将帧加入硬件发送邮箱。
  */
-int BSP_CAN_Send(const bsp_can_t *can, const bsp_can_frame_t *frame);
+uint8_t BSP_CAN_SendMsg(uint8_t id, uint32_t can_id, uint8_t is_extid, uint8_t is_remote, uint8_t *data, uint8_t len);
 
-#endif /* __BSP_CAN_H__ */
+#endif

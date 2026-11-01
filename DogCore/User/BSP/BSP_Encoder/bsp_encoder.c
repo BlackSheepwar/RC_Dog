@@ -1,134 +1,150 @@
 /**
  * @file bsp_encoder.c
- * @brief 正交编码器驱动实现：句柄 → 定时器
- * @author Ricardo
- * @date 2026-11-01
+ * @brief 定时器编码器读取（BSP层）实现
+ * @author 李嘉图
+ * @date 2026-07-05
  *
- * @note 定时器映射与方向取反只写在本文件的句柄实例里。
- *       计数器是 16 位的，两个 10 ms 周期之间最多 65535 个脉冲，
- *       远超电机实际转速，不需要软件扩展位宽。
+ * @note 使用 STM32 定时器编码器模式（Encoder Mode TI1+TI2），
+ *       硬件自动根据 A/B 相脉冲计数和判向。
+ *       每次读取后自动清零计数器，供上层做增量速度计算。
  */
 
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
 // 固定包含
-#include <stddef.h>
-#include "main.h"               /* HAL 与 &htimN */
+#include <stdint.h>
+#include "main.h"
+#include "common.h"
 #include "bsp_encoder.h"
 // 功能包含
-#include "tim.h"                /* TIM_HandleTypeDef 与 htim 实例 */
+#include "tim.h"
 
 /*==============================================================================
- * 类型定义
+ * 编码器硬件映射表
+ *
+ * 将逻辑 encoder_id 映射到具体的定时器句柄。
+ * 当前映射：
+ *   encoder 0 → TIM1（左前腿电机）
+ *   encoder 1 → TIM2（右前腿电机）
+ *   encoder 2 → TIM3（左后腿电机）
+ *   encoder 3 → TIM4（右后腿电机）
+ *
+ * ★ 此表为 BSP 内部实现，上层不可见。换硬件时改表即可 ★
  *============================================================================*/
-/**
- * @brief 编码器句柄（一路一份）
- * @note direction_invert 用来把"电机装在另一侧、A/B 相反"的差别收在 BSP，
- *       上层拿到的增量正方向永远是"电机正转"。
- */
-struct bsp_encoder {
-    void    *htim;               /* 定时器句柄（本文件内还原成 TIM_HandleTypeDef *） */
-    uint8_t  direction_invert;   /* 1: 计数取反 */
+typedef struct {
+    uint8_t            encoder_id;       /**< 编码器逻辑编号              */
+    TIM_HandleTypeDef *htim;             /**< 定时器句柄指针              */
+    uint8_t            direction_invert; /**< 方向反向: 0=正常, 1=反向    */
+} BSP_EncoderMap_t;
+
+static const BSP_EncoderMap_t ENCODER_HW_MAP[BSP_ENCODER_NUM] = {
+    { .encoder_id = 1, .htim = &htim1, .direction_invert = 0 },
+    { .encoder_id = 2, .htim = &htim2, .direction_invert = 0 },
+    { .encoder_id = 3, .htim = &htim3, .direction_invert = 0 },
+    { .encoder_id = 4, .htim = &htim4, .direction_invert = 0 },
 };
 
-/*==============================================================================
- * 句柄实例：定时器只出现在这里
- *============================================================================*/
-/** @brief 电机 1 编码器（TIM1，左前） */
-const bsp_encoder_t bsp_encoder_1 = { &htim1, 0u };
-/** @brief 电机 2 编码器（TIM2，右前） */
-const bsp_encoder_t bsp_encoder_2 = { &htim2, 0u };
-/** @brief 电机 3 编码器（TIM3，左后） */
-const bsp_encoder_t bsp_encoder_3 = { &htim3, 0u };
-/** @brief 电机 4 编码器（TIM4，右后） */
-const bsp_encoder_t bsp_encoder_4 = { &htim4, 0u };
-
-/*==============================================================================
- * 内部函数
- *============================================================================*/
 /**
- * @brief 读计数器原始值（含符号取反）
- * @param enc 编码器句柄，不可为 NULL
- * @retval 计数器值，已按句柄配置取反
+ * @brief 根据 encoder_id 查找硬件映射
+ * @param id 编码器逻辑编号
+ * @retval 非 NULL：找到
+ * @retval NULL：未找到
  */
-static int16_t BSP_Encoder_Read_Counter(const bsp_encoder_t *enc)
+static const BSP_EncoderMap_t *BSP_Encoder_FindMap(uint8_t id)
 {
-    TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)enc->htim;
-    int16_t            raw;
-
-    raw = (int16_t)__HAL_TIM_GET_COUNTER(htim);
-    return (enc->direction_invert != 0u) ? (int16_t)(-raw) : raw;
+    for (uint8_t i = 0; i < BSP_ENCODER_NUM; i++)
+    {
+        if (ENCODER_HW_MAP[i].encoder_id == id)
+            return &ENCODER_HW_MAP[i];
+    }
+    return NULL;
 }
 
 /*==============================================================================
- * 初始化
+ * 初始化函数
  *============================================================================*/
 /**
- * @brief 启动所有编码器定时器并把计数器清零
- * @retval 无
+ * @brief 编码器 BSP 层初始化
+ * @note 启动所有编码器定时器的编码器模式，计数器归零
  */
 void BSP_Encoder_Init(void)
 {
-    static const bsp_encoder_t *const s_list[] = {
-        &bsp_encoder_1, &bsp_encoder_2, &bsp_encoder_3, &bsp_encoder_4,
-    };
+    for (uint8_t i = 0; i < BSP_ENCODER_NUM; i++)
+    {
+        const BSP_EncoderMap_t *map = &ENCODER_HW_MAP[i];
 
-    for (uint8_t i = 0u; i < 4u; i++) {
-        BSP_Encoder_Reset(s_list[i]);
-        (void)HAL_TIM_Encoder_Start((TIM_HandleTypeDef *)s_list[i]->htim,
-                                    TIM_CHANNEL_ALL);
+        __HAL_TIM_SET_COUNTER(map->htim, 0);
+        HAL_TIM_Encoder_Start(map->htim, TIM_CHANNEL_ALL);
     }
 }
 
 /*==============================================================================
- * 读数
+ * 编码器读数函数
  *============================================================================*/
 /**
- * @brief 读取本周期的计数增量并清零计数器（速度环用）
- * @param enc   编码器句柄，不可为 NULL
- * @param delta 输出增量，不可为 NULL
- * @retval 0: 读取成功
- * @retval -1: 句柄或输出指针为 NULL
+ * @brief 获取指定编码器的计数值（读取后自动清零）
+ * @param id    编码器索引（1 ~ BSP_ENCODER_NUM，1-based）
+ * @param count 输出计数值的指针
+ * @retval 1: 成功
+ * @retval 0: 失败
  */
-int BSP_Encoder_Read_Delta(const bsp_encoder_t *enc, int16_t *delta)
+uint8_t BSP_Encoder_GetCount(uint8_t id, int16_t *count)
 {
-    if ((enc == NULL) || (delta == NULL)) {
-        return -1;
-    }
+    if (id < 1 || id > BSP_ENCODER_NUM || count == NULL)
+        return 0;
 
-    *delta = BSP_Encoder_Read_Counter(enc);
-    BSP_Encoder_Reset(enc);
-    return 0;
+    const BSP_EncoderMap_t *map = BSP_Encoder_FindMap(id);
+    if (map == NULL)
+        return 0;
+
+    int16_t raw = (int16_t)__HAL_TIM_GET_COUNTER(map->htim);
+    *count = map->direction_invert ? (int16_t)(-raw) : raw;
+    __HAL_TIM_SET_COUNTER(map->htim, 0);
+
+    return 1;
+}
+
+/*==============================================================================
+ * 编码器累积读数函数（不清零，用于分辨率检测/PID调参）
+ *============================================================================*/
+/**
+ * @brief 读取编码器当前计数值（不自动清零，用于累积测量）
+ * @param id    编码器索引（1 ~ BSP_ENCODER_NUM，1-based）
+ * @param count 输出计数值的指针
+ * @retval 1: 成功
+ * @retval 0: 失败
+ * @note 与 BSP_Encoder_GetCount 的区别：此函数不清零硬件计数器，
+ *       适用于手动旋转电机一圈检测编码器线数等累积测量场景。
+ */
+uint8_t BSP_Encoder_ReadCount(uint8_t id, int16_t *count)
+{
+    if (id < 1 || id > BSP_ENCODER_NUM || count == NULL)
+        return 0;
+
+    const BSP_EncoderMap_t *map = BSP_Encoder_FindMap(id);
+    if (map == NULL)
+        return 0;
+
+    int16_t raw = (int16_t)__HAL_TIM_GET_COUNTER(map->htim);
+    *count = map->direction_invert ? (int16_t)(-raw) : raw;
+
+    return 1;
 }
 
 /**
- * @brief 读取当前累计计数但不清零（标定线数用）
- * @param enc 编码器句柄，不可为 NULL
- * @param raw 输出累计计数，不可为 NULL
- * @retval 0: 读取成功
- * @retval -1: 句柄或输出指针为 NULL
+ * @brief 复位编码器计数器（清零）
+ * @param id 编码器索引（1 ~ BSP_ENCODER_NUM，1-based）
+ * @note 用于累积测量前手动归零，不影响编码器模式运行状态。
  */
-int BSP_Encoder_Read_Raw(const bsp_encoder_t *enc, int16_t *raw)
+void BSP_Encoder_ResetCount(uint8_t id)
 {
-    if ((enc == NULL) || (raw == NULL)) {
-        return -1;
-    }
-
-    *raw = BSP_Encoder_Read_Counter(enc);
-    return 0;
-}
-
-/**
- * @brief 把计数器清零
- * @param enc 编码器句柄，可为 NULL
- * @retval 无
- */
-void BSP_Encoder_Reset(const bsp_encoder_t *enc)
-{
-    if (enc == NULL) {
+    if (id < 1 || id > BSP_ENCODER_NUM)
         return;
-    }
 
-    __HAL_TIM_SET_COUNTER((TIM_HandleTypeDef *)enc->htim, 0u);
+    const BSP_EncoderMap_t *map = BSP_Encoder_FindMap(id);
+    if (map == NULL)
+        return;
+
+    __HAL_TIM_SET_COUNTER(map->htim, 0);
 }

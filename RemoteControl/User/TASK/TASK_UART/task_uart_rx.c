@@ -1,12 +1,13 @@
 /**
  * @file task_uart_rx.c
- * @brief 串口接收线程：等通知、排空字节队列、解包成帧
+ * @brief UART 接收处理任务
  * @author 李嘉图
- * @date 2026-10-31
+ * @date 2026-06-20
  *
- * @note 线程体只做一件事：调用链路服务把字节变成帧。
- *       "等谁的通知、怎么排空、解包状态机放在哪"全部由 Service 决定，
- *       这里不出现任何队列名、DMA 或缓冲区。
+ * @note 收到 BSP 中断通知后，从 DMA 循环缓冲读取数据、
+ *       解析数据包，入描述符 FIFO，然后唤醒 CMD 任务处理。
+ *
+ *       命令分发已拆分到 UART_RX_CMD 任务。
  */
 
 /*==============================================================================
@@ -14,25 +15,31 @@
  *============================================================================*/
 // 固定包含
 #include <stdint.h>
-#include "cmsis_os2.h"
-#include "svc_uart.h"
+#include "main.h"
+#include "common.h"
+// 功能包含
+#include "app_uart.h"
 
 /*==============================================================================
- * 线程函数
+ * 任务函数
  *============================================================================*/
-/**
- * @brief 串口接收线程
- * @param argument 线程参数（未使用）
- * @retval 无
- * @note 阻塞在 Svc_Uart_Rx_Poll() 内，返回即表示一批字节已解包完毕。
- *       系统节拍由本层取（TASK 是唯一允许看 OS 时钟的层），服务层只收参数。
- */
 void Task_UART_RX(void *argument)
 {
-    (void)argument;
+    osDelay(10);
+    /* 初始化 BSP + 所有串口端口 */
+    APP_UART_Init();
 
+    uint8_t id;
+
+    /* 主循环：等待中断通知 → 处理数据 → 通知 CMD 任务 */
     for (;;)
     {
-        Svc_Uart_Rx_Poll(osKernelGetTickCount());
+        osMessageQueueGet(UART_RX_QHandle, &id, NULL, osWaitForever);
+
+        /* 从 DMA 循环缓冲读取新数据并解析（入描述符 FIFO） */
+        APP_UART_ProcessRxData(id);
+
+        /* 唤醒 CMD 任务消费描述符 */
+        osSemaphoreRelease(UART_RX_BSHandle);
     }
 }

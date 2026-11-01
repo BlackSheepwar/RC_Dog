@@ -1,18 +1,16 @@
 /**
  * @file bsp_pwm.h
- * @brief PWM 硬件驱动层：一个定时器通道一个句柄，只做脉宽与占空比
- * @author Ricardo
- * @date 2026-11-01
+ * @brief 通用PWM输出BSP层（通过逻辑ID映射到定时器通道）
+ * @author 李嘉图
+ * @date 2026-06-07
  *
- * @note BSP 不知道什么是"度"、什么是"速度"：它只接受微秒脉宽或百分比占空比。
- *       角度→脉宽的换算在 APP_Servo，速度→占空比的换算在 APP_Motor。
+ * @note BSP层不知道什么是"度"，只提供脉宽设定接口。
+ *       角度→脉宽的换算由上层（APP_Servo）负责。
  *
- *       定时器、通道、计数器频率全部写在 bsp_pwm.c 的句柄实例里：
- *       换引脚只改那一个文件，Device / APP 一行不动。
+ *       硬件映射表（pwm_id → TIM+Channel）内置在 bsp_pwm.c 中，
+ *       上层调用时只需传 pwm_id，无需知道具体的定时器句柄。
  *
- *       舵机与电机的定时器频率不同（舵机 1 MHz 计数 → 1 计数 = 1 μs；
- *       电机 10 MHz 计数 → 20 kHz、500 级分辨率），因此频率写在句柄里，
- *       换算时按句柄自己的 count_hz 走，不需要查表。
+ *       适用于舵机、直流电机、LED调光、蜂鸣器等所有PWM设备。
  */
 
 #ifndef __BSP_PWM_H__
@@ -25,85 +23,54 @@
 #include <stdint.h>
 
 /*==============================================================================
- * 类型定义
+ * 宏定义与常量
  *============================================================================*/
-/**
- * @brief PWM 通道句柄（不透明类型，布局在 bsp_pwm.c）
- */
-typedef struct bsp_pwm bsp_pwm_t;
+#define TIM_MAX_SIZE      16            // PWM通道数量
 
 /*==============================================================================
- * 外部声明：每个用到的通道一份句柄
- *============================================================================*/
-// 舵机 1~8（前腿 1~4，后腿 5~8）
-extern const bsp_pwm_t bsp_pwm_servo_1;
-extern const bsp_pwm_t bsp_pwm_servo_2;
-extern const bsp_pwm_t bsp_pwm_servo_3;
-extern const bsp_pwm_t bsp_pwm_servo_4;
-extern const bsp_pwm_t bsp_pwm_servo_5;
-extern const bsp_pwm_t bsp_pwm_servo_6;
-extern const bsp_pwm_t bsp_pwm_servo_7;
-extern const bsp_pwm_t bsp_pwm_servo_8;
-// 电机 1~4，每路两个通道（正转 / 反转）
-extern const bsp_pwm_t bsp_pwm_motor_1_fwd;
-extern const bsp_pwm_t bsp_pwm_motor_1_rev;
-extern const bsp_pwm_t bsp_pwm_motor_2_fwd;
-extern const bsp_pwm_t bsp_pwm_motor_2_rev;
-extern const bsp_pwm_t bsp_pwm_motor_3_fwd;
-extern const bsp_pwm_t bsp_pwm_motor_3_rev;
-extern const bsp_pwm_t bsp_pwm_motor_4_fwd;
-extern const bsp_pwm_t bsp_pwm_motor_4_rev;
-
-/*==============================================================================
- * 初始化
+ * 初始化函数
  *============================================================================*/
 /**
- * @brief 按句柄表配置所有 PWM 定时器的预分频与自动重装值
- * @retval 无
- * @note 必须在任何 BSP_PWM_Start 之前调用一次：
- *       这里改了 PSC/ARR，之前设过的比较值全部失效。
- *       同一个定时器被多个通道共用时只会被配置一次，重复调用结果一样。
+ * @brief 初始化PWM BSP层
  */
 void BSP_PWM_Init(void);
 
 /*==============================================================================
- * 启停
+ * 定时器控制函数
  *============================================================================*/
 /**
- * @brief 启动通道输出
- * @param pwm 通道句柄，可为 NULL
- * @retval 无
- * @note 高级定时器（TIM1/8/15/16/17）需要 BDTR.MOE 置位才有波形，
- *       这里在 HAL 启动后再写一次，重复调用安全。
+ * @brief 启动PWM输出（通过pwm_id查内置硬件映射表）
+ * @param pwm_id 逻辑PWM编号
  */
-void BSP_PWM_Start(const bsp_pwm_t *pwm);
+void BSP_PWM_Start(uint8_t pwm_id);
 
 /**
- * @brief 停止通道输出
- * @param pwm 通道句柄，可为 NULL
- * @retval 无
+ * @brief 停止PWM输出
+ * @param pwm_id 逻辑PWM编号
  */
-void BSP_PWM_Stop(const bsp_pwm_t *pwm);
+void BSP_PWM_Stop(uint8_t pwm_id);
+
+/**
+ * @brief 重置定时器计数器
+ * @param pwm_id 逻辑PWM编号
+ */
+void BSP_PWM_Reset(uint8_t pwm_id);
 
 /*==============================================================================
- * 占空比 / 脉宽
+ * 脉宽控制函数
  *============================================================================*/
 /**
- * @brief 设置高电平脉宽（舵机用）
- * @param pwm      通道句柄，可为 NULL
- * @param pulse_us 脉宽，单位 μs；超出周期时夹到周期值
- * @retval 无
- * @note 换算：比较值 = pulse_us × count_hz / 1e6，count_hz 取自句柄。
+ * @brief 设置PWM脉宽（适用于舵机，直接输μs）
+ * @param pwm_id   逻辑PWM编号
+ * @param pulse_us 高电平脉宽，单位μs（典型范围500~2500）
  */
-void BSP_PWM_Set_Pulse_Us(const bsp_pwm_t *pwm, uint16_t pulse_us);
+void BSP_PWM_SetPulseUs(uint8_t pwm_id, uint16_t pulse_us);
 
 /**
- * @brief 设置占空比（电机、LED 用）
- * @param pwm     通道句柄，可为 NULL
- * @param percent 占空比 0.0 ~ 100.0，超出自动夹紧
- * @retval 无
- * @note 比较值 = (ARR + 1) × percent / 100，四舍五入。
+ * @brief 设置PWM占空比（适用于电机、LED等）
+ * @param pwm_id       逻辑PWM编号
+ * @param duty_percent 占空比百分比（0.0~100.0）
  */
-void BSP_PWM_Set_Duty_Percent(const bsp_pwm_t *pwm, float percent);
+void BSP_PWM_SetDuty(uint8_t pwm_id, float duty_percent);
 
 #endif /* __BSP_PWM_H__ */

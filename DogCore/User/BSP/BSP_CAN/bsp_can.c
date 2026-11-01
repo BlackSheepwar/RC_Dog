@@ -1,309 +1,292 @@
 /**
  * @file bsp_can.c
- * @brief CAN（FDCAN）硬件驱动实现：句柄 → hfdcan，帧 → HAL 结构体
- * @author Ricardo
- * @date 2026-11-01
+ * @brief CAN硬件接口实现
+ * @author 李嘉图
+ * @date 2026-06-01
  *
- * @note 工程里只有一路 FDCAN，所以句柄表只有 bsp_can1；
- *       加第二路时新增一个句柄实例，函数一行不用改。
- *
- *       中断里只做"取一帧、投队列"：不解析、不处理、不打印。
- *       队列由 freertos.c 创建，满了就丢——丢帧计数留给上层统计，
- *       ISR 里不做任何可能阻塞的操作。
+ * @note 硬件映射表（id → hcan）在此文件中静态定义，
+ *       上层通过 id 调用，无需知道具体 CAN 外设。
+ *       映射表为编译期常量，运行时不修改。
+ *       支持双CAN（hfdcan1/hfdcan1），滤波器28个平均分配。
+ *       滤波器 id1~id4 直通 HAL 寄存器字段，不介入位运算。
  */
 
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
 // 固定包含
-#include <stddef.h>
-#include "main.h"               /* HAL 与 hfdcan1 */
+#include <stdint.h>
+#include <string.h>
+#include "common.h"
 #include "bsp_can.h"
-// 功能包含
-#include "cmsis_os.h"           /* 中断里投递消息队列 */
-#include "fdcan.h"              /* FDCAN_HandleTypeDef 与 hfdcan1 */
+#include "main.h"           /* CAN_F0/F1_QHandle, CAN_TX_BSHandle */
 
 /*==============================================================================
- * 类型定义
+ * CAN 硬件映射表（编译期常量）
+ *
+ * 将逻辑 ID（上层使用的 CAN 实例编号）映射到具体 CAN 硬件句柄。
+ * 当前映射：
+ *   id 0 → hfdcan1（CAN1）
+ *   id 1 → hfdcan1（CAN2）
+ *
+ * ★ 此表为 BSP 内部实现，上层不可见。可根据需要扩展 ★
  *============================================================================*/
 /**
- * @brief CAN 总线句柄（一路一份）
- * @note hal 用 void * 存，FDCAN_HandleTypeDef * 的转换只在本文件出现。
+ * @brief CAN实例配置
+ * @note 编译期固定的硬件映射，运行时不修改
  */
-struct bsp_can {
-    void *hal;          /* FDCAN 句柄（本文件内还原成 FDCAN_HandleTypeDef *） */
+typedef struct {
+    uint8_t      id;             // CAN实例ID
+    FDCAN_HandleTypeDef *hcan;     // CAN硬件句柄
+} BSP_CAN_Map_t;
+
+/** @brief CAN硬件映射表（当前仅FDCAN1，id统一为1） */
+static const BSP_CAN_Map_t BSP_CAN_MAP[BSP_CAN_MAX_NUM] = {
+    { .id = 1, .hcan = &hfdcan1 },
 };
 
-/*==============================================================================
- * 句柄实例
- *============================================================================*/
-/** @brief FDCAN1 总线（唯一的 CAN 口） */
-const bsp_can_t bsp_can1 = { &hfdcan1 };
-
-/*==============================================================================
- * 内部变量
- *============================================================================*/
-/** @brief 启动标志（运行时状态，不进 const 句柄） */
-static uint8_t s_can_started = 0u;
+/** @brief CAN实例启动状态（运行时可变） */
+static uint8_t bsp_can_started[BSP_CAN_MAX_NUM] = {0};
 
 /*==============================================================================
  * 内部函数
  *============================================================================*/
 /**
- * @brief 把 BSP 帧类型翻译成 HAL 帧头类型
- * @param frame 待发帧，不可为 NULL
- * @param header 输出 HAL 帧头，不可为 NULL
- * @retval 无
+ * @brief 根据 ID 查找 CAN 硬件映射
+ * @param id CAN实例ID
+ * @retval 非NULL：找到
+ * @retval NULL：未找到
  */
-static void BSP_CAN_Fill_Tx_Header(const bsp_can_frame_t *frame,
-                                   FDCAN_TxHeaderTypeDef *header)
+static const BSP_CAN_Map_t *BSP_CAN_FindMap(uint8_t id)
 {
-    header->Identifier          = frame->id;
-    header->IdType              = (frame->ide == (uint8_t)BSP_CAN_ID_EXT)
-                                  ? FDCAN_EXTENDED_ID : FDCAN_STANDARD_ID;
-    header->TxFrameType         = (frame->rtr == (uint8_t)BSP_CAN_FRAME_REMOTE)
-                                  ? FDCAN_REMOTE_FRAME : FDCAN_DATA_FRAME;
-    header->DataLength          = frame->dlc;
-    header->ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-    header->BitRateSwitch       = FDCAN_BRS_OFF;
-    header->FDFormat            = FDCAN_CLASSIC_CAN;
-    header->TxEventFifoControl  = FDCAN_NO_TX_EVENTS;
-    header->MessageMarker       = 0u;
+    for (uint8_t i = 0; i < ARRAY_SIZE(BSP_CAN_MAP); i++)
+    {
+        if (BSP_CAN_MAP[i].id == id)
+            return &BSP_CAN_MAP[i];
+    }
+    return NULL;
 }
 
 /**
- * @brief 从指定 FIFO 取一帧并投进对应的消息队列
- * @param hfdcan 触发中断的 HAL 句柄
- * @param fifo   取帧的 FIFO，取 bsp_can_fifo_t
- * @param queue 目标队列句柄（由 freertos.c 创建）
- * @retval 无
- * @note 只在中断上下文调用。
+ * @brief 根据句柄查找 CAN 硬件映射
+ * @param hcan CAN硬件句柄
+ * @retval 非NULL：找到
+ * @retval NULL：未找到
  */
-static void BSP_CAN_Rx_To_Queue(FDCAN_HandleTypeDef *hfdcan, uint8_t fifo,
-                                osMessageQueueId_t queue)
+static const BSP_CAN_Map_t *BSP_CAN_FindByHcan(FDCAN_HandleTypeDef *hcan)
 {
-    bsp_can_frame_t        frame;
-    FDCAN_RxHeaderTypeDef  header;
-    uint8_t                data[BSP_CAN_DATA_LEN] = {0};
-
-    if ((hfdcan == NULL) || (queue == NULL)) {
-        return;
+    for (uint8_t i = 0; i < ARRAY_SIZE(BSP_CAN_MAP); i++)
+    {
+        if (BSP_CAN_MAP[i].hcan == hcan)
+            return &BSP_CAN_MAP[i];
     }
-
-    if (fifo == (uint8_t)BSP_CAN_FIFO0) {
-        if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &header, data) != HAL_OK) {
-            return;
-        }
-    } else {
-        if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &header, data) != HAL_OK) {
-            return;
-        }
-    }
-
-    frame.id  = header.Identifier;
-    frame.ide = (header.IdType == FDCAN_EXTENDED_ID) ? (uint8_t)BSP_CAN_ID_EXT
-                                                     : (uint8_t)BSP_CAN_ID_STD;
-    frame.rtr = (header.RxFrameType == FDCAN_REMOTE_FRAME) ? (uint8_t)BSP_CAN_FRAME_REMOTE
-                                                           : (uint8_t)BSP_CAN_FRAME_DATA;
-    frame.dlc = (uint8_t)header.DataLength;
-
-    for (uint8_t i = 0u; i < BSP_CAN_DATA_LEN; i++) {
-        frame.data[i] = data[i];
-    }
-
-    /* 队列满就丢这一帧：ISR 里不允许等待，也不允许重试 */
-    (void)osMessageQueuePut(queue, &frame, 0u, 0u);
+    return NULL;
 }
 
 /*==============================================================================
- * 初始化与启停
+ * 初始化函数
  *============================================================================*/
 /**
- * @brief 复位启动标志（不碰硬件）
- * @retval 0: 成功
+ * @brief 初始化BSP CAN层
+ * @note 映射表为编译期常量，仅复位运行时启动状态
  */
-int BSP_CAN_Init(void)
+void BSP_CAN_Init(void)
 {
-    s_can_started = 0u;
-    return 0;
+    /* 消耗 CubeMX 生成的初始计数值（初始=1→0，适配 ISR 信号模式） */
+    osSemaphoreAcquire(CAN_TX_BSHandle, 0);
+
+    memset(bsp_can_started, 0, sizeof(bsp_can_started));
 }
 
 /**
- * @brief 启动总线并使能 FIFO0 / FIFO1 接收中断
- * @param can 总线句柄，不可为 NULL
- * @retval 0: 已启动
- * @retval -1: 句柄为 NULL 或 HAL 启动失败
+ * @brief 根据CAN句柄获取实例ID
+ * @param hcan CAN硬件句柄
+ * @retval 0~BSP_CAN_MAX_NUM-1: 对应实例ID
+ * @retval 0xFF: 未找到
  */
-int BSP_CAN_Start(const bsp_can_t *can)
+uint8_t BSP_CAN_GetIdByHcan(FDCAN_HandleTypeDef *hcan)
 {
-    FDCAN_HandleTypeDef *hfdcan;
-
-    if (can == NULL) {
-        return -1;
-    }
-
-    if (s_can_started != 0u) {
-        return 0;
-    }
-
-    hfdcan = (FDCAN_HandleTypeDef *)can->hal;
-    if (hfdcan == NULL) {
-        return -1;
-    }
-
-    if (HAL_FDCAN_Start(hfdcan) != HAL_OK) {
-        return -1;
-    }
-
-    if (HAL_FDCAN_ActivateNotification(hfdcan,
-            FDCAN_IT_RX_FIFO0_NEW_MESSAGE | FDCAN_IT_RX_FIFO1_NEW_MESSAGE,
-            0u) != HAL_OK) {
-        return -1;
-    }
-
-    s_can_started = 1u;
-    return 0;
+    const BSP_CAN_Map_t *map = BSP_CAN_FindByHcan(hcan);
+    return map ? map->id : 0xFF;
 }
 
 /*==============================================================================
- * 滤波器
+ * 控制函数
  *============================================================================*/
 /**
- * @brief 配置一条滤波器规则
- * @param can 总线句柄，不可为 NULL
- * @param cfg 规则，不可为 NULL
- * @retval 0: 配置成功
- * @retval -1: 参数非法
- * @retval -2: HAL 配置失败
- */
-int BSP_CAN_Set_Filter(const bsp_can_t *can, const bsp_can_filter_t *cfg)
-{
-    FDCAN_HandleTypeDef *hfdcan;
-    FDCAN_FilterTypeDef  filter;
-    uint32_t             id_max;
-
-    if ((can == NULL) || (cfg == NULL)) {
-        return -1;
-    }
-
-    if (cfg->index > 127u) {
-        return -1;
-    }
-
-    id_max = (cfg->ide == (uint8_t)BSP_CAN_ID_EXT) ? BSP_CAN_EXT_ID_MAX
-                                                   : BSP_CAN_STD_ID_MAX;
-    if ((cfg->id1 > id_max) || (cfg->id2 > id_max)) {
-        return -1;
-    }
-
-    hfdcan = (FDCAN_HandleTypeDef *)can->hal;
-    if (hfdcan == NULL) {
-        return -1;
-    }
-
-    /* ---------- 组装 HAL 滤波器 ---------- */
-    filter.IdType       = (cfg->ide == (uint8_t)BSP_CAN_ID_EXT)
-                          ? FDCAN_EXTENDED_ID : FDCAN_STANDARD_ID;
-    filter.FilterIndex  = cfg->index;
-    filter.FilterConfig = (cfg->fifo == (uint8_t)BSP_CAN_FIFO0)
-                          ? FDCAN_FILTER_TO_RXFIFO0 : FDCAN_FILTER_TO_RXFIFO1;
-    filter.FilterID1    = cfg->id1;
-    filter.FilterID2    = cfg->id2;
-
-    switch (cfg->mode) {
-        case BSP_CAN_FILTER_RANGE:
-            filter.FilterType = FDCAN_FILTER_RANGE;
-            break;
-        case BSP_CAN_FILTER_DUAL:
-            filter.FilterType = FDCAN_FILTER_DUAL;
-            break;
-        case BSP_CAN_FILTER_MASK:
-        default:
-            filter.FilterType = FDCAN_FILTER_MASK;
-            break;
-    }
-
-    if (HAL_FDCAN_ConfigFilter(hfdcan, &filter) != HAL_OK) {
-        return -2;
-    }
-
-    return 0;
-}
-
-/*==============================================================================
- * 收发
- *============================================================================*/
-/**
- * @brief 把一帧放进硬件发送 FIFO（非阻塞）
- * @param can   总线句柄，不可为 NULL
- * @param frame 待发帧，不可为 NULL
- * @retval 0: 已进入硬件 FIFO
- * @retval -1: 参数非法
- * @retval -2: 硬件 FIFO 满或总线未启动
- */
-int BSP_CAN_Send(const bsp_can_t *can, const bsp_can_frame_t *frame)
-{
-    FDCAN_HandleTypeDef  *hfdcan;
-    FDCAN_TxHeaderTypeDef header;
-
-    if ((can == NULL) || (frame == NULL)) {
-        return -1;
-    }
-
-    if (frame->dlc > BSP_CAN_DATA_LEN) {
-        return -1;
-    }
-
-    if (frame->ide == (uint8_t)BSP_CAN_ID_EXT) {
-        if (frame->id > BSP_CAN_EXT_ID_MAX) {
-            return -1;
-        }
-    } else {
-        if (frame->id > BSP_CAN_STD_ID_MAX) {
-            return -1;
-        }
-    }
-
-    hfdcan = (FDCAN_HandleTypeDef *)can->hal;
-    if (hfdcan == NULL) {
-        return -1;
-    }
-
-    BSP_CAN_Fill_Tx_Header(frame, &header);
-
-    if (HAL_FDCAN_AddMessageToTxFifoQ(hfdcan, &header,
-                                      (uint8_t *)frame->data) != HAL_OK) {
-        return -2;
-    }
-
-    return 0;
-}
-
-/*==============================================================================
- * 中断回调
+ * @brief 启动CAN通信
+ * @param id CAN实例ID
+ * @retval 1: 启动成功
+ * @retval 0: 启动失败
  *
- * ISR 只搬字节：取帧 → 投队列，不做任何业务判断。
+ * @note 启动后自动使能 FIFO0/FIFO1 消息挂起中断及溢出中断，
+ *       以及发送邮箱空中断（用于上层 TX 缓冲排空）。
+ *       重复调用安全，已启动则直接返回成功。
+ */
+uint8_t BSP_CAN_Start(uint8_t id)
+{
+    /* ---------- 查找实例 ---------- */
+    const BSP_CAN_Map_t *map = BSP_CAN_FindMap(id);
+    if (!map) return 0;                     // 未找到
+    uint8_t idx = map - BSP_CAN_MAP;        // 计算索引
+
+    if (bsp_can_started[idx]) return 1;     // 已启动，直接返回
+
+    /* ---------- HAL启动CAN ---------- */
+    if (HAL_FDCAN_Start(map->hcan) != HAL_OK) return 0;   // 启动失败
+
+    /* ---------- 使能FIFO接收和TX完成中断 ---------- */
+    if (HAL_FDCAN_ActivateNotification(map->hcan,
+        FDCAN_IT_RX_FIFO0_NEW_MESSAGE |
+        FDCAN_IT_RX_FIFO1_NEW_MESSAGE |
+        FDCAN_IT_TX_FIFO_EMPTY, 0) != HAL_OK) return 0;
+
+    bsp_can_started[idx] = 1;
+    return 1;
+}
+
+/*==============================================================================
+ * 滤波器配置
  *============================================================================*/
 /**
- * @brief HAL 接收 FIFO0 中断回调
- * @param hfdcan      触发中断的 HAL 句柄
- * @param RxFifoBufferIT 未使用
- * @retval 无
+ * @brief 配置CAN滤波器 (FDCAN Message RAM 过滤)
+ * @param id  CAN实例ID
+ * @param cfg 滤波器配置参数
+ * @retval 1: 配置成功
+ * @retval 0: 配置失败
+ *
+ * @note FDCAN 使用标准/扩展过滤列表，filter_bank 作序号使用。
+ *       scale=16 → 标准ID，scale=32 → 扩展ID。
+ *       id1:id2 组合为 FilterID1，id3:id4 组合为 FilterID2。
+ */
+uint8_t BSP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg)
+{
+    /* ---------- 参数检查 ---------- */
+    const BSP_CAN_Map_t *map = BSP_CAN_FindMap(id);
+    if (!map || !cfg) return 0;             // 实例未找到或参数为空
+
+    if (cfg->filter_bank > 127) return 0;   // FDCAN标准过滤列表0-127
+
+    /* ---------- 组装FDCAN滤波器结构 ---------- */
+    FDCAN_FilterTypeDef filter;
+
+    filter.IdType       = (cfg->scale == BSP_CAN_FILTER_SCALE_32)
+                           ? FDCAN_EXTENDED_ID : FDCAN_STANDARD_ID;
+    filter.FilterIndex  = cfg->filter_bank;
+    if (cfg->mode == BSP_CAN_FILTER_MODE_RANGE)
+        filter.FilterType = FDCAN_FILTER_RANGE;
+    else if (cfg->mode == BSP_CAN_FILTER_MODE_LIST)
+        filter.FilterType = FDCAN_FILTER_DUAL;
+    else
+        filter.FilterType = FDCAN_FILTER_MASK;
+    filter.FilterConfig = (cfg->fifo == BSP_CAN_FIFO0)
+                           ? FDCAN_FILTER_TO_RXFIFO0 : FDCAN_FILTER_TO_RXFIFO1;
+
+    /* id1/id2 直接传入原始ID值 */
+    filter.FilterID1 = cfg->id1;
+    filter.FilterID2 = cfg->id2;
+
+    /* ---------- 写入硬件 ---------- */
+    if (HAL_FDCAN_ConfigFilter(map->hcan, &filter) != HAL_OK)
+        return 0;   // HAL配置失败
+
+    return 1;
+}
+
+/*==============================================================================
+ * 发送函数
+ *============================================================================*/
+/**
+ * @brief 发送CAN帧（支持 标准/扩展 × 数据/遥控 四种组合）
+ * @param id       CAN实例ID
+ * @param can_id   ID值（标准帧11bit / 扩展帧29bit）
+ * @param is_extid ID类型: BSP_CAN_STDID / BSP_CAN_EXTID
+ * @param is_remote 帧类型: BSP_CAN_DATA_FRAME / BSP_CAN_REMOTE_FRAME
+ * @param data     数据指针（遥控帧传 NULL）
+ * @param len      数据长度 (0~8, 遥控帧时表示期望返回的DLC)
+ * @retval 1: 发送成功
+ * @retval 0: 发送失败
+ *
+ * @note 非阻塞发送，通过HAL_CAN_AddTxMessage将帧加入硬件发送邮箱。
+ */
+uint8_t BSP_CAN_SendMsg(uint8_t id, uint32_t can_id, uint8_t is_extid, uint8_t is_remote, uint8_t *data, uint8_t len)
+{
+    /* ---------- 参数检查 ---------- */
+    const BSP_CAN_Map_t *map = BSP_CAN_FindMap(id);
+    if (!map) return 0;                     // 实例未找到
+
+    if (len > BSP_CAN_DATA_LEN) return 0;   // 长度非法
+    if (!is_remote && !data) return 0;      // 数据帧必须有数据
+    if (is_extid && can_id > 0x1FFFFFFF) return 0;  // 扩展ID超限
+    if (!is_extid && can_id > 0x7FF) return 0;      // 标准ID超限
+
+    /* ---------- 组装发送帧头 (FDCAN) ---------- */
+    FDCAN_TxHeaderTypeDef tx_header;
+
+    tx_header.Identifier = can_id;
+    tx_header.IdType = is_extid ? FDCAN_EXTENDED_ID : FDCAN_STANDARD_ID;
+    tx_header.TxFrameType = is_remote ? FDCAN_REMOTE_FRAME : FDCAN_DATA_FRAME;
+    tx_header.DataLength = len;
+    tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    tx_header.BitRateSwitch = FDCAN_BRS_OFF;
+    tx_header.FDFormat = FDCAN_CLASSIC_CAN;
+    tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    tx_header.MessageMarker = 0;
+
+    /* ---------- 加入硬件发送FIFO ---------- */
+    if (HAL_FDCAN_AddMessageToTxFifoQ(map->hcan, &tx_header, data) != HAL_OK)
+        return 0;   // 发送失败（FIFO满或CAN未启动）
+
+    return 1;
+}
+
+/*==============================================================================
+ * CAN中断回调
+ *============================================================================*/
+/**
+ * @brief HAL库CAN接收FIFO0消息挂起中断回调
+ * @param hcan 触发中断的CAN句柄
+ * @note 将接收帧放入 CAN_F0_QHandle 消息队列，由 Task_CAN_RXF0 处理。
  */
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifoBufferIT)
 {
     (void)RxFifoBufferIT;
-    BSP_CAN_Rx_To_Queue(hfdcan, (uint8_t)BSP_CAN_FIFO0, CAN_RXF0_QHandle);
+    const BSP_CAN_Map_t *map = BSP_CAN_FindByHcan(hfdcan);
+    if (!map) return;
+    BSP_CAN_Packet_t rx_pkt;
+    rx_pkt.id = map->id;
+    HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rx_pkt.header, rx_pkt.data);
+    osMessageQueuePut(CAN_RXF0_QHandle, &rx_pkt, 0, 0);
 }
 
 /**
- * @brief HAL 接收 FIFO1 中断回调
- * @param hfdcan      触发中断的 HAL 句柄
- * @param RxFifoBufferIT 未使用
- * @retval 无
+ * @brief HAL库CAN接收FIFO1消息挂起中断回调
+ * @param hcan 触发中断的CAN句柄
+ * @note 将接收帧放入 CAN_F1_QHandle 消息队列，由 Task_CAN_RXF1 处理。
  */
 void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifoBufferIT)
 {
     (void)RxFifoBufferIT;
-    BSP_CAN_Rx_To_Queue(hfdcan, (uint8_t)BSP_CAN_FIFO1, CAN_RXF1_QHandle);
+    const BSP_CAN_Map_t *map = BSP_CAN_FindByHcan(hfdcan);
+    if (!map) return;
+    BSP_CAN_Packet_t rx_pkt;
+    rx_pkt.id = map->id;
+    HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &rx_pkt.header, rx_pkt.data);
+    osMessageQueuePut(CAN_RXF1_QHandle, &rx_pkt, 0, 0);
+}
+
+/*==============================================================================
+ * CAN TX 完成中断回调
+ *
+ * HAL 在任一发送邮箱空出后调用此回调，释放信号量唤醒 TX 服务任务。
+ * 由 TX 服务任务在任务上下文中排空软件发送缓冲。
+ *============================================================================*/
+/**
+ * @brief HAL库CAN发送邮箱0完成回调
+ * @param hcan 触发中断的CAN句柄
+ */
+void HAL_FDCAN_TxFifoEmptyCallback(FDCAN_HandleTypeDef *hfdcan)
+{
+    (void)hfdcan;
+    osSemaphoreRelease(CAN_TX_BSHandle);
 }

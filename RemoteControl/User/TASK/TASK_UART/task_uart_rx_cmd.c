@@ -1,49 +1,47 @@
 /**
  * @file task_uart_rx_cmd.c
- * @brief 串口命令线程：取一帧已解出的报文，交给 APP 命令表执行
+ * @brief UART 命令分发任务
  * @author 李嘉图
- * @date 2026-10-31
+ * @date 2026-06-20
  *
- * @note 与接收线程分开的理由：解包必须跟得上字节流（否则队列溢出），
- *       而命令处理可能很慢（启动步态、改 PID）。两者共用一个线程时，
- *       一次慢命令就会拖垮整条链路的接收。
+ * @note 等待 UART_RX_BS 信号量 → 从描述符 FIFO 弹出包 → 调用命令处理。
+ *       通过独立任务，将命令处理与 DMA 数据读取（Task_UART_RX）分离。
  */
 
 /*==============================================================================
  * 头文件包含
  *============================================================================*/
 // 固定包含
-#include <stdint.h>
-#include "svc_proto.h"
-#include "svc_uart.h"
+#include "main.h"
+// 功能包含
 #include "app_uart.h"
 
 /*==============================================================================
- * 内部变量
+ * 任务函数
+ *
+ * CubeMX 在 freertos.c 中生成了该任务的弱定义，
+ * 此处强定义覆盖之。
  *============================================================================*/
-/**
- * @brief 帧暂存区
- * @note 单消费者（只有本线程读），放静态区：
- *       CMD 线程栈只有 128 字，在栈上开 126 字节的帧会吃掉四分之一。
- */
-static svc_proto_frame_t s_frame;
-
-/*==============================================================================
- * 线程函数
- *============================================================================*/
-/**
- * @brief 串口命令线程
- * @param argument 线程参数（未使用）
- * @retval 无
- * @note 阻塞在 Svc_Uart_Frame_Get() 内；取到一帧就分发一次。
- */
 void Task_UART_RX_CMD(void *argument)
 {
-    (void)argument;
-
+    osDelay(10);
     for (;;)
     {
-        if (Svc_Uart_Frame_Get(&s_frame) == 0)
-            APP_UART_Cmd(s_frame.cmd, s_frame.payload, s_frame.len);
+        /* 等待 RX 任务通知（有已解析的数据包待处理） */
+        osSemaphoreAcquire(UART_RX_BSHandle, osWaitForever);
+
+        /* 消费所有已解析的包 */
+        uint8_t count = 0;
+        while (APP_UART_SendRxPacket())
+        {
+            count++;
+
+            /* 每连续处理 5 个包让出 CPU */
+            if (count >= 5)
+            {
+                count = 0;
+                osDelay(2);
+            }
+        }
     }
 }
