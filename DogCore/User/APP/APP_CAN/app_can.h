@@ -1,12 +1,15 @@
 /**
  * @file app_can.h
- * @brief CAN应用层
- * @author 李嘉图
- * @date 2026-06-01
+ * @brief CAN 业务层：总线开闭、发送出口、接收分发入口
+ * @author Ricardo
+ * @date 2026-11-01
  *
- * @note 在BSP_CAN基础上封装，提供应用层CAN管理。
- *       使用编译期映射表，无需注册。支持发送缓冲，解决高频发送丢帧问题。
- *       BSP层使用编译期映射表，无需注册。
+ * @note 本层只做"业务收发口"，三件事不在这里：
+ *       - 排队与不丢帧：Service/Svc_Can_Tx；排空由 TASK 周期驱动；
+ *       - 帧 ID 的处理逻辑：APP_CAN_Cmd 的命令表；
+ *       - 硬件细节：BSP_CAN。
+ *
+ *       所以本层不需要 cmsis_os.h，也不会去释放信号量唤醒谁。
  */
 
 #ifndef __APP_CAN_H__
@@ -16,73 +19,69 @@
  * 头文件包含
  *============================================================================*/
 // 固定包含
+#include <stdint.h>
 #include "bsp_can.h"
+#include "app_can_cfg.h"
 
 /*==============================================================================
  * 宏定义与常量
  *============================================================================*/
-#define APP_CAN_TX_BUF_SIZE     16          // 每端口发送缓冲深度
+/** @brief 本机 CAN 端口数量（当前只有 FDCAN1） */
+#define APP_CAN_PORT_COUNT      1u
+/** @brief 端口编号：1 = FDCAN1 */
+#define APP_CAN_PORT_1          1u
 
 /*==============================================================================
- * 初始化函数
+ * 初始化与开闭
  *============================================================================*/
 /**
- * @brief CAN应用层初始化
- * @note 复位发送缓冲。BSP映射表为编译期常量，无需调用BSP初始化。
+ * @brief 清空发送缓冲并复位 BSP 启动状态
+ * @retval 0: 成功
+ * @note 必须在创建线程前调用一次；不碰硬件。
  */
-void APP_CAN_Init(void);
+int APP_CAN_Init(void);
+
+/**
+ * @brief 按配置表配置滤波器并启动总线
+ * @param port 端口编号，1 ~ APP_CAN_PORT_COUNT
+ * @retval 0: 成功
+ * @retval -1: 端口号非法
+ * @retval -2: 某个滤波器配置失败
+ * @retval -3: 总线启动失败
+ * @note 滤波器来自 app_can_cfg.h 的静态表，重复调用结果一致。
+ */
+int APP_CAN_Open(uint8_t port);
 
 /*==============================================================================
- * 滤波器配置
+ * 发送
  *============================================================================*/
 /**
- * @brief 配置CAN滤波器
- * @param id 端口ID（0=CAN1, 1=CAN2）
- * @param cfg 滤波器配置参数（支持规则组/通道组 × 标准帧/扩展帧 共4种模式）
- * @retval 1: 配置成功
- * @retval 0: 配置失败
+ * @brief 组一帧并放进发送缓冲
+ * @param port 端口编号
+ * @param id   帧 ID
+ * @param ide  ID 类型，取 bsp_can_id_t
+ * @param data 数据，可为 NULL（dlc 须为 0）
+ * @param dlc  数据长度 0 ~ 8
+ * @retval 0: 已入队
+ * @retval -1: 参数非法
+ * @retval -2: 发送缓冲已满（丢弃计数加一）
+ * @note 入队即返回，真正的发送由 APP_CAN_Flush 在 TASK 里完成。
  */
-uint8_t APP_CAN_FilterConfig(uint8_t id, const BSP_CAN_FilterConfig_t *cfg);
-
-/*==============================================================================
- * 启动函数
- *============================================================================*/
-/**
- * @brief 启动CAN通信
- * @param id 端口ID（0=CAN1, 1=CAN2）
- * @retval 1: 启动成功
- * @retval 0: 启动失败
- *
- * @note 内部调用 BSP_CAN_Start，使能FIFO中断
- */
-uint8_t APP_CAN_Start(uint8_t id);
-
-/*==============================================================================
- * 发送函数
- *============================================================================*/
-/**
- * @brief 排空指定端口的发送缓冲
- * @param id 端口ID（0=CAN1, 1=CAN2）
- *
- * @note 由 CAN TX 服务任务调用，不断出队发送直到缓冲为空或硬件邮箱满。
- *       发送缓冲已满时出队的帧会重新放回队首，不会丢帧。
- */
-void APP_CAN_FlushTxBuf(uint8_t id);
+int APP_CAN_Send(uint8_t port, uint32_t id, uint8_t ide,
+                 const uint8_t *data, uint8_t dlc);
 
 /**
- * @brief 发送CAN帧（支持标准/扩展 × 数据/遥控）
- * @param id       端口ID（0=CAN1, 1=CAN2）
- * @param can_id   ID值（标准帧11bit / 扩展帧29bit）
- * @param is_extid ID类型: BSP_CAN_STDID / BSP_CAN_EXTID
- * @param is_remote 帧类型: BSP_CAN_DATA_FRAME / BSP_CAN_REMOTE_FRAME
- * @param data     数据指针（遥控帧传NULL）
- * @param len      数据长度 (0~8)
- * @retval 1: 入队成功（由 TX 服务任务异步发送）
- * @retval 0: 发送失败（参数错误或发送缓冲已满）
- *
- * @note 所有帧统一入队缓冲管理，由 TX 服务任务异步排空。
- *       仅作生产者（入队），消费者（出队发送）由 Task_CAN_TX 独立完成。
+ * @brief 把各端口发送缓冲里的帧推进硬件邮箱
+ * @retval 无
+ * @note 由 CAN 发送线程每 1 ms 调一次；硬件邮箱满时自动留到下一轮。
  */
-uint8_t APP_CAN_SendMsg(uint8_t id, uint32_t can_id, uint8_t is_extid, uint8_t is_remote, uint8_t *data, uint8_t len);
+void APP_CAN_Flush(void);
 
-#endif
+/**
+ * @brief 查询某端口的累计丢弃帧数
+ * @param port 端口编号
+ * @retval 累计丢弃帧数；端口非法时返回 0
+ */
+uint32_t APP_CAN_Dropped(uint8_t port);
+
+#endif /* __APP_CAN_H__ */

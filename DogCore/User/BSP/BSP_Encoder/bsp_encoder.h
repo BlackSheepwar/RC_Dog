@@ -1,12 +1,14 @@
 /**
  * @file bsp_encoder.h
- * @brief 定时器编码器读取（BSP层）
- * @author 李嘉图
- * @date 2026-07-05
+ * @brief 正交编码器硬件驱动层：一路编码器一个句柄，只做计数读写
+ * @author Ricardo
+ * @date 2026-11-01
  *
- * @note 内置编码器硬件映射表（encoder_id → htim），
- *       上层通过 encoder_id 调用，无需知道具体定时器句柄。
- *       映射表在 bsp_encoder.c 中静态定义，根据项目需要自由增删。
+ * @note 用定时器的 Encoder Mode（TI1+TI2）由硬件自动判向计数，
+ *       本层只负责"读计数、清零计数"，不做速度换算——
+ *       什么算一圈、一圈多少脉冲是机械参数，属于 APP_Motor。
+ *
+ *       定时器与方向取反写在 bsp_encoder.c 的句柄实例里。
  */
 
 #ifndef __BSP_ENCODER_H__
@@ -19,52 +21,64 @@
 #include <stdint.h>
 
 /*==============================================================================
- * 宏定义与常量
- *============================================================================*/
-#define BSP_ENCODER_NUM     4            /* 编码器数量（1个/电机）       */
-
-/*==============================================================================
- * 初始化函数
+ * 类型定义
  *============================================================================*/
 /**
- * @brief 编码器 BSP 层初始化
- * @note 注册所有编码器定时器到映射表并启动编码器模式
+ * @brief 编码器句柄（不透明类型，布局在 bsp_encoder.c）
+ */
+typedef struct bsp_encoder bsp_encoder_t;
+
+/*==============================================================================
+ * 外部声明：一路电机编码器一份句柄
+ *============================================================================*/
+/** @brief 电机 1 编码器（TIM1） */
+extern const bsp_encoder_t bsp_encoder_1;
+/** @brief 电机 2 编码器（TIM2） */
+extern const bsp_encoder_t bsp_encoder_2;
+/** @brief 电机 3 编码器（TIM3） */
+extern const bsp_encoder_t bsp_encoder_3;
+/** @brief 电机 4 编码器（TIM4） */
+extern const bsp_encoder_t bsp_encoder_4;
+
+/*==============================================================================
+ * 初始化
+ *============================================================================*/
+/**
+ * @brief 启动所有编码器定时器并把计数器清零
+ * @retval 无
+ * @note 每个定时器只启动一次；重复调用会把计数清零（相当于重新开始计步）。
  */
 void BSP_Encoder_Init(void);
 
 /*==============================================================================
- * 编码器读数函数
+ * 读数
  *============================================================================*/
 /**
- * @brief 获取指定编码器的计数值（读取后自动清零）
- * @param id    编码器索引（0 ~ BSP_ENCODER_NUM-1）
- * @param count 输出计数值的指针
- * @retval 1: 成功
- * @retval 0: 失败（id 无效或 count 为 NULL）
- * @note 每次读取后硬件计数器自动清零，下次读取得到的是新周期增量
+ * @brief 读取本周期的计数增量并清零计数器（速度环用）
+ * @param enc   编码器句柄，不可为 NULL
+ * @param delta 输出增量，不可为 NULL；已按句柄的取反配置换算好符号
+ * @retval 0: 读取成功
+ * @retval -1: 句柄或输出指针为 NULL
+ * @note 读与清不是原子的：清零前若又来了脉冲，这个脉冲会算进下一周期，
+ *       不会丢，但也可能让本周期少 1。速度环 10 ms 一次，影响可忽略。
  */
-uint8_t BSP_Encoder_GetCount(uint8_t id, int16_t *count);
-
-/*==============================================================================
- * 编码器累积读数函数（不清零，用于分辨率检测/PID调参）
- *============================================================================*/
-/**
- * @brief 读取编码器当前计数值（不自动清零，用于累积测量）
- * @param id    编码器索引（1 ~ BSP_ENCODER_NUM，1-based）
- * @param count 输出计数值的指针
- * @retval 1: 成功
- * @retval 0: 失败（id 无效或 count 为 NULL）
- * @note 与 BSP_Encoder_GetCount 不同，此函数不清零计数器，
- *       适用于手动旋转电机一圈检测编码器线数等累积测量场景。
- *       配合 BSP_Encoder_ResetCount 使用：先复位→旋转→读数。
- */
-uint8_t BSP_Encoder_ReadCount(uint8_t id, int16_t *count);
+int BSP_Encoder_Read_Delta(const bsp_encoder_t *enc, int16_t *delta);
 
 /**
- * @brief 复位编码器计数器（清零）
- * @param id 编码器索引（1 ~ BSP_ENCODER_NUM，1-based）
- * @note 用于累积测量前手动归零。不影响编码器模式运行状态。
+ * @brief 读取当前累计计数但不清零（标定线数用）
+ * @param enc 编码器句柄，不可为 NULL
+ * @param raw 输出累计计数，不可为 NULL
+ * @retval 0: 读取成功
+ * @retval -1: 句柄或输出指针为 NULL
  */
-void BSP_Encoder_ResetCount(uint8_t id);
+int BSP_Encoder_Read_Raw(const bsp_encoder_t *enc, int16_t *raw);
+
+/**
+ * @brief 把计数器清零
+ * @param enc 编码器句柄，可为 NULL
+ * @retval 无
+ * @note 标定前手动归零用；不影响编码器模式的运行状态。
+ */
+void BSP_Encoder_Reset(const bsp_encoder_t *enc);
 
 #endif /* __BSP_ENCODER_H__ */

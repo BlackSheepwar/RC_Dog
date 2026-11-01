@@ -21,14 +21,29 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
-#include "cmsis_os.h"
+#include "FreeRTOS.h"
+#include "cmsis_os2.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "app_key.h"
-#include "bsp_can.h"
-#include "app_uart.h"
-#include "app_motor_debug.h"
+#include "svc_key_logic.h"   /* App_Key_EventPacket_t 别名：生成代码要用它建队列 */
+#include "app_uart.h"        /* APP_TxFrame_t 别名：生成代码要用它建队列 */
+#include "bsp_can.h"         /* BSP_CAN_Packet_t 别名：生成代码要用它建队列 */
+#include "svc_uart.h"
+#include "bsp_iic.h"
+/* 初始化链用到的各层头文件 */
+#include "bsp_pwm.h"
+#include "dev_key.h"
+#include "dev_motor.h"
+#include "dev_servo.h"
+#include "svc_motor_speed.h"
+#include "svc_servo_motion.h"
+#include "app_chassis.h"
+#include "app_motion.h"
+#include "app_motion_scheduler.h"
+#include "app_can.h"
+#include "oled.h"
+#include "oled_ui.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -264,6 +279,11 @@ const osMessageQueueAttr_t CAN_RXF1_Q_attributes = {
   .mq_mem = &CAN_RXF1_QBuffer,
   .mq_size = sizeof(CAN_RXF1_QBuffer)
 };
+/* Definitions for IIC_LOCK */
+osMutexId_t IIC_LOCKHandle;
+const osMutexAttr_t IIC_LOCK_attributes = {
+  .name = "IIC_LOCK"
+};
 /* Definitions for CAN_TX_BS */
 osSemaphoreId_t CAN_TX_BSHandle;
 osStaticSemaphoreDef_t CAN_TX_BSControlBlock;
@@ -317,11 +337,47 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-
+  /* 全系统初始化：在 osKernelStart() 之前、任何线程存在之前跑完。
+     顺序自底向上：定时器频率 → 设备 → 服务 → APP。
+     这条链不碰任何 OS 对象，所以放最早；要互斥量的在 RTOS_MUTEX 段，
+     要队列的在 RTOS_QUEUES 段，见下面两段。
+     任一步失败立即 Error_Handler()：此刻没有线程在跑，停机是干净的。 */
+  BSP_PWM_Init();
+  if (Dev_Key_Init() != 0) {
+    Error_Handler();
+  }
+  if (Dev_Motor_Init() != 0) {
+    Error_Handler();
+  }
+  if (Dev_Servo_Init() != 0) {
+    Error_Handler();
+  }
+  if (Svc_Motor_Speed_Init() != 0) {
+    Error_Handler();
+  }
+  if (Svc_Servo_Motion_Init() != 0) {
+    Error_Handler();
+  }
+  if (APP_Chassis_Init() != 0) {
+    Error_Handler();
+  }
+  APP_Motion_Init();
+  APP_Motion_Sched_Init();
   /* USER CODE END Init */
+  /* Create the mutex(es) */
+  /* creation of IIC_LOCK */
+  IIC_LOCKHandle = osMutexNew(&IIC_LOCK_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
+  /* IIC 总线登记：IIC_LOCK 已在上面的 "Create the mutex(es)" 里创建，
+     MX_I2C2_Init() 也已在 main 里跑过，这里只做句柄校验。
+     必须在建线程之前完成，否则 OLED 任务第一次刷屏会拿到未初始化的总线。 */
+  (void)BSP_IIC_Init();
+  /* OLED 面板：整屏刷新走 I2C，要等 IIC_LOCK 就位；上电初始化约 23 ms，
+     放在线程之前，线程里就只剩刷屏。 */
+  OLED_Init();
+  OLED_UI_FpsInit();
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
@@ -360,6 +416,18 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  /* 串口链路：队列/信号量都建好之后、线程启动之前初始化。
+     这里会建立 GFIFO 字节队列并启动 DMA 循环接收，
+     早于本段则 OS 对象还不存在，晚于线程启动则可能丢开头几个字节。 */
+  (void)Svc_Uart_Init();
+  /* CAN 链路：FDCAN 一启动接收，中断就会直接往 CAN_RXF0_Q 投帧，
+     所以 Init/Open 必须排在 CAN_RXF0_Q 建好之后。 */
+  if (APP_CAN_Init() != 0) {
+    Error_Handler();
+  }
+  if (APP_CAN_Open(APP_CAN_PORT_1) != 0) {
+    Error_Handler();
+  }
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -426,7 +494,7 @@ __weak void StartDefaultTask(void *argument)
   for(;;)
   {
     /* 标定完成后取消注释，恢复 PID 调参数据发送 */
-    //APP_Motor_SendPIDData(2);
+    //APP_Debug_Send_Motor_PID(2);
     osDelay(50);
   }
   /* USER CODE END StartDefaultTask */

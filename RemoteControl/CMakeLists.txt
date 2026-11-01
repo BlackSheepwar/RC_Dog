@@ -42,85 +42,19 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
 )
 
-# Add sources to executable
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user sources here
-    # APP
-    User/APP/APP_Key/app_key.c
-    User/APP/APP_Key/app_key_cmd.c
-    User/APP/APP_Uart/app_uart.c
-    User/APP/APP_Uart/app_uart_cmd.c
-    User/APP/APP_LED/app_led.c
-
-    # Common
-    User/Common/common_utils.c
-
-    # BSP
-    User/BSP/BSP_GPIO/bsp_gpio.c
-    User/BSP/BSP_SYS/bsp_sys.c
-    User/BSP/BSP_Uart/bsp_uart.c
-    User/BSP/BSP_Encoder/bsp_encoder.c
-
-    # Middlewares
-    User/Middlewares/Codec/codec.c
-
-    # TASK
-    User/TASK/TASK_KEY/task_key_cmd.c
-    User/TASK/TASK_KEY/task_key_debounce.c
-    User/TASK/TASK_OLED/task_oled.c
-    User/TASK/TASK_UART/task_uart_rx.c
-    User/TASK/TASK_UART/task_uart_rx_cmd.c
-    User/TASK/TASK_UART/task_uart_tx.c
-
-    # Third_Party
-    User/Third_Party/OLED/font.c
-    User/Third_Party/OLED/oled.c
-    User/Third_Party/OLED/oled_extend.c
-    User/Third_Party/OLED/oled_ui.c
-
-)
-
-# Add include paths
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined include paths
-    # APP
-    User/APP/APP_Key
-    User/APP/APP_Uart
-    User/APP/APP_LED
-
-    # Common
-    User/Common
-
-    # BSP
-    User/BSP/BSP_GPIO
-    User/BSP/BSP_SYS
-    User/BSP/BSP_Uart
-    User/BSP/BSP_Encoder
-
-    # Middlewares
-    User/Middlewares/Codec
-
-    # TASK
-    User/TASK/TASK_KEY
-    User/TASK/TASK_OLED
-    User/TASK/TASK_UART
-
-    # Third_Party
-    User/Third_Party/OLED
-
-)
-
-# Add project symbols (macros)
-target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined symbols
-)
-
 # Remove wrong libob.a library dependency when using cpp files
 list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
-    # Add user defined libraries
 )
+
+# -----------------------------------------------------------------------------
+# 用户代码：全部走分层库，源文件与头文件路径都不再写在这个文件里
+#
+# 结构：User/{Common, BSP, Third_Party, Service, APP, TASK}
+#   一行一层 add_subdirectory，模块库写在各层自己的 CMakeLists.txt 中；
+#   加文件 = 改层内那一个 CMakeLists，不动本文件。
+# -----------------------------------------------------------------------------
+add_subdirectory(User)

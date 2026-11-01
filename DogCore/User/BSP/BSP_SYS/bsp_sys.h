@@ -1,12 +1,14 @@
 /**
  * @file bsp_sys.h
- * @brief 系统级 BSP 封装（tick、复位等平台相关操作）
- * @author 李嘉图
- * @date 2026-06-18
+ * @brief 系统级 BSP：毫秒时间基准（上层唯一允许看时间的地方）
+ * @author Ricardo
+ * @date 2026-11-01
  *
- * @note 本模块对 HAL 的平台相关接口做一层薄封装，
- *       上层通过 BSP_GetTickMs() 获取时间基准，不直接调用 HAL_GetTick()。
- *       将来换平台或换 tick 源时只需改此文件。
+ * @note 上层统一用本函数取时间，不直接调 HAL_GetTick()：
+ *       换 tick 源（改用 TIM 或 OS 节拍）只改这一个 .c。
+ *
+ *       时间比较一律写成无符号减法，回绕才安全：
+ *       `if ((now - last) >= timeout_ms)`
  */
 
 #ifndef __BSP_SYS_H__
@@ -22,12 +24,11 @@
  * 时间基准
  *============================================================================*/
 /**
- * @brief 获取系统滴答计数值（单位：ms）
- * @return 系统上电后的毫秒数（49 天回绕）
- * @note 实质为 HAL_GetTick() 的 BSP 层封装。
- *       使用无符号减法可安全处理回绕：
- *       if ((now - last) > timeout)  // 正确处理回绕
+ * @brief 取系统毫秒计数
+ * @retval 上电以来的毫秒数，约 49.7 天回绕一次
+ * @note 调用本身不收句柄、不改状态，任何层都可以调；
+ *       Service 层为了可单测，仍然只收 elapsed_ms 参数，不自己调这里。
  */
-uint32_t BSP_GetTickMs(void);
+uint32_t BSP_SYS_Get_Tick_Ms(void);
 
 #endif /* __BSP_SYS_H__ */

@@ -1,7 +1,15 @@
 /**
- * @brief 步态序列数据
- * @author 李嘉图
- * @date 2026-06-30
+ * @file app_gait_seq.h
+ * @brief 步态序列表：一组 const 数据，只有内容没有逻辑
+ * @author Ricardo
+ * @date 2026-11-01
+ *
+ * @note 每个 GAIT_xxx 是一个 motion_gait_t：若 phase_count 个相位，
+ *       每个相位列出参与的腿 + 目标（mode=0 用角度，mode=1 用足端坐标）+ 速度。
+ *
+ *       pos.y 的约定：**足端向下伸展的距离，正值**（越大越站得高、越小越抬腿）。
+ *       这条约定与 IK 的数学坐标系差一个符号，由 app_motion_scheduler.c
+ *       在调用解算前统一处理，改这里的数值时不用管符号。
  */
 
 #ifndef __APP_GAIT_SEQ_H__
@@ -12,7 +20,6 @@
  *============================================================================*/
 // 功能包含
 #include "app_motion_scheduler.h"
-#include "app_motion_ik.h"
 
 /*==============================================================================
  * 站立
@@ -40,7 +47,7 @@ static const motion_gait_t GAIT_Stand = {
     },
     .phase_count = 1,
     .loop = 0,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -69,7 +76,7 @@ static const motion_gait_t GAIT_Vertical = {
     },
     .phase_count = 1,
     .loop = 0,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -98,7 +105,7 @@ static const motion_gait_t GAIT_Grovel = {
     },
     .phase_count = 1,
     .loop = 0,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -163,7 +170,7 @@ static const motion_gait_t GAIT_Trot_1 = {
     },
     .phase_count = 4,
     .loop = 1,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -228,7 +235,7 @@ static const motion_gait_t GAIT_Trot_2 = {
     },
     .phase_count = 4,
     .loop = 1,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -340,7 +347,7 @@ static const motion_gait_t GAIT_Walk_1_Front = {
     },
     .phase_count = 8,
     .loop = 1,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -452,7 +459,7 @@ static const motion_gait_t GAIT_Walk_1_Queen = {
     },
     .phase_count = 8,
     .loop = 1,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -564,7 +571,7 @@ static const motion_gait_t GAIT_Walk_2_Front = {
     },
     .phase_count = 8,
     .loop = 1,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -676,7 +683,7 @@ static const motion_gait_t GAIT_Walk_2_Queen = {
     },
     .phase_count = 8,
     .loop = 1,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -788,7 +795,7 @@ static const motion_gait_t GAIT_Walk_3_Front = {
     },
     .phase_count = 8,
     .loop = 1,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 /*==============================================================================
@@ -900,7 +907,7 @@ static const motion_gait_t GAIT_Walk_3_Queen = {
     },
     .phase_count = 8,
     .loop = 1,
-    .mode = 1,
+    .mode = APP_MOTION_MODE_POS,
 };
 
 #endif /* __APP_GAIT_SEQ_H__ */

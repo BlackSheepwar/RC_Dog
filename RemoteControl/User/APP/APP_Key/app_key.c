@@ -5,7 +5,7 @@
  * @date 2026-06-18
  *
  * @note GPIO 引脚映射已下沉到 BSP 层（bsp_gpio.c 的 GPIO_HW_MAP），
- *       消抖状态机从 Middlewares/Debounce 合并至此，本模块不再依赖外部模块。
+ *       消抖状态机从 APP_Key 内部 合并至此，本模块不再依赖外部模块。
  *
  *       内部状态机：
  *         APP_KEY_STATE_NO → (按下消抖稳定) → APP_KEY_EVENT_DOWN → APP_KEY_STATE_YES
